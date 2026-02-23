@@ -1,0 +1,18 @@
+* text=auto
+
+# Keep source files normalized in repo (LF); Windows users can still checkout CRLF if configured.
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.svg text eol=lf
+*.csv text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary

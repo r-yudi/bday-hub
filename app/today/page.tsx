@@ -16,6 +16,13 @@ export default function TodayPage() {
   const [showImport, setShowImport] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
   const support = getNotificationSupport();
+  const notificationCtaLabel = !support.supported
+    ? "Navegador sem suporte"
+    : support.permission === "granted" && settings?.notificationEnabled
+      ? "Notificações ativadas"
+      : support.permission === "denied"
+        ? "Permissão bloqueada"
+        : "Solicitar / Ativar notificações";
 
   async function loadData() {
     setLoading(true);
@@ -133,9 +140,19 @@ export default function TodayPage() {
               <p>Permissão: {String(support.permission)}</p>
               <p>Ativado no app: {settings?.notificationEnabled ? "sim" : "não"}</p>
             </div>
-            <button type="button" onClick={() => void handleEnableNotifications()} className="mt-3 rounded-lg bg-accent px-3 py-2 text-sm text-white">
-              Solicitar / Ativar notificações
+            <button
+              type="button"
+              onClick={() => void handleEnableNotifications()}
+              disabled={!support.supported || (support.permission === "granted" && Boolean(settings?.notificationEnabled))}
+              className="mt-3 rounded-lg bg-accent px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {notificationCtaLabel}
             </button>
+            {support.permission === "denied" && (
+              <p className="mt-2 text-xs text-amber-700">
+                Permissão negada no navegador. Reative manualmente nas configurações do site para usar notificações.
+              </p>
+            )}
           </section>
 
           <section className="rounded-2xl border border-black/10 bg-white/80 p-4">
