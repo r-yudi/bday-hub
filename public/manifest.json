@@ -1,0 +1,23 @@
+{
+  "name": "BdayHub",
+  "short_name": "BdayHub",
+  "description": "Lembretes simples de aniversários",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#0b1220",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
