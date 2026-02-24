@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { maybeNotifyTodayBirthdays } from "@/lib/notifications";
@@ -171,6 +172,9 @@ function PwaInstallBanner() {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLanding = pathname === "/";
+  const isLegalPage = pathname === "/privacy" || pathname === "/terms";
+  const isDebugRoute = Boolean(pathname?.startsWith("/debug"));
+  const showGlobalFooter = !isLanding && !isLegalPage && !isDebugRoute;
 
   useEffect(() => {
     void maybeNotifyTodayBirthdays();
@@ -182,6 +186,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 sm:px-6">
         {!isLanding && <PwaInstallBanner />}
         {children}
+
+        {showGlobalFooter && (
+          <footer className="mt-10 border-t border-black/10 pt-5 text-center text-xs text-black/55 sm:text-right">
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-end sm:gap-4">
+              <Link href="/privacy" className="hover:text-black/75">
+                Política de Privacidade
+              </Link>
+              <Link href="/terms" className="hover:text-black/75">
+                Termos
+              </Link>
+            </div>
+          </footer>
+        )}
       </main>
     </div>
   );
