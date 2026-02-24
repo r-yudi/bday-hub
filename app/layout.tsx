@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -15,8 +15,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://uselembra.com.br"),
   title: {
-    default: "Lembra.",
-    template: "%s"
+    default: "Lembra. — Nunca mais esqueça aniversários",
+    template: "Lembra. — %s"
   },
   description: "Nunca mais esqueça um aniversário 🎉",
   openGraph: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://uselembra.com.br",
-    title: "Lembra.",
+    title: "Lembra. — Nunca mais esqueça aniversários",
     description: "Nunca mais esqueça um aniversário 🎉"
   },
   verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION

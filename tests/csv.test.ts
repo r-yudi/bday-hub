@@ -1,4 +1,4 @@
-import test from "node:test";
+﻿import test from "node:test";
 import assert from "node:assert/strict";
 import { parseBirthdayCsv } from "@/lib/csv";
 import { decodeCsvBytes } from "@/lib/csv-file";
@@ -15,6 +15,19 @@ test("parseBirthdayCsv aceita CSV válido com header obrigatório", () => {
   assert.equal(result.invalid.length, 0);
   assert.equal(result.valid[0]?.name, "Ana Silva");
   assert.deepEqual(result.valid[0]?.tags, ["amigos", "faculdade"]);
+  assert.deepEqual(result.valid[0]?.categories, ["amigos", "faculdade"]);
+});
+
+test("parseBirthdayCsv aceita múltiplos separadores em categorias (tags)", () => {
+  const csv = [
+    "name,day,month,tags,whatsapp,instagram,notes",
+    'Bia,10,8,"Família, amigos | trabalho ; amigos",,,'
+  ].join("\n");
+
+  const result = parseBirthdayCsv(csv);
+
+  assert.equal(result.valid.length, 1);
+  assert.deepEqual(result.valid[0]?.categories, ["Família", "amigos", "trabalho"]);
 });
 
 test("parseBirthdayCsv marca linhas inválidas e reporta erros", () => {
@@ -47,5 +60,5 @@ test("decodeCsvBytes faz fallback para Latin1 quando detecta mojibake", () => {
 
   assert.match(decoded, /João/);
   assert.match(decoded, /Parabéns/);
-  assert.ok(!decoded.includes("ParabÃ©ns"));
+  assert.ok(!decoded.includes("ParabÃƒÂ©ns"));
 });

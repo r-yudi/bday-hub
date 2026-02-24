@@ -224,7 +224,7 @@ export default function TodayPage() {
         <section className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-[2rem]">Hoje</h1>
-            <p className="text-sm text-black/70">Veja quem faz aniversário hoje e resolva rápido.</p>
+            <p className="text-sm text-black/70">Veja quem faz aniversário hoje e registre pessoas com categorias quando precisar.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/person" className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover">

@@ -1,10 +1,13 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { maybeNotifyTodayBirthdays } from "@/lib/notifications";
 import { TopNav } from "@/components/TopNav";
+import { useAuth } from "@/components/AuthProvider";
+
+// ... keep existing types below
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -15,6 +18,28 @@ type InstallPlatform = "ios" | "desktop-chrome" | "other";
 
 const PWA_BANNER_DISMISSED_UNTIL_KEY = "bdayhub_pwa_banner_dismissed_until";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+function SessionGuardNotice() {
+  const { sessionNotice, dismissSessionNotice } = useAuth();
+
+  if (!sessionNotice) return null;
+
+  return (
+    <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div className="flex items-start justify-between gap-3">
+        <p>{sessionNotice}</p>
+        <button
+          type="button"
+          onClick={dismissSessionNotice}
+          className="rounded-md px-2 py-0.5 text-xs text-amber-900/80 hover:bg-amber-100"
+          aria-label="Fechar aviso de sessão"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function isStandaloneMode() {
   if (typeof window === "undefined") return false;
@@ -116,10 +141,10 @@ function PwaInstallBanner() {
   const showDesktopInstructions = platform === "desktop-chrome" || installEvent !== null;
 
   return (
-    <section className="mb-4 rounded-2xl border border-black/10 bg-white/90 p-3 shadow-sm">
+    <section className="mb-4 rounded-2xl border border-black/10 bg-white/90 p-3 shadow-sm dark:border-white/10 dark:bg-white/5">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-black/90">Instale o Lembra. e deixe seus lembretes por perto</p>
+          <p className="text-sm font-medium text-black/90 dark:text-white/90">Instale o Lembra. e deixe seus lembretes por perto</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -134,7 +159,7 @@ function PwaInstallBanner() {
             type="button"
             onClick={handleDismiss}
             aria-label="Dispensar sugestão de instalação"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-black/60 hover:bg-black/5"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-black/60 hover:bg-black/5 dark:border-white/15 dark:text-white/65 dark:hover:bg-white/10"
           >
             ×
           </button>
@@ -145,7 +170,7 @@ function PwaInstallBanner() {
         <button
           type="button"
           onClick={() => setShowInstructions((value) => !value)}
-          className="text-xs text-black/65 underline decoration-black/20 underline-offset-2 hover:text-black/85"
+          className="text-xs text-black/65 underline decoration-black/20 underline-offset-2 hover:text-black/85 dark:text-white/65 dark:decoration-white/20 dark:hover:text-white/85"
           aria-expanded={showInstructions}
         >
           {showInstructions ? "Ocultar" : "Como instalar"}
@@ -153,10 +178,8 @@ function PwaInstallBanner() {
       </div>
 
       {showInstructions && (
-        <div className="mt-2 rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-xs text-black/70">
-          {showIosInstructions && (
-            <p>No iPhone/iPad (Safari): toque em "Compartilhar" e depois em "Adicionar à Tela de Início".</p>
-          )}
+        <div className="mt-2 rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-xs text-black/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70">
+          {showIosInstructions && <p>No iPhone/iPad (Safari): toque em "Compartilhar" e depois em "Adicionar à Tela de Início".</p>}
           {showDesktopInstructions && (
             <p>No Chrome (desktop): clique em "Instalar" ou use o ícone de instalação na barra de endereço.</p>
           )}
@@ -184,16 +207,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <TopNav />
       <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 sm:px-6">
+        {!isDebugRoute && <SessionGuardNotice />}
         {!isLanding && <PwaInstallBanner />}
         {children}
 
         {showGlobalFooter && (
-          <footer className="mt-10 border-t border-black/10 pt-5 text-center text-xs text-black/55 sm:text-right">
+          <footer className="mt-10 border-t border-black/10 pt-5 text-center text-xs text-black/55 sm:text-right dark:border-white/10 dark:text-white/55">
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-end sm:gap-4">
-              <Link href="/privacy" className="hover:text-black/75">
+              <Link href="/privacy" className="hover:text-black/75 dark:hover:text-white/80">
                 Política de Privacidade
               </Link>
-              <Link href="/terms" className="hover:text-black/75">
+              <Link href="/terms" className="hover:text-black/75 dark:hover:text-white/80">
                 Termos
               </Link>
             </div>

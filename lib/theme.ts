@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+﻿import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -37,23 +37,28 @@ export function storeThemeMode(mode: ThemeMode) {
 export async function loadRemoteThemePreference(userId: string): Promise<ThemeMode | null> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return null;
-  const { data, error } = await supabase.from("user_settings").select("theme").eq("user_id", userId).maybeSingle();
-  if (error) return null;
-  const theme = typeof data?.theme === "string" ? data.theme : null;
-  return isThemeMode(theme) ? theme : null;
+  try {
+    const { data, error } = await supabase.from("user_settings").select("theme").eq("user_id", userId).maybeSingle();
+    if (error) return null;
+    const theme = typeof data?.theme === "string" ? data.theme : null;
+    return isThemeMode(theme) ? theme : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function saveRemoteThemePreference(userId: string, theme: ThemeMode): Promise<void> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return;
-  const { error } = await supabase
-    .from("user_settings")
-    .upsert({ user_id: userId, theme }, { onConflict: "user_id" });
 
-  if (error) {
-    // Ignora para não quebrar UX se a coluna ainda não existir no banco.
-    if (process.env.NODE_ENV === "development") {
+  try {
+    const { error } = await supabase.from("user_settings").upsert({ user_id: userId, theme }, { onConflict: "user_id" });
+    if (error && process.env.NODE_ENV === "development") {
       console.warn("[theme] remote theme save skipped:", error.message);
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[theme] remote theme save failed:", error instanceof Error ? error.message : String(error));
     }
   }
 }

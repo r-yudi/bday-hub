@@ -1,8 +1,14 @@
-"use client";
+﻿"use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
-import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase-browser";
+import {
+  clearSupabaseLocalSession,
+  getSafeBrowserSession,
+  getSupabaseBrowserClient,
+  isInvalidRefreshTokenError,
+  isSupabaseConfigured
+} from "@/lib/supabase-browser";
 import { syncBirthdaysAfterSignIn, type SyncStatus } from "@/lib/birthdaysRepo";
 
 type AuthContextValue = {
@@ -13,6 +19,8 @@ type AuthContextValue = {
   user: User | null;
   syncStatus: SyncStatus;
   syncMessage: string | null;
+  sessionNotice: string | null;
+  dismissSessionNotice: () => void;
   signInWithGoogle: (returnTo?: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 };
@@ -31,6 +39,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [sessionNotice, setSessionNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!sessionNotice) return;
+    const timer = window.setTimeout(() => setSessionNotice(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [sessionNotice]);
 
   useEffect(() => {
     if (!configured) {
@@ -48,12 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     let active = true;
 
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => {
+    void getSafeBrowserSession()
+      .then((result) => {
         if (!active) return;
-        setSession(data.session ?? null);
-        logAuthEventDev("getSession:init", data.session?.user?.id ?? null);
+        setSession(result.session);
+        if (result.sessionRecovered) {
+          setSessionNotice("Sessão expirada, entre novamente.");
+        }
+        logAuthEventDev("getSession:init", result.session?.user?.id ?? null);
       })
       .finally(() => {
         if (!active) return;
@@ -67,6 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!active) return;
       logAuthEventDev(`onAuthStateChange:${event}`, nextSession?.user?.id ?? null);
       setSession(nextSession);
+      if (event === "SIGNED_OUT") {
+        setSyncStatus("idle");
+        setSyncMessage(null);
+      }
       setInitialized(true);
       setLoading(false);
     });
@@ -108,6 +129,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((error: unknown) => {
         if (!active) return;
+        const invalidToken = isInvalidRefreshTokenError(error);
+        if (invalidToken) {
+          void clearSupabaseLocalSession();
+          setSession(null);
+          setSessionNotice("Sessão expirada, entre novamente.");
+          setSyncStatus("idle");
+          setSyncMessage(null);
+          return;
+        }
         setSyncStatus("error");
         setSyncMessage(error instanceof Error ? error.message : "Não foi possível atualizar agora");
       });
@@ -126,6 +156,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user: session?.user ?? null,
       syncStatus,
       syncMessage,
+      sessionNotice,
+      dismissSessionNotice() {
+        setSessionNotice(null);
+      },
       async signInWithGoogle(returnTo) {
         if (!configured) {
           return { error: "Supabase não configurado no ambiente." };
@@ -136,24 +170,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const redirectTo = `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo || "/today")}`;
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo
-          }
-        });
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo
+            }
+          });
 
-        if (error) return { error: error.message };
-        return {};
+          if (error) return { error: error.message };
+          return {};
+        } catch (error) {
+          if (isInvalidRefreshTokenError(error)) {
+            await clearSupabaseLocalSession();
+            setSession(null);
+            setSessionNotice("Sessão expirada, entre novamente.");
+            return { error: "Sessão expirada, entre novamente." };
+          }
+          return { error: error instanceof Error ? error.message : "Falha ao iniciar login com Google." };
+        }
       },
       async signOut() {
         const supabase = getSupabaseBrowserClient();
         if (!supabase) return;
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch (error) {
+          if (isInvalidRefreshTokenError(error)) {
+            await clearSupabaseLocalSession();
+            setSession(null);
+            setSessionNotice("Sessão expirada, entre novamente.");
+          }
+        }
         logAuthEventDev("signOut:manual");
       }
     }),
-    [configured, initialized, loading, session, syncStatus, syncMessage]
+    [configured, initialized, loading, session, syncStatus, syncMessage, sessionNotice]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

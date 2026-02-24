@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import { LoginPageClient } from "@/components/LoginPageClient";
+
+export const metadata: Metadata = {
+  title: "Entrar"
+};
 
 type LoginPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;

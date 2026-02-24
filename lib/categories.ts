@@ -12,7 +12,9 @@ export const PREDEFINED_CATEGORIES = [
 ] as const;
 
 export function normalizeCategoryName(value: string) {
-  return normalizeNfc(value).trim();
+  return normalizeNfc(value)
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function dedupeCategoryNames(values: Array<string | undefined | null>) {

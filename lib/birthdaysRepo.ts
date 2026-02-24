@@ -2,7 +2,7 @@
 
 import { birthdayCategoriesFromAny } from "@/lib/categories";
 import { getTodayPeople, getUpcomingPeople } from "@/lib/dates";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getSafeBrowserSession, getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
   deletePerson as deleteLocalPerson,
   getPersonById as getLocalPersonById,
@@ -100,11 +100,8 @@ function personToRow(person: BirthdayPerson, userId: string): BirthdaysRow {
 }
 
 async function getCurrentAuthUserId() {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) return null;
-  const { data, error } = await supabase.auth.getSession();
-  if (error) return null;
-  return data.session?.user?.id ?? null;
+  const { session } = await getSafeBrowserSession();
+  return session?.user?.id ?? null;
 }
 
 async function listRemoteBirthdays(userId: string): Promise<BirthdayPerson[]> {
@@ -252,10 +249,10 @@ export async function debugTestBirthdaysTable() {
   if (!supabase) {
     return { ok: false, message: "Cliente Supabase indisponível." };
   }
-  const { data: authData, error: authError } = await supabase.auth.getSession();
-  const userId = authData.session?.user?.id;
-  if (authError || !userId) {
-    return { ok: false, message: authError?.message || "Sem sessão ativa." };
+  const { session, errorMessage } = await getSafeBrowserSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { ok: false, message: errorMessage || "Sem sessão ativa." };
   }
 
   const countRes = await supabase.from("birthdays").select("*", { count: "exact", head: true });

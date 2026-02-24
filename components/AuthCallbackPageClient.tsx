@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getSafeBrowserSession } from "@/lib/supabase-browser";
 
 type CallbackState =
   | { status: "loading"; attempt: number; message: string }
@@ -21,17 +21,15 @@ async function wait(ms: number) {
 }
 
 async function checkSessionOnce(): Promise<SessionCheckResult> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    return { hasSession: false, error: "Cliente Supabase indisponível." };
+  const { session, errorMessage, sessionRecovered } = await getSafeBrowserSession();
+  if (session?.user) {
+    return { hasSession: true, userId: session.user.id };
   }
-
-  const { data, error } = await supabase.auth.getSession();
-  if (data.session?.user) {
-    return { hasSession: true, userId: data.session.user.id };
+  if (sessionRecovered) {
+    return { hasSession: false, error: "Sessão expirada, entre novamente." };
   }
-  if (error) {
-    return { hasSession: false, error: error.message };
+  if (errorMessage) {
+    return { hasSession: false, error: errorMessage };
   }
   return { hasSession: false };
 }

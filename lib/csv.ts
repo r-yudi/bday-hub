@@ -1,4 +1,5 @@
-﻿import { isValidDayMonth } from "@/lib/dates";
+﻿import { dedupeCategoryNames } from "@/lib/categories";
+import { isValidDayMonth } from "@/lib/dates";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 
@@ -90,10 +91,12 @@ export function parseBirthdayCsv(text: string): ParsedCsvResult {
       continue;
     }
 
-    const tags = normalizeNfc(raw.tags ?? "")
-      .split(";")
-      .map((tag) => normalizeNfc(tag.trim()))
-      .filter(Boolean);
+    const tags = dedupeCategoryNames(
+      normalizeNfc(raw.tags ?? "")
+        .split(/[;,|]/)
+        .map((tag) => normalizeNfc(tag.trim()))
+        .filter(Boolean)
+    );
 
     const key = `${name.toLowerCase()}::${day}::${month}`;
     if (seen.has(key)) {

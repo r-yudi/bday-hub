@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { PREDEFINED_CATEGORIES, dedupeCategoryNames, normalizeCategoryName } from "@/lib/categories";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getSafeBrowserSession, getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { listCategoriesLocal, saveCategoriesLocal } from "@/lib/storage";
 
 const SEEDED_PREFIX = "lembra_categories_seeded_";
@@ -14,11 +14,8 @@ type UserCategoryRow = {
 };
 
 async function getCurrentUserId() {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) return null;
-  const { data, error } = await supabase.auth.getSession();
-  if (error) return null;
-  return data.session?.user?.id ?? null;
+  const { session } = await getSafeBrowserSession();
+  return session?.user?.id ?? null;
 }
 
 function isDuplicateCategoryError(message?: string) {
