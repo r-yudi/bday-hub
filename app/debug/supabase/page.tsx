@@ -363,6 +363,12 @@ export default function DebugSupabasePage() {
         <p className="mt-3 text-xs text-black/60">
           <span className="font-semibold text-black/75">Host Supabase:</span> {hostname ?? "(inválido/ausente)"}
         </p>
+        {!configured && (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            Supabase não configurado neste ambiente. Defina `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+            e faça novo deploy/restart.
+          </div>
+        )}
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">

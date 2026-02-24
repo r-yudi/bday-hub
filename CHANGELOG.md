@@ -5,6 +5,7 @@ Todos os releases acompanham o padrao SemVer.
 ## [Unreleased]
 
 ### Added
+- Endpoint `/healthz` para smoke test de producao/deploy
 - Multi-device sync de aniversarios com Supabase quando logado (fallback local mantido quando nao logado)
 - Ferramentas de debug de auth Supabase em `/debug/supabase` (health, session/getUser, teste de DB e limpar sessao local)
 - Fluxo de login Google com redirect robusto via `/auth/callback` (retry curto para consolidar sessao)
@@ -23,6 +24,8 @@ Todos os releases acompanham o padrao SemVer.
 - Toast discreto de onboarding ao adicionar aniversario (incluindo estado especial ao completar setup)
 
 ### Fixed
+- Hardening de producao: rotas `/debug/*` agora ficam indisponiveis (404) em `NODE_ENV=production`
+- `/debug/supabase` exibe aviso amigavel quando env vars publicas do Supabase estao ausentes
 - Debug de DB em `/debug/supabase` agora usa `user_settings.user_id` (sem depender de coluna `id`) e valida RLS com upsert/select do proprio usuario
 - `/debug/supabase` ganhou teste de `birthdays` (count + upsert/delete dummy) para validar acesso com RLS
 - UX da pagina `/share/[token]` com layout centralizado, mais espacamento e contexto claro sobre privacidade (sem ano)

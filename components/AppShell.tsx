@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { maybeNotifyTodayBirthdays } from "@/lib/notifications";
 import { TopNav } from "@/components/TopNav";
 
@@ -168,6 +169,9 @@ function PwaInstallBanner() {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
+
   useEffect(() => {
     void maybeNotifyTodayBirthdays();
   }, []);
@@ -176,7 +180,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <TopNav />
       <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 sm:px-6">
-        <PwaInstallBanner />
+        {!isLanding && <PwaInstallBanner />}
         {children}
       </main>
     </div>

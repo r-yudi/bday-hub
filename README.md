@@ -14,6 +14,7 @@ MVP client-only para lembrar aniversários, conforme `SPEC.md`.
 
 ## Funcionalidades entregues
 
+- Landing pública em `/` com CTA para usar o app ou entrar com Google
 - Rotas ` /today ` e ` /upcoming `
 - CRUD (adicionar, editar, excluir)
 - Importação CSV com preview de linhas válidas/inválidas
@@ -22,6 +23,7 @@ MVP client-only para lembrar aniversários, conforme `SPEC.md`.
 - Persistência local (IndexedDB com fallback)
 - Notificação best-effort ao abrir o app (evita duplicar no mesmo dia)
 - ` /share/[token] ` (v1) para compartilhar nome + dia/mês e adicionar à lista local
+- Página pública ` /privacy ` (e ` /terms ` básica)
 - Botão para limpar todos os dados locais
 
 ## Limitação conhecida (MVP)
@@ -40,12 +42,20 @@ Notificação agendada confiável em background varia por navegador/OS. Implemen
 3. `npm run dev`
 4. Abrir `http://localhost:3000/today`
 
+## Landing + privacidade
+
+- `/` é a landing pública do produto (domínio canônico: `https://uselembra.com.br`)
+- `/privacy` explica dados, armazenamento e sessão
+- `/terms` traz termos básicos para início de operação pública
+- Rotas internas do app (`/today`, `/upcoming`, `/person`, `/share`, etc.) continuam funcionando
+
 ## Login Google (Supabase) - checklist
 
 Env vars usadas no client:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (opcional, meta tag do Google Search Console)
 
 Checklist de configuração (Supabase + Google):
 
@@ -75,11 +85,65 @@ Como testar localmente:
 
 Como validar em producao:
 
-1. Configurar as mesmas env vars na Vercel
-2. Confirmar URLs/origins no Supabase e Google Cloud para o dominio de producao
-3. Fazer login em `/login`
-4. Confirmar persistencia da sessao apos refresh
-5. No painel Supabase, validar em `Authentication > Users` que o usuario foi criado
+1. Configurar as env vars públicas na Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+2. Fazer redeploy após criar/alterar env vars (deploy antigo não lê mudanças retroativamente)
+3. Confirmar `/healthz` retorna `200 OK`
+4. Confirmar URLs/origins no Supabase e Google Cloud para o domínio de produção
+5. Fazer login em `/login`
+6. Confirmar persistência da sessão após refresh
+7. Criar um aniversário no desktop logado
+8. Abrir no mobile logado com a mesma conta e confirmar sincronização em `/today` ou `/upcoming`
+9. No painel Supabase, validar em `Authentication > Users` que o usuário foi criado
+
+## Checklist de deploy (Vercel + Supabase + Google)
+
+Vercel:
+
+- Definir `NEXT_PUBLIC_SUPABASE_URL`
+- Definir `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- (Opcional) Definir `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` para Google Search Console
+- Redeploy após mudança de env vars
+- Smoke test:
+  - `GET /healthz` => 200
+  - `/login` abre normalmente
+  - `/debug/*` deve retornar 404 em produção
+  - `/` abre landing pública
+
+Supabase Auth > URL Configuration:
+
+- `Site URL` apontando para o domínio de produção (ex.: `https://uselembra.com.br`)
+- `Redirect URLs` incluindo:
+  - `http://localhost:3000/**`
+  - `https://uselembra.com.br/**`
+  - `https://www.uselembra.com.br/**` (se usar www)
+
+Google OAuth (Web client):
+
+- Authorized JavaScript origins:
+  - `http://localhost:3000`
+  - `https://uselembra.com.br`
+  - `https://www.uselembra.com.br` (se usar www)
+- Authorized redirect URI:
+  - callback do Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`)
+
+## Analytics + SEO
+
+- Analytics habilitado com `@vercel/analytics`
+- Performance insights habilitado com `@vercel/speed-insights`
+- `robots.txt` e `sitemap.xml` gerados pelo App Router
+- `/debug/*` não indexado (robots + bloqueio em produção)
+- Canonical configurado para `https://uselembra.com.br`
+
+## Search Console (verificação por meta tag)
+
+Para habilitar:
+
+1. Copie o token de verificação da propriedade no Google Search Console
+2. Defina `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` na Vercel
+3. Faça redeploy
+4. Verifique se a meta tag aparece no HTML da home e confirme no Search Console
 
 Checklist de troubleshooting (quando o login nao completa):
 

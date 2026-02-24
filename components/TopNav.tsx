@@ -13,6 +13,35 @@ export function TopNav() {
   const pathname = usePathname();
   const { configured, initialized, user, signOut, syncStatus, syncMessage } = useAuth();
   const displayName = user?.user_metadata?.full_name || user?.email || "Conta";
+  const isLanding = pathname === "/";
+
+  if (isLanding) {
+    return (
+      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <Link href="/" className="group inline-flex flex-col font-semibold tracking-tight">
+            <span>Lembra.</span>
+            <span className="mt-1 h-0.5 w-10 rounded-full bg-accent transition-all duration-150 ease-out group-hover:w-12" />
+          </Link>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/today" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm">
+              Hoje
+            </Link>
+            <Link href="/upcoming" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm">
+              Próximos 7 dias
+            </Link>
+            <Link
+              href={user ? "/today" : "/login?returnTo=%2Ftoday"}
+              className="btn-primary-brand rounded-full bg-accent px-3 py-1.5 text-sm text-white hover:bg-accentHover"
+            >
+              {configured && initialized && user ? "Continuar" : "Entrar"}
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur">
