@@ -180,6 +180,7 @@ export default function ShareLandingPage() {
         day: values.day,
         month: values.month,
         source: "manual",
+        categories: [],
         tags: [],
         createdAt: now,
         updatedAt: now

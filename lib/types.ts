@@ -12,6 +12,8 @@ export type BirthdayPerson = {
   day: number;
   month: number;
   source: SourceType;
+  categories?: string[];
+  category?: string;
   tags: string[];
   notes?: string;
   links?: PersonLinks;

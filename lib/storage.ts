@@ -1,6 +1,7 @@
 "use client";
 
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
+import { dedupeCategoryNames } from "@/lib/categories";
 import type { AppSettings, BirthdayPerson, SettingRecord } from "@/lib/types";
 import { DEFAULT_SETTINGS } from "@/lib/types";
 
@@ -19,6 +20,7 @@ const DB_NAME = "bdayhub-db";
 const DB_VERSION = 1;
 const LS_PEOPLE_KEY = "bdayhub_people";
 const LS_SETTINGS_KEY = "bdayhub_settings";
+const LS_CATEGORIES_KEY = "lembra_categories";
 
 let dbPromise: Promise<IDBPDatabase<BdayDB>> | null = null;
 
@@ -78,6 +80,23 @@ function lsGetSettings(): AppSettings {
 function lsSetSettings(settings: AppSettings): void {
   if (!canUseBrowserStorage()) return;
   window.localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function lsGetCategories(): string[] {
+  if (!canUseBrowserStorage()) return [];
+  try {
+    const raw = window.localStorage.getItem(LS_CATEGORIES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function lsSetCategories(categories: string[]): void {
+  if (!canUseBrowserStorage()) return;
+  window.localStorage.setItem(LS_CATEGORIES_KEY, JSON.stringify(dedupeCategoryNames(categories)));
 }
 
 export async function listPeople(): Promise<BirthdayPerson[]> {
@@ -209,4 +228,35 @@ export async function clearAllData(): Promise<void> {
 
   window.localStorage.removeItem(LS_PEOPLE_KEY);
   window.localStorage.removeItem(LS_SETTINGS_KEY);
+  window.localStorage.removeItem(LS_CATEGORIES_KEY);
+}
+
+export async function listCategoriesLocal(): Promise<string[]> {
+  if (!canUseBrowserStorage()) return [];
+  if (!supportsIndexedDb()) return lsGetCategories();
+
+  try {
+    const db = await getDb();
+    const record = await db.get("settings", "categories");
+    const value = record?.value;
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : lsGetCategories();
+  } catch {
+    return lsGetCategories();
+  }
+}
+
+export async function saveCategoriesLocal(categories: string[]): Promise<void> {
+  const normalized = dedupeCategoryNames(categories);
+  if (!canUseBrowserStorage()) return;
+  if (!supportsIndexedDb()) {
+    lsSetCategories(normalized);
+    return;
+  }
+
+  try {
+    const db = await getDb();
+    await db.put("settings", { key: "categories", value: normalized });
+  } catch {
+    lsSetCategories(normalized);
+  }
 }

@@ -1,12 +1,13 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { encodeShareToken } from "@/lib/share";
 import { formatDayMonth, formatRelativeLabel } from "@/lib/dates";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 import { Templates, getMessageTemplates } from "@/components/Templates";
+import { dedupeCategoryNames } from "@/lib/categories";
 
 type PersonCardProps = {
   person: BirthdayPerson;
@@ -18,6 +19,10 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   const [messageCopied, setMessageCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const links = person.links ?? {};
+  const categories = useMemo(
+    () => dedupeCategoryNames([...(person.categories ?? []), ...(person.tags ?? []), person.category]),
+    [person.categories, person.tags, person.category]
+  );
 
   function getShareUrl() {
     const token = encodeShareToken({
@@ -58,7 +63,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   }
 
   return (
-    <article className="rounded-2xl border border-black/10 bg-white/95 p-4 shadow-sm">
+    <article className="rounded-2xl border border-black/10 bg-white/95 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -70,23 +75,23 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
                 rel="noreferrer"
                 aria-label={`Abrir Instagram de ${person.name}`}
                 title="Abrir Instagram"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 text-xs text-black/70 hover:bg-black/5"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 text-xs text-black/70 hover:bg-black/5 dark:border-white/15 dark:text-white/75 dark:hover:bg-white/10"
               >
                 IG
               </a>
             )}
           </div>
 
-          <p className="mt-0.5 text-sm text-black/70">
+          <p className="mt-0.5 text-sm text-black/70 dark:text-white/70">
             {formatDayMonth(person.day, person.month)}
             {typeof relativeDays === "number" ? ` • ${formatRelativeLabel(relativeDays)}` : ""}
           </p>
 
-          {person.tags.length > 0 && (
+          {categories.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {person.tags.map((tag) => (
-                <span key={tag} className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 shadow-sm">
-                  {normalizeNfc(tag)}
+              {categories.map((category) => (
+                <span key={category} className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 shadow-sm">
+                  {normalizeNfc(category)}
                 </span>
               ))}
             </div>
@@ -106,12 +111,12 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         <button
           type="button"
           onClick={() => void copyShareLink()}
-          className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/5"
+          className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
         >
           Copiar link
         </button>
 
-        <Link href={`/person?id=${person.id}`} className="rounded-xl bg-black/5 px-3 py-2 text-sm hover:bg-black/10">
+        <Link href={`/person?id=${person.id}`} className="rounded-xl bg-black/5 px-3 py-2 text-sm hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15">
           Editar
         </Link>
 
@@ -119,7 +124,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
           <button
             type="button"
             onClick={() => void handleDelete()}
-            className="rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm text-rose-700 hover:bg-rose-50"
+            className="rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm text-rose-700 hover:bg-rose-50 dark:bg-white/10"
           >
             Excluir
           </button>
@@ -127,7 +132,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
       </div>
 
       <div className="mt-2 min-h-5 text-xs">
-        {messageCopied && <span className="text-emerald-700">Mensagem pronta ✓</span>}
+        {messageCopied && <span className="text-emerald-700">Mensagem copiada ✓</span>}
         {!messageCopied && linkCopied && <span className="text-emerald-700">Link copiado ✓</span>}
       </div>
 
@@ -138,7 +143,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
               href={links.whatsapp}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-black/10 px-3 py-1.5 text-sm hover:bg-black/5"
+              className="rounded-lg border border-black/10 px-3 py-1.5 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
             >
               Abrir WhatsApp
             </a>
@@ -148,7 +153,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
               href={links.other}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-black/10 px-3 py-1.5 text-sm hover:bg-black/5"
+              className="rounded-lg border border-black/10 px-3 py-1.5 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
             >
               Abrir link
             </a>
@@ -156,7 +161,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         </div>
       )}
 
-      {person.notes && <p className="mt-3 text-sm text-black/70">{normalizeNfc(person.notes)}</p>}
+      {person.notes && <p className="mt-3 text-sm text-black/70 dark:text-white/70">{normalizeNfc(person.notes)}</p>}
 
       <div className="mt-4">
         <Templates person={person} />

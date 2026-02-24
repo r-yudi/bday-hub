@@ -1,4 +1,4 @@
-import { isValidDayMonth } from "@/lib/dates";
+﻿import { isValidDayMonth } from "@/lib/dates";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 
@@ -23,9 +23,9 @@ function splitCsvLine(line: string): string[] {
 
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i];
-    if (ch === "\"") {
-      if (inQuotes && line[i + 1] === "\"") {
-        current += "\"";
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
         i += 1;
       } else {
         inQuotes = !inQuotes;
@@ -105,6 +105,8 @@ export function parseBirthdayCsv(text: string): ParsedCsvResult {
       name,
       day,
       month,
+      categories: tags,
+      category: tags[0] || undefined,
       source: "csv",
       tags,
       notes: raw.notes || undefined,

@@ -41,6 +41,8 @@ export default function ShareTokenPage() {
         day: validPayload.day,
         month: validPayload.month,
         source: "shared",
+        categories: ["Compartilhado"],
+        category: "Compartilhado",
         tags: ["compartilhado"],
         createdAt: now,
         updatedAt: now

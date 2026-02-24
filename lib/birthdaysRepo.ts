@@ -1,5 +1,6 @@
 "use client";
 
+import { birthdayCategoriesFromAny } from "@/lib/categories";
 import { getTodayPeople, getUpcomingPeople } from "@/lib/dates";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
@@ -17,6 +18,8 @@ type BirthdaysRow = {
   name: string;
   day: number;
   month: number;
+  categories?: string[] | null;
+  category?: string | null;
   source?: string | null;
   tags?: string[] | null;
   notes?: string | null;
@@ -37,10 +40,13 @@ export type SyncResult = {
 
 function normalizePerson(person: BirthdayPerson): BirthdayPerson {
   const now = Date.now();
+  const categories = birthdayCategoriesFromAny(person);
   return {
     ...person,
     id: person.id || crypto.randomUUID(),
-    tags: Array.isArray(person.tags) ? person.tags : [],
+    categories,
+    category: categories[0] || undefined,
+    tags: categories,
     source: person.source || "manual",
     createdAt: Number.isFinite(person.createdAt) ? person.createdAt : now,
     updatedAt: Number.isFinite(person.updatedAt) ? person.updatedAt : now
@@ -51,13 +57,16 @@ function rowToPerson(row: BirthdaysRow): BirthdayPerson {
   const now = Date.now();
   const createdAt = row.created_at ? Date.parse(row.created_at) : now;
   const updatedAt = row.updated_at ? Date.parse(row.updated_at) : createdAt;
+  const categories = birthdayCategoriesFromAny(row);
   return {
     id: row.id,
     name: row.name,
     day: Number(row.day),
     month: Number(row.month),
     source: row.source === "csv" || row.source === "shared" ? row.source : "manual",
-    tags: Array.isArray(row.tags) ? row.tags.filter((tag): tag is string => typeof tag === "string") : [],
+    categories,
+    category: categories[0] ?? undefined,
+    tags: categories,
     notes: row.notes ?? undefined,
     links: {
       whatsapp: row.whatsapp ?? undefined,
@@ -77,8 +86,10 @@ function personToRow(person: BirthdayPerson, userId: string): BirthdaysRow {
     name: normalized.name,
     day: normalized.day,
     month: normalized.month,
+    categories: normalized.categories ?? [],
+    category: normalized.category ?? null,
     source: normalized.source,
-    tags: normalized.tags ?? [],
+    tags: normalized.categories ?? normalized.tags ?? [],
     notes: normalized.notes ?? null,
     whatsapp: normalized.links?.whatsapp ?? null,
     instagram: normalized.links?.instagram ?? null,
@@ -252,18 +263,19 @@ export async function debugTestBirthdaysTable() {
     return { ok: false, message: countRes.error.message };
   }
 
-  const now = Date.now();
-  const dummyId = crypto.randomUUID();
-  const dummy: BirthdayPerson = {
+      const now = Date.now();
+      const dummyId = crypto.randomUUID();
+      const dummy: BirthdayPerson = {
     id: dummyId,
     name: "__debug_birthdays__",
     day: 1,
-    month: 1,
-    source: "manual",
-    tags: ["debug"],
-    createdAt: now,
-    updatedAt: now
-  };
+        month: 1,
+        source: "manual",
+        categories: ["debug"],
+        tags: ["debug"],
+        createdAt: now,
+        updatedAt: now
+      };
   await upsertRemoteBirthdays(userId, [dummy]);
   const del = await supabase.from("birthdays").delete().eq("id", dummyId);
   if (del.error) {
