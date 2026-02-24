@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { isValidDayMonth } from "@/lib/dates";
+import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 
 type PersonFormProps = {
@@ -44,7 +45,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   const tagSet = useMemo(() => new Set(tags.map((tag) => tag.toLowerCase())), [tags]);
 
   function addTag(raw: string) {
-    const normalized = raw.trim();
+    const normalized = normalizeNfc(raw.trim());
     if (!normalized) return;
     if (tagSet.has(normalized.toLowerCase())) return;
     setTags((prev) => [...prev, normalized]);
@@ -67,12 +68,12 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
     const now = Date.now();
     const person: BirthdayPerson = {
       id: initialPerson?.id ?? crypto.randomUUID(),
-      name: name.trim(),
+      name: normalizeNfc(name.trim()),
       day,
       month,
       source,
-      tags,
-      notes: notes.trim() || undefined,
+      tags: tags.map((tag) => normalizeNfc(tag)),
+      notes: normalizeNfc(notes.trim()) || undefined,
       links: {
         whatsapp: whatsapp.trim() || undefined,
         instagram: instagram.trim() || undefined,
@@ -126,7 +127,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Tags</label>
+        <label className="mb-1 block text-sm font-medium">Categorias</label>
         <div className="rounded-xl border border-black/15 px-3 py-2">
           <div className="mb-2 flex flex-wrap gap-2">
             {tags.map((tag) => (
@@ -135,7 +136,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                 type="button"
                 onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
                 className="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs text-orange-700 hover:bg-orange-100"
-                title="Remover tag"
+                title="Remover categoria"
               >
                 {tag} ×
               </button>
@@ -173,7 +174,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Notas</label>
+        <label className="mb-1 block text-sm font-medium">Observações</label>
         <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-24 w-full rounded-xl border border-black/15 px-3 py-2" placeholder="Observações" />
       </div>
 

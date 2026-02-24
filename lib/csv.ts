@@ -1,4 +1,5 @@
 import { isValidDayMonth } from "@/lib/dates";
+import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 
 export type CsvRowPreview = {
@@ -39,11 +40,11 @@ function splitCsvLine(line: string): string[] {
     current += ch;
   }
   out.push(current);
-  return out.map((cell) => cell.trim());
+  return out.map((cell) => normalizeNfc(cell.trim()));
 }
 
 export function parseBirthdayCsv(text: string): ParsedCsvResult {
-  const lines = text
+  const lines = normalizeNfc(text)
     .replace(/^\uFEFF/, "")
     .split(/\r?\n/)
     .map((line) => line.trimEnd())
@@ -73,11 +74,11 @@ export function parseBirthdayCsv(text: string): ParsedCsvResult {
     const cells = splitCsvLine(lines[i]);
     const raw: Record<string, string> = {};
     headers.forEach((header, idx) => {
-      raw[header] = (cells[idx] ?? "").trim();
+      raw[header] = normalizeNfc((cells[idx] ?? "").trim());
     });
 
     const rowErrors: string[] = [];
-    const name = (raw.name ?? "").trim();
+    const name = normalizeNfc((raw.name ?? "").trim());
     const day = Number(raw.day);
     const month = Number(raw.month);
 
@@ -89,9 +90,9 @@ export function parseBirthdayCsv(text: string): ParsedCsvResult {
       continue;
     }
 
-    const tags = (raw.tags ?? "")
+    const tags = normalizeNfc(raw.tags ?? "")
       .split(";")
-      .map((tag) => tag.trim())
+      .map((tag) => normalizeNfc(tag.trim()))
       .filter(Boolean);
 
     const key = `${name.toLowerCase()}::${day}::${month}`;

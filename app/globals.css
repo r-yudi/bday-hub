@@ -4,6 +4,26 @@
 
 :root {
   color-scheme: light;
+  --color-ink: 11 18 32;
+  --color-paper: 255 247 237;
+  --color-accent: 255 77 79;
+  --color-accent-hover: 224 67 69;
+  --color-warm: 255 200 87;
+  --color-surface: 255 255 255;
+  --color-surface-soft: 255 255 255;
+  --color-border: 0 0 0;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-ink: 241 245 249;
+  --color-paper: 22 18 24;
+  --color-accent: 255 102 106;
+  --color-accent-hover: 255 87 90;
+  --color-warm: 255 200 87;
+  --color-surface: 33 28 36;
+  --color-surface-soft: 40 34 44;
+  --color-border: 255 255 255;
 }
 
 @layer base {
@@ -32,6 +52,24 @@ body {
   background-image:
     radial-gradient(circle at 12% 8%, rgba(255, 90, 95, 0.12), transparent 42%),
     radial-gradient(circle at 88% 0%, rgba(253, 186, 116, 0.14), transparent 38%);
+}
+
+.dark body {
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(255, 90, 95, 0.15), transparent 45%),
+    radial-gradient(circle at 88% 0%, rgba(255, 200, 87, 0.12), transparent 40%);
+}
+
+@layer utilities {
+  .surface-card {
+    background-color: rgb(var(--color-surface) / 0.92);
+    border-color: rgb(var(--color-border) / 0.1);
+  }
+
+  .surface-soft {
+    background-color: rgb(var(--color-surface-soft) / 0.85);
+    border-color: rgb(var(--color-border) / 0.1);
+  }
 }
 
 a {

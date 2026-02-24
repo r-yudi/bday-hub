@@ -31,13 +31,12 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
       <section className="rounded-3xl border border-black/10 bg-white/95 p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-wide text-black/60">Lembra. • Login</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-black/90 sm:text-[2rem]">Entrar com Google</h1>
-        <p className="mt-2 text-sm text-black/70">
-          Faça login para acessar suas telas principais. O retorno é feito via `/auth/callback`.
-        </p>
+        <p className="mt-2 text-sm text-black/70">Faça login para continuar com seus aniversários em qualquer dispositivo.</p>
 
         {!configured && (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            Supabase não configurado neste ambiente. Defina `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+            O login com Google ainda não está configurado neste ambiente. Defina `NEXT_PUBLIC_SUPABASE_URL` e
+            `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
           </div>
         )}
 
@@ -55,9 +54,9 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
         {error && <p className="mt-3 text-sm text-rose-700">{error}</p>}
 
         <div className="mt-4 flex items-center justify-between text-xs text-black/60">
-          <span>Destino após login: {returnTo}</span>
+          <span>Você volta para: {returnTo}</span>
           <Link href="/debug/supabase" className="underline decoration-black/20 underline-offset-2 hover:text-black/85">
-            Debug Supabase
+            Diagnóstico
           </Link>
         </div>
       </section>

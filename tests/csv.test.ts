@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { parseBirthdayCsv } from "@/lib/csv";
+import { decodeCsvBytes } from "@/lib/csv-file";
 
 test("parseBirthdayCsv aceita CSV válido com header obrigatório", () => {
   const csv = [
@@ -38,4 +39,13 @@ test("parseBirthdayCsv rejeita header incompleto", () => {
   assert.equal(result.valid.length, 0);
   assert.equal(result.invalid.length, 0);
   assert.ok(result.warnings.some((w) => w.includes("Header inválido")));
+});
+
+test("decodeCsvBytes faz fallback para Latin1 quando detecta mojibake", () => {
+  const latin1Bytes = Buffer.from("name,day,month,tags,whatsapp,instagram,notes\nJoão,1,1,,,,Parabéns", "latin1");
+  const decoded = decodeCsvBytes(latin1Bytes.buffer.slice(latin1Bytes.byteOffset, latin1Bytes.byteOffset + latin1Bytes.byteLength));
+
+  assert.match(decoded, /João/);
+  assert.match(decoded, /Parabéns/);
+  assert.ok(!decoded.includes("ParabÃ©ns"));
 });

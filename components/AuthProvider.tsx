@@ -88,18 +88,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     let active = true;
     setSyncStatus("syncing");
-    setSyncMessage("Sincronizando...");
+    setSyncMessage("Atualizando sua lista...");
 
     void syncBirthdaysAfterSignIn()
       .then((result) => {
         if (!active) return;
         if (!result.ok) {
           setSyncStatus("error");
-          setSyncMessage(result.message || "Falha ao sincronizar");
+          setSyncMessage(result.message || "Não foi possível atualizar agora");
           return;
         }
         setSyncStatus("synced");
-        setSyncMessage(`Sincronizado (${result.syncedCount})`);
+        setSyncMessage(`Lista atualizada (${result.syncedCount})`);
         window.setTimeout(() => {
           if (!active) return;
           setSyncStatus("idle");
@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch((error: unknown) => {
         if (!active) return;
         setSyncStatus("error");
-        setSyncMessage(error instanceof Error ? error.message : "Falha ao sincronizar");
+        setSyncMessage(error instanceof Error ? error.message : "Não foi possível atualizar agora");
       });
 
     return () => {

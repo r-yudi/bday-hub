@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { useThemeMode } from "@/components/ThemeProvider";
 
 const navItems = [
   { href: "/today", label: "Hoje" },
@@ -12,12 +13,16 @@ const navItems = [
 export function TopNav() {
   const pathname = usePathname();
   const { configured, initialized, user, signOut, syncStatus, syncMessage } = useAuth();
+  const { themeMode, setThemeMode } = useThemeMode();
   const displayName = user?.user_metadata?.full_name || user?.email || "Conta";
   const isLanding = pathname === "/";
 
+  const themeSelectClass =
+    "rounded-full border border-black/10 bg-white/85 px-3 py-1.5 text-black/75 hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15";
+
   if (isLanding) {
     return (
-      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-white/5">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link href="/" className="group inline-flex flex-col font-semibold tracking-tight">
             <span>Lembra.</span>
@@ -25,10 +30,23 @@ export function TopNav() {
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Link href="/today" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm">
+            <label className="sr-only" htmlFor="theme-mode-home">
+              Tema
+            </label>
+            <select
+              id="theme-mode-home"
+              value={themeMode}
+              onChange={(e) => setThemeMode(e.target.value as "light" | "dark" | "system")}
+              className={`${themeSelectClass} text-sm`}
+            >
+              <option value="system">Sistema</option>
+              <option value="light">Claro</option>
+              <option value="dark">Escuro</option>
+            </select>
+            <Link href="/today" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm dark:bg-white/10 dark:hover:bg-white/15">
               Hoje
             </Link>
-            <Link href="/upcoming" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm">
+            <Link href="/upcoming" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm dark:bg-white/10 dark:hover:bg-white/15">
               Próximos 7 dias
             </Link>
             <Link
@@ -44,7 +62,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-white/5">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href="/today" className="group inline-flex flex-col font-semibold tracking-tight">
           <span>Lembra.</span>
@@ -52,6 +70,21 @@ export function TopNav() {
         </Link>
 
         <div className="flex flex-wrap items-center justify-end gap-2">
+          <label className="sr-only" htmlFor="theme-mode-app">
+            Tema
+          </label>
+          <select
+            id="theme-mode-app"
+            value={themeMode}
+            onChange={(e) => setThemeMode(e.target.value as "light" | "dark" | "system")}
+            className={`${themeSelectClass} text-xs`}
+            title="Tema"
+          >
+            <option value="system">Sistema</option>
+            <option value="light">Claro</option>
+            <option value="dark">Escuro</option>
+          </select>
+
           <nav className="flex items-center gap-2">
             {navItems.map((item) => {
               const active = pathname === item.href;
@@ -63,7 +96,7 @@ export function TopNav() {
                     "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-out",
                     active
                       ? "scale-[1.02] bg-accent text-white shadow-sm"
-                      : "bg-white/80 hover:-translate-y-px hover:bg-white hover:shadow-sm"
+                      : "bg-white/80 hover:-translate-y-px hover:bg-white hover:shadow-sm dark:bg-white/10 dark:hover:bg-white/15"
                   ].join(" ")}
                 >
                   {item.label}
@@ -73,7 +106,7 @@ export function TopNav() {
           </nav>
 
           {configured && (
-            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/85 px-2 py-1">
+            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/85 px-2 py-1 dark:border-white/15 dark:bg-white/10">
               {user && syncMessage && (
                 <span
                   className={[
@@ -87,22 +120,22 @@ export function TopNav() {
                           : "bg-black/5 text-black/60"
                   ].join(" ")}
                 >
-                  {syncMessage}
+                  {syncStatus === "syncing" ? "Atualizando..." : syncStatus === "synced" ? "Tudo em dia" : syncMessage}
                 </span>
               )}
-              <span className="max-w-40 truncate px-2 text-xs text-black/70 sm:max-w-52" title={displayName}>
+              <span className="max-w-40 truncate px-2 text-xs text-black/70 sm:max-w-52 dark:text-white/75" title={displayName}>
                 {!initialized ? "Carregando sessão..." : user ? displayName : "Não conectado"}
               </span>
               {user ? (
                 <button
                   type="button"
                   onClick={() => void signOut()}
-                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5"
+                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
                 >
                   Sair
                 </button>
               ) : (
-                <Link href="/login" className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5">
+                <Link href="/login" className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15">
                   Entrar
                 </Link>
               )}

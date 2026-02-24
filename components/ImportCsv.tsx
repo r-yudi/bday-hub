@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { decodeCsvBytes } from "@/lib/csv-file";
 import { parseBirthdayCsv } from "@/lib/csv";
 import type { BirthdayPerson } from "@/lib/types";
 
@@ -14,7 +15,8 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
   const [importing, setImporting] = useState(false);
 
   async function handleFile(file: File) {
-    const text = await file.text();
+    const buffer = await file.arrayBuffer();
+    const text = decodeCsvBytes(buffer);
     setRawText(text);
   }
 
@@ -52,7 +54,7 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
           />
         </label>
         <span className="text-sm text-black/70">
-          Header obrigatório: `name,day,month,tags,whatsapp,instagram,notes`
+          Header obrigatório: `name,day,month,tags,whatsapp,instagram,notes` (coluna `tags` = categorias)
         </span>
       </div>
 

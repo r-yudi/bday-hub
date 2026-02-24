@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
 import { encodeShareToken } from "@/lib/share";
 import { formatDayMonth, formatRelativeLabel } from "@/lib/dates";
+import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 import { Templates, getMessageTemplates } from "@/components/Templates";
 
@@ -20,7 +21,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
 
   function getShareUrl() {
     const token = encodeShareToken({
-      name: person.name,
+      name: normalizeNfc(person.name),
       day: person.day,
       month: person.month,
       issuedAt: Date.now()
@@ -35,7 +36,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
       setMessageCopied(true);
       window.setTimeout(() => setMessageCopied(false), 1400);
     } catch {
-      window.alert("NÃ£o foi possÃ­vel copiar a mensagem.");
+      window.alert("Não foi possível copiar a mensagem.");
     }
   }
 
@@ -45,13 +46,13 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
       setLinkCopied(true);
       window.setTimeout(() => setLinkCopied(false), 1400);
     } catch {
-      window.alert("NÃ£o foi possÃ­vel copiar o link.");
+      window.alert("Não foi possível copiar o link.");
     }
   }
 
   async function handleDelete() {
     if (!onDelete) return;
-    const confirmed = window.confirm(`Excluir ${person.name}?`);
+    const confirmed = window.confirm(`Remover ${person.name} da sua lista?`);
     if (!confirmed) return;
     await onDelete(person.id);
   }
@@ -61,7 +62,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold tracking-tight">{person.name}</h3>
+            <h3 className="text-lg font-semibold tracking-tight">{normalizeNfc(person.name)}</h3>
             {links.instagram && (
               <a
                 href={links.instagram}
@@ -78,14 +79,14 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
 
           <p className="mt-0.5 text-sm text-black/70">
             {formatDayMonth(person.day, person.month)}
-            {typeof relativeDays === "number" ? ` â€¢ ${formatRelativeLabel(relativeDays)}` : ""}
+            {typeof relativeDays === "number" ? ` • ${formatRelativeLabel(relativeDays)}` : ""}
           </p>
 
           {person.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {person.tags.map((tag) => (
                 <span key={tag} className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 shadow-sm">
-                  {tag}
+                  {normalizeNfc(tag)}
                 </span>
               ))}
             </div>
@@ -155,7 +156,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         </div>
       )}
 
-      {person.notes && <p className="mt-3 text-sm text-black/70">{person.notes}</p>}
+      {person.notes && <p className="mt-3 text-sm text-black/70">{normalizeNfc(person.notes)}</p>}
 
       <div className="mt-4">
         <Templates person={person} />
@@ -163,4 +164,3 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
     </article>
   );
 }
-

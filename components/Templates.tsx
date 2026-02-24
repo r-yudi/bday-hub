@@ -1,13 +1,17 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
+import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 
-export const getMessageTemplates = (person: BirthdayPerson): string[] => [
-  `ParabÃ©ns, ${person.name}! Que seu dia seja incrÃ­vel ðŸŽ‰`,
-  `Feliz aniversÃ¡rio, ${person.name}! Muita saÃºde e alegria!`,
-  `${person.name}, feliz aniversÃ¡rio! Tudo de melhor hoje e sempre!`
-];
+export const getMessageTemplates = (person: BirthdayPerson): string[] => {
+  const name = normalizeNfc(person.name);
+  return [
+    `Parabéns, ${name}! Que seu dia seja incrível 🎉`,
+    `Feliz aniversário, ${name}! Muita saúde e alegria!`,
+    `${name}, feliz aniversário! Tudo de melhor hoje e sempre!`
+  ];
+};
 
 export function Templates({ person }: { person: BirthdayPerson }) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -19,7 +23,7 @@ export function Templates({ person }: { person: BirthdayPerson }) {
       setCopiedIndex(idx);
       window.setTimeout(() => setCopiedIndex(null), 1200);
     } catch {
-      window.alert("NÃ£o foi possÃ­vel copiar a mensagem.");
+      window.alert("Não foi possível copiar a mensagem.");
     }
   }
 
@@ -43,4 +47,3 @@ export function Templates({ person }: { person: BirthdayPerson }) {
     </div>
   );
 }
-
