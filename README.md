@@ -40,6 +40,18 @@ Notificação agendada confiável em background varia por navegador/OS. Implemen
   - cálculo de próximos 7 dias
   - validação/parsing de CSV
 
+## Testes E2E (Playwright)
+
+- Instalar dependencias: `npm install`
+- Instalar browser do Playwright (primeira vez): `npx playwright install chromium`
+- Rodar smoke tests E2E: `npm run test:e2e`
+
+Cobertura atual (smoke):
+- CRUD de aniversario
+- Import CSV (preview + import)
+- Persistencia apos reload
+- `/share/[token]` com CTA "Adicionar a lista"
+
 ## CSV suportado
 
 Header obrigatório:
