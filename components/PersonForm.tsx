@@ -115,7 +115,6 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
       month,
       source,
       categories: normalizedCategories,
-      category: normalizedCategories[0] || undefined,
       tags: normalizedCategories,
       notes: normalizeNfc(notes.trim()) || undefined,
       links: {

@@ -109,7 +109,6 @@ export function parseBirthdayCsv(text: string): ParsedCsvResult {
       day,
       month,
       categories: tags,
-      category: tags[0] || undefined,
       source: "csv",
       tags,
       notes: raw.notes || undefined,

@@ -19,9 +19,8 @@ type BirthdaysRow = {
   day: number;
   month: number;
   categories?: string[] | null;
-  category?: string | null;
   source?: string | null;
-  tags?: string[] | null;
+  tags?: string[] | string | null;
   notes?: string | null;
   whatsapp?: string | null;
   instagram?: string | null;
@@ -45,7 +44,6 @@ function normalizePerson(person: BirthdayPerson): BirthdayPerson {
     ...person,
     id: person.id || crypto.randomUUID(),
     categories,
-    category: categories[0] || undefined,
     tags: categories,
     source: person.source || "manual",
     createdAt: Number.isFinite(person.createdAt) ? person.createdAt : now,
@@ -53,11 +51,24 @@ function normalizePerson(person: BirthdayPerson): BirthdayPerson {
   };
 }
 
+function parseLegacyTags(tags: BirthdaysRow["tags"]): string[] {
+  if (Array.isArray(tags)) {
+    return tags.filter((value): value is string => typeof value === "string");
+  }
+  if (typeof tags === "string") {
+    return tags
+      .split(/[;,|]/)
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 function rowToPerson(row: BirthdaysRow): BirthdayPerson {
   const now = Date.now();
   const createdAt = row.created_at ? Date.parse(row.created_at) : now;
   const updatedAt = row.updated_at ? Date.parse(row.updated_at) : createdAt;
-  const categories = birthdayCategoriesFromAny(row);
+  const categories = birthdayCategoriesFromAny({ categories: row.categories, tags: parseLegacyTags(row.tags) });
   return {
     id: row.id,
     name: row.name,
@@ -65,7 +76,6 @@ function rowToPerson(row: BirthdaysRow): BirthdayPerson {
     month: Number(row.month),
     source: row.source === "csv" || row.source === "shared" ? row.source : "manual",
     categories,
-    category: categories[0] ?? undefined,
     tags: categories,
     notes: row.notes ?? undefined,
     links: {
@@ -87,7 +97,6 @@ function personToRow(person: BirthdayPerson, userId: string): BirthdaysRow {
     day: normalized.day,
     month: normalized.month,
     categories: normalized.categories ?? [],
-    category: normalized.category ?? null,
     source: normalized.source,
     tags: normalized.categories ?? normalized.tags ?? [],
     notes: normalized.notes ?? null,
@@ -110,15 +119,14 @@ async function listRemoteBirthdays(userId: string): Promise<BirthdayPerson[]> {
 
   const { data, error } = await supabase
     .from("birthdays")
-    .select("*")
+    .select("id,user_id,name,day,month,categories,tags,source,notes,whatsapp,instagram,other_link,created_at,updated_at")
+    .eq("user_id", userId)
     .order("month", { ascending: true })
     .order("day", { ascending: true })
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
-  return ((data ?? []) as BirthdaysRow[])
-    .filter((row) => row.user_id === userId)
-    .map(rowToPerson);
+  return ((data ?? []) as BirthdaysRow[]).map(rowToPerson);
 }
 
 async function upsertRemoteBirthdays(userId: string, people: BirthdayPerson[]): Promise<void> {
@@ -255,7 +263,7 @@ export async function debugTestBirthdaysTable() {
     return { ok: false, message: errorMessage || "Sem sessão ativa." };
   }
 
-  const countRes = await supabase.from("birthdays").select("*", { count: "exact", head: true });
+  const countRes = await supabase.from("birthdays").select("id", { count: "exact", head: true });
   if (countRes.error) {
     return { ok: false, message: countRes.error.message };
   }
