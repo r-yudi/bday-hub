@@ -1,8 +1,18 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { dedupeCategoryNames } from "@/lib/categories";
+import {
+  buildCategoryIndex,
+  dedupeCategoryNames,
+  extractCategoriesFromPerson,
+  findCloseCategorySuggestion,
+  mergeSuggestions,
+  normalizeCategory,
+  normalizeCategoryName,
+  PREDEFINED_CATEGORIES
+} from "@/lib/categories";
 import { listCategories, seedDefaultCategories, upsertCategory } from "@/lib/categoriesRepo";
+import { listBirthdays } from "@/lib/birthdaysRepo";
 import { isValidDayMonth } from "@/lib/dates";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
@@ -18,7 +28,7 @@ const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
 function initialCategoriesFromPerson(person?: BirthdayPerson | null) {
   if (!person) return [];
-  return dedupeCategoryNames([...(person.categories ?? []), ...(person.tags ?? []), person.category]);
+  return extractCategoriesFromPerson(person);
 }
 
 export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps) {
@@ -51,19 +61,32 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   const isEdit = Boolean(initialPerson);
   const source = initialPerson?.source ?? "manual";
 
-  const categorySet = useMemo(() => new Set(categories.map((value) => value.toLocaleLowerCase("pt-BR"))), [categories]);
+  const categoryIndex = useMemo(() => buildCategoryIndex([...categoryOptions, ...categories]), [categoryOptions, categories]);
+  const selectedKeys = useMemo(() => new Set(categories.map((value) => normalizeCategory(value))), [categories]);
   const availableOptions = useMemo(
-    () => categoryOptions.filter((option) => !categorySet.has(option.toLocaleLowerCase("pt-BR"))),
-    [categoryOptions, categorySet]
+    () => categoryOptions.filter((option) => !selectedKeys.has(normalizeCategory(option))),
+    [categoryOptions, selectedKeys]
   );
+
+  const typoSuggestion = useMemo(() => {
+    if (!categoryInput.trim()) return null;
+    const suggestion = findCloseCategorySuggestion(categoryInput, categoryOptions);
+    if (!suggestion) return null;
+    const inputKey = normalizeCategory(categoryInput);
+    const suggestionKey = normalizeCategory(suggestion);
+    if (!inputKey || inputKey === suggestionKey) return null;
+    return suggestion;
+  }, [categoryInput, categoryOptions]);
 
   useEffect(() => {
     let active = true;
     void (async () => {
       await seedDefaultCategories();
-      const options = await listCategories();
+      const [repoCategories, people] = await Promise.all([listCategories(), listBirthdays()]);
       if (!active) return;
-      setCategoryOptions(options);
+
+      const categoriesFromPeople = people.flatMap((person) => extractCategoriesFromPerson(person));
+      setCategoryOptions(mergeSuggestions(PREDEFINED_CATEGORIES, categoriesFromPeople, repoCategories));
     })();
     return () => {
       active = false;
@@ -71,20 +94,23 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   }, []);
 
   async function addCategory(raw: string) {
-    const normalized = normalizeNfc(raw.trim());
-    if (!normalized) return;
+    const pretty = normalizeCategoryName(raw);
+    if (!pretty) return;
 
-    const saved = await upsertCategory(normalized);
-    const finalValue = saved ?? normalized;
+    const exactExisting = categoryIndex.get(normalizeCategory(pretty));
+    const chosen = exactExisting ?? pretty;
+
+    const saved = await upsertCategory(chosen);
+    const finalValue = saved ?? chosen;
 
     setCategories((prev) => dedupeCategoryNames([...prev, finalValue]));
-    setCategoryOptions((prev) => dedupeCategoryNames([...prev, finalValue]));
+    setCategoryOptions((prev) => mergeSuggestions(PREDEFINED_CATEGORIES, prev, [finalValue]));
     setCategoryInput("");
   }
 
   function removeCategory(value: string) {
-    const key = value.toLocaleLowerCase("pt-BR");
-    setCategories((prev) => prev.filter((item) => item.toLocaleLowerCase("pt-BR") !== key));
+    const key = normalizeCategory(value);
+    setCategories((prev) => prev.filter((item) => normalizeCategory(item) !== key));
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -102,8 +128,13 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
     let resolvedCategories = categories;
     if (categoryInput.trim()) {
-      await addCategory(categoryInput);
-      resolvedCategories = dedupeCategoryNames([...categories, categoryInput]);
+      const pretty = normalizeCategoryName(categoryInput);
+      const exactExisting = categoryIndex.get(normalizeCategory(pretty));
+      const finalInput = exactExisting ?? pretty;
+      if (finalInput) {
+        await addCategory(finalInput);
+        resolvedCategories = dedupeCategoryNames([...categories, finalInput]);
+      }
     }
 
     const normalizedCategories = dedupeCategoryNames(resolvedCategories.map((value) => normalizeNfc(value)));
@@ -210,6 +241,19 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
               Adicionar
             </button>
           </div>
+
+          {typoSuggestion && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              Você quis dizer <span className="font-semibold">{typoSuggestion}</span>?{" "}
+              <button
+                type="button"
+                onClick={() => void addCategory(typoSuggestion)}
+                className="underline decoration-amber-700/40 underline-offset-2 hover:text-amber-950"
+              >
+                Usar {typoSuggestion}
+              </button>
+            </div>
+          )}
 
           <datalist id="category-options">
             {availableOptions.map((option) => (
