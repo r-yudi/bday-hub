@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PersonForm } from "@/components/PersonForm";
-import { deletePerson, getPersonById, upsertPerson } from "@/lib/storage";
+import { deleteBirthday, getBirthdayById, upsertBirthday } from "@/lib/birthdaysRepo";
+import { queueBirthdayAddedToast } from "@/lib/onboarding-ui";
 import type { BirthdayPerson } from "@/lib/types";
 
 function PersonPageContent() {
@@ -23,7 +24,7 @@ function PersonPageContent() {
 
     let cancelled = false;
     setLoading(true);
-    void getPersonById(id).then((person) => {
+    void getBirthdayById(id).then((person) => {
       if (cancelled) return;
       setInitialPerson(person);
       setLoading(false);
@@ -35,14 +36,18 @@ function PersonPageContent() {
   }, [id]);
 
   async function handleSave(person: BirthdayPerson) {
-    await upsertPerson(person);
+    const isNewPerson = !id;
+    await upsertBirthday(person);
+    if (isNewPerson) {
+      queueBirthdayAddedToast();
+    }
     router.push("/today");
   }
 
   async function handleDelete(personId: string) {
     const confirmed = window.confirm("Excluir este aniversário?");
     if (!confirmed) return;
-    await deletePerson(personId);
+    await deleteBirthday(personId);
     router.push("/today");
   }
 
@@ -50,7 +55,7 @@ function PersonPageContent() {
     <div className="mx-auto max-w-2xl space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{id ? "Editar pessoa" : "Adicionar pessoa"}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-[2rem]">{id ? "Editar pessoa" : "Adicionar pessoa"}</h1>
           <p className="text-sm text-black/70">Cadastro manual de aniversário.</p>
         </div>
         <Link href="/today" className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm">

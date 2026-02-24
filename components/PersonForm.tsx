@@ -134,7 +134,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                 key={tag}
                 type="button"
                 onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
-                className="rounded-full bg-black/5 px-2 py-1 text-xs hover:bg-black/10"
+                className="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs text-orange-700 hover:bg-orange-100"
                 title="Remover tag"
               >
                 {tag} ×
@@ -180,7 +180,11 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
       {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
 
       <div className="flex flex-wrap items-center gap-2">
-        <button type="submit" disabled={saving} className="rounded-lg bg-ink px-4 py-2 text-sm text-paper disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={saving}
+          className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover disabled:opacity-50"
+        >
           {saving ? "Salvando..." : "Salvar"}
         </button>
         {isEdit && onDelete && initialPerson && (

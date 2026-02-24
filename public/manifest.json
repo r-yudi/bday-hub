@@ -1,7 +1,7 @@
-{
-  "name": "BdayHub",
-  "short_name": "BdayHub",
-  "description": "Lembretes simples de aniversários",
+﻿{
+  "name": "Lembra",
+  "short_name": "Lembra",
+  "description": "Nunca mais esqueça um aniversário 🎉",
   "start_url": "/today",
   "display": "standalone",
   "background_color": "#f7f5ef",

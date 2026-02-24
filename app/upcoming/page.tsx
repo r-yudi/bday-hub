@@ -2,35 +2,44 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PersonCard } from "@/components/PersonCard";
+import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { getUpcomingPeople } from "@/lib/dates";
-import { deletePerson, listPeople } from "@/lib/storage";
+import { deleteBirthday, listBirthdays } from "@/lib/birthdaysRepo";
 import type { BirthdayPerson } from "@/lib/types";
 
 export default function UpcomingPage() {
+  const [mounted, setMounted] = useState(false);
   const [people, setPeople] = useState<BirthdayPerson[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function loadData() {
     setLoading(true);
     try {
-      setPeople(await listPeople());
+      setPeople(await listBirthdays());
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    void loadData();
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    void loadData();
+  }, [mounted]);
 
   const upcoming = useMemo(() => getUpcomingPeople(people), [people]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <section>
-        <h1 className="text-2xl font-semibold tracking-tight">Próximos 7 dias</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-[2rem]">Próximos 7 dias</h1>
         <p className="text-sm text-black/70">Inclui hoje e considera virada de ano.</p>
       </section>
+
+      {!loading && <OnboardingBanner count={people.length} mounted={mounted} />}
 
       {loading ? (
         <p className="text-sm text-black/60">Carregando...</p>
@@ -46,7 +55,7 @@ export default function UpcomingPage() {
               person={person}
               relativeDays={person.daysUntil}
               onDelete={async (id) => {
-                await deletePerson(id);
+                await deleteBirthday(id);
                 await loadData();
               }}
             />

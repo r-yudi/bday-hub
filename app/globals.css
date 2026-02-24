@@ -6,11 +6,32 @@
   color-scheme: light;
 }
 
+@layer base {
+  button,
+  a,
+  label {
+    transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease;
+  }
+}
+
+@layer components {
+  .btn-primary-brand {
+    @apply shadow-sm;
+  }
+
+  .btn-primary-brand:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(225, 77, 80, 0.18);
+  }
+}
+
 body {
-  @apply bg-paper text-ink antialiased;
+  @apply bg-paper text-ink antialiased leading-relaxed;
   background-image:
-    radial-gradient(circle at 10% 10%, rgba(245, 158, 11, 0.12), transparent 45%),
-    radial-gradient(circle at 90% 0%, rgba(15, 118, 110, 0.1), transparent 40%);
+    radial-gradient(circle at 12% 8%, rgba(255, 90, 95, 0.12), transparent 42%),
+    radial-gradient(circle at 88% 0%, rgba(253, 186, 116, 0.14), transparent 38%);
 }
 
 a {

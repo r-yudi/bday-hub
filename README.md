@@ -1,4 +1,6 @@
-# BdayHub (MVP)
+﻿# Lembra (MVP)
+
+Nunca mais esqueça um aniversário 🎉
 
 MVP client-only para lembrar aniversários, conforme `SPEC.md`.
 
@@ -7,6 +9,7 @@ MVP client-only para lembrar aniversários, conforme `SPEC.md`.
 - Next.js (App Router) + TypeScript
 - Tailwind CSS
 - `idb` (IndexedDB) com fallback `localStorage`
+- `@supabase/supabase-js` (auth Google + sessao)
 - `next-pwa` (best-effort para suporte PWA/notificações)
 
 ## Funcionalidades entregues
@@ -31,8 +34,102 @@ Notificação agendada confiável em background varia por navegador/OS. Implemen
 ## Como rodar localmente
 
 1. `npm install`
-2. `npm run dev`
-3. Abrir `http://localhost:3000/today`
+2. (Opcional para auth) criar `.env.local` com:
+   - `NEXT_PUBLIC_SUPABASE_URL=...`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
+3. `npm run dev`
+4. Abrir `http://localhost:3000/today`
+
+## Login Google (Supabase) - checklist
+
+Env vars usadas no client:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+Checklist de configuração (Supabase + Google):
+
+- Supabase `Authentication > Providers > Google` configurado com Client ID/Secret
+- Supabase `Authentication > URL Configuration` inclui:
+  - `http://localhost:3000/**`
+  - `https://bday-hub.vercel.app/**` (ou seu dominio atual de producao)
+- Google Cloud OAuth inclui:
+  - Authorized JavaScript origins: `http://localhost:3000` e dominio de producao
+  - Redirect URI: callback do Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`)
+
+Como testar localmente:
+
+1. Definir as env vars em `.env.local`
+2. Rodar `npm run dev`
+3. Visitar `/debug/supabase` antes do login e validar:
+   - health (`/auth/v1/health`) responde OK
+   - `getSession()` retorna `session null`
+   - `getUser()` sem usuário (ou erro esperado sem sessão)
+4. Abrir `/login` e clicar em `Entrar com Google`
+5. Confirmar retorno para `/auth/callback` e depois redirecionamento para a rota protegida (`/today`, `/upcoming` ou `/share`)
+6. Voltar em `/debug/supabase` e validar:
+   - `getSession()` com `session/user` preenchidos
+   - `getUser()` com `user` preenchido
+   - botão `Testar DB` retorna `DB OK (RLS OK)` (faz probe + upsert/select da própria linha em `user_settings`)
+7. (Opcional) abrir `/debug/auth` em desenvolvimento para um painel resumido (`Auth OK` / `DB OK`)
+
+Como validar em producao:
+
+1. Configurar as mesmas env vars na Vercel
+2. Confirmar URLs/origins no Supabase e Google Cloud para o dominio de producao
+3. Fazer login em `/login`
+4. Confirmar persistencia da sessao apos refresh
+5. No painel Supabase, validar em `Authentication > Users` que o usuario foi criado
+
+Checklist de troubleshooting (quando o login nao completa):
+
+- Validar `/debug/supabase` antes do login (health OK)
+- Conferir se o retorno passa por `/auth/callback`
+- Na tela `/auth/callback`, se houver erro, revisar:
+  - Supabase `Redirect URLs` allowlist (`http://localhost:3000/**` e dominio de producao)
+  - Google OAuth redirect URI do projeto Supabase (`/auth/v1/callback`)
+- Usar `Limpar sessão local` em `/debug/supabase` e tentar novamente
+- Conferir `Authentication > Users` no Supabase apos tentativa de login
+
+## Schema Supabase (v2 - referencia)
+
+Tabelas principais esperadas:
+
+- `public.user_settings`
+  - PK: `user_id` (uma linha por usuario)
+  - `user_id` referencia `auth.users(id)`
+- `public.birthdays`
+  - PK: `id`
+  - `user_id` referencia `auth.users(id)` (para RLS)
+  - indice recomendado: `(user_id, month, day)`
+
+Validacao de DB pelo `/debug/supabase`:
+
+- `Testar DB` usa `select('user_id').limit(1)` em `user_settings`
+- Depois executa `upsert` da linha do usuario logado (`user_id = auth user id`) e `select` da propria linha
+- Se passar, mostra `DB OK (RLS OK)`
+
+SQL de verificacao/preparo (PK/FK/RLS):
+
+- `docs/sql/verify_schema.sql` (rodar no Supabase SQL Editor)
+
+## Multi-device sync (Birthdays)
+
+Comportamento atual:
+
+- Usuario logado: `birthdays` usa Supabase como source of truth (com cache local)
+- Usuario nao logado: continua modo local/offline como no MVP
+- Ao fazer login: o app faz merge local + Supabase (last-write-wins por `updatedAt`) e sincroniza em background
+
+Como testar multi-device:
+
+1. Fazer login com a mesma conta no desktop e no mobile
+2. No desktop, criar ou editar um aniversario em `/person`
+3. Abrir `/today` ou `/upcoming` no mobile (mesma conta)
+4. Confirmar que o aniversario aparece apos sincronizacao
+5. Em `/debug/supabase`, usar:
+   - `Testar DB` para validar `user_settings` + RLS
+   - `Testar Birthdays` para validar `count` e `upsert/delete` dummy em `birthdays`
 
 ## Testes (mínimo da SPEC)
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 
 const navItems = [
   { href: "/today", label: "Hoje" },
@@ -10,30 +11,75 @@ const navItems = [
 
 export function TopNav() {
   const pathname = usePathname();
+  const { configured, initialized, user, signOut, syncStatus, syncMessage } = useAuth();
+  const displayName = user?.user_metadata?.full_name || user?.email || "Conta";
 
   return (
     <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/today" className="font-semibold tracking-tight">
-          BdayHub
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <Link href="/today" className="group inline-flex flex-col font-semibold tracking-tight">
+          <span>Lembra.</span>
+          <span className="mt-1 h-0.5 w-10 rounded-full bg-accent transition-all duration-150 ease-out group-hover:w-12" />
         </Link>
-        <nav className="flex items-center gap-2">
-          {navItems.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={[
-                  "rounded-full px-3 py-1.5 text-sm transition",
-                  active ? "bg-ink text-paper" : "bg-white/80 hover:bg-white"
-                ].join(" ")}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <nav className="flex items-center gap-2">
+            {navItems.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={[
+                    "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-out",
+                    active
+                      ? "scale-[1.02] bg-accent text-white shadow-sm"
+                      : "bg-white/80 hover:-translate-y-px hover:bg-white hover:shadow-sm"
+                  ].join(" ")}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {configured && (
+            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/85 px-2 py-1">
+              {user && syncMessage && (
+                <span
+                  className={[
+                    "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                    syncStatus === "syncing"
+                      ? "bg-amber-50 text-amber-800"
+                      : syncStatus === "synced"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : syncStatus === "error"
+                          ? "bg-rose-50 text-rose-700"
+                          : "bg-black/5 text-black/60"
+                  ].join(" ")}
+                >
+                  {syncMessage}
+                </span>
+              )}
+              <span className="max-w-40 truncate px-2 text-xs text-black/70 sm:max-w-52" title={displayName}>
+                {!initialized ? "Carregando sessão..." : user ? displayName : "Não conectado"}
+              </span>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5"
+                >
+                  Sair
+                </button>
+              ) : (
+                <Link href="/login" className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5">
+                  Entrar
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

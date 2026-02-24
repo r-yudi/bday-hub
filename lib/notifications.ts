@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { getTodayPeople, todayParts } from "@/lib/dates";
 import { getSettings, listPeople, saveSettings } from "@/lib/storage";
@@ -37,10 +37,18 @@ export async function maybeNotifyTodayBirthdays(): Promise<{ notified: boolean; 
     return { notified: false, count: todayPeople.length };
   }
 
+  const title =
+    todayPeople.length === 1
+      ? `Hoje Ã© aniversÃ¡rio de ${todayPeople[0].name} ðŸŽ‰`
+      : `Hoje: ${todayPeople.length} aniversÃ¡rios ðŸŽ‰`;
   const names = todayPeople.slice(0, 3).map((p) => p.name).join(", ");
   const extra = todayPeople.length > 3 ? ` +${todayPeople.length - 3}` : "";
-  const body = `${todayPeople.length} aniversariante(s) hoje: ${names}${extra}`;
-  new Notification("BdayHub: aniversários de hoje", { body });
+  const body =
+    todayPeople.length === 1
+      ? "Abra o Lembra para enviar parabÃ©ns rapidamente."
+      : `Aniversariantes de hoje: ${names}${extra}`;
+
+  new Notification(title, { body });
 
   const nextSettings: AppSettings = {
     ...settings,
@@ -50,3 +58,4 @@ export async function maybeNotifyTodayBirthdays(): Promise<{ notified: boolean; 
 
   return { notified: true, count: todayPeople.length };
 }
+

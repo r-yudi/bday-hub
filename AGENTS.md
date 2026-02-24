@@ -7,10 +7,11 @@
 - Repositorio: https://github.com/r-yudi/bday-hub
 
 ## Estado atual (baseline)
-- MVP concluido e validado (manual + testes unitarios minimos).
+- MVP concluido e validado (manual + testes unitarios + smoke E2E Playwright).
 - Releases publicadas:
   - v0.1.0 (MVP)
   - v0.1.1 (patch de UX/manutencao)
+  - v0.1.2 (patch de QA/documentacao com Playwright E2E)
 - Stack definida e mantida conforme SPEC.md.
 
 ## Regras para agentes (obrigatorias)
@@ -41,12 +42,18 @@
 ## Testes e validacao
 - Rodar antes de finalizar mudancas relevantes:
   - npm test
+  - npm run test:e2e
   - npm run build (quando alterar comportamento/rotas/config)
 - Smoke test manual minimo quando mexer em fluxos:
   - adicionar/editar/excluir
   - importar CSV valido/invalido
   - /share/[token]
   - /today notificacoes (granted/denied)
+- Smoke E2E automatizado (Playwright) ja cobre:
+  - CRUD
+  - import CSV
+  - persistencia apos reload
+  - /share/[token] -> adicionar a lista
 
 ## Convencoes praticas
 - Commits pequenos e objetivos.
@@ -57,4 +64,4 @@
 - Estrategia de backend minimo para revogacao de link compartilhado.
 - Dedupe/merge de importacao CSV.
 - Notificacoes mais confiaveis alem do fallback ao abrir.
-- Testes E2E (ex.: Playwright).
+- Expandir E2E (ex.: cenarios de notificacao/permissao e regressao visual leve).

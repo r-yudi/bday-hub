@@ -6,9 +6,10 @@ const config: Config = {
     extend: {
       colors: {
         ink: "#0b1220",
-        paper: "#f7f5ef",
-        accent: "#0f766e",
-        warm: "#f59e0b"
+        paper: "#FFF7ED",
+        accent: "#FF4D4F",
+        accentHover: "#E04345",
+        warm: "#FFC857"
       }
     }
   },

@@ -39,7 +39,7 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
   return (
     <section className="rounded-2xl border border-black/10 bg-white/80 p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <label className="cursor-pointer rounded-lg bg-ink px-3 py-2 text-sm text-paper">
+        <label className="btn-primary-brand cursor-pointer rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover">
           Selecionar CSV
           <input
             type="file"
@@ -59,10 +59,10 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
       {parsed && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-3 text-sm">
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
               Válidas: {parsed.valid.length}
             </span>
-            <span className="rounded-full bg-rose-50 px-3 py-1 text-rose-700">
+            <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-rose-700">
               Inválidas: {parsed.invalid.length}
             </span>
           </div>
@@ -106,7 +106,7 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
             type="button"
             disabled={parsed.valid.length === 0 || importing}
             onClick={() => void handleImport()}
-            className="rounded-lg bg-accent px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary-brand rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {importing ? "Importando..." : "Importar"}
           </button>

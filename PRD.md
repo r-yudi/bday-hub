@@ -1,6 +1,6 @@
 ﻿# BdayHub â€” PRD (MVP)
 
-## Status do projeto (atualizado em 2026-02-23)
+## Status do projeto (atualizado em 2026-02-24)
 
 ### Resumo executivo
 - MVP entregue end-to-end e validado manualmente.
@@ -30,6 +30,11 @@
   - calculo de proximos 7 dias
   - validacao/parsing de CSV
   - encode/decode de share token (extra)
+- Smoke E2E automatizado (Playwright) implementado e validado:
+  - CRUD de aniversario
+  - import CSV
+  - persistencia apos reload
+  - fluxo /share/[token] -> adicionar a lista
 - Smoke test manual validado em producao:
   - adicionar manual
   - importar CSV valido e invalido
@@ -41,6 +46,11 @@
 - v0.1.1 (patch) publicado com:
   - .gitattributes para line endings
   - melhoria de UX na secao de notificacoes
+- v0.1.2 (patch) publicado com:
+  - Playwright E2E smoke tests (4 fluxos criticos do MVP)
+  - script npm run test:e2e
+  - documentacao no README
+  - atualizacao de PRD/SPEC + AGENTS.md para continuidade do projeto
 
 ### Proximos passos para o escopo total
 - Evoluir compartilhamento para revogacao (exige backend minimo ou estrategia remota).

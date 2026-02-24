@@ -1,17 +1,17 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import type { BirthdayPerson } from "@/lib/types";
 
-const buildTemplates = (person: BirthdayPerson): string[] => [
-  `Parabéns, ${person.name}! Que seu dia seja incrível 🎉`,
-  `Feliz aniversário, ${person.name}! Muita saúde e alegria!`,
-  `${person.name}, feliz aniversário! Tudo de melhor hoje e sempre!`
+export const getMessageTemplates = (person: BirthdayPerson): string[] => [
+  `ParabÃ©ns, ${person.name}! Que seu dia seja incrÃ­vel ðŸŽ‰`,
+  `Feliz aniversÃ¡rio, ${person.name}! Muita saÃºde e alegria!`,
+  `${person.name}, feliz aniversÃ¡rio! Tudo de melhor hoje e sempre!`
 ];
 
 export function Templates({ person }: { person: BirthdayPerson }) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const templates = buildTemplates(person);
+  const templates = getMessageTemplates(person);
 
   async function copyText(text: string, idx: number) {
     try {
@@ -19,13 +19,13 @@ export function Templates({ person }: { person: BirthdayPerson }) {
       setCopiedIndex(idx);
       window.setTimeout(() => setCopiedIndex(null), 1200);
     } catch {
-      window.alert("Não foi possível copiar a mensagem.");
+      window.alert("NÃ£o foi possÃ­vel copiar a mensagem.");
     }
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium uppercase tracking-wide text-black/60">Mensagens</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-black/60">Mais mensagens</p>
       <div className="space-y-2">
         {templates.map((template, idx) => (
           <button
@@ -36,10 +36,11 @@ export function Templates({ person }: { person: BirthdayPerson }) {
             title={template}
           >
             <span className="line-clamp-2">{template}</span>
-            {copiedIndex === idx && <span className="ml-2 text-xs text-accent">Copiado</span>}
+            {copiedIndex === idx && <span className="ml-2 text-xs text-accent">Mensagem copiada ✓</span>}
           </button>
         ))}
       </div>
     </div>
   );
 }
+

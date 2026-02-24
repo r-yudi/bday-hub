@@ -1,12 +1,12 @@
 ﻿# BdayHub â€” SPEC (MVP)
 
-## Status de implementacao (atualizado em 2026-02-23)
+## Status de implementacao (atualizado em 2026-02-24)
 
 ### Estado geral
 - SPEC do MVP implementada e publicada em producao.
 - URL de producao: https://bday-hub.vercel.app
 - Repositorio: https://github.com/r-yudi/bday-hub
-- Releases: v0.1.0 (MVP) e v0.1.1 (patch UX/manutencao)
+- Releases: v0.1.0 (MVP), v0.1.1 (patch UX/manutencao) e v0.1.2 (patch QA/documentacao)
 
 ### Implementado (conforme SPEC)
 - Rotas:
@@ -50,6 +50,13 @@
   - proximos 7 dias
   - CSV parse/validacao
   - share token roundtrip (extra)
+- Playwright E2E smoke tests implementados:
+  - CRUD de aniversario
+  - import CSV (preview + import)
+  - persistencia apos reload
+  - /share/[token] -> adicionar a lista
+- Script de execucao E2E:
+  - npm run test:e2e
 - Smoke test manual validado:
   - CRUD
   - import CSV valido/invalido
