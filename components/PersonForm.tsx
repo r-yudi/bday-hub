@@ -188,7 +188,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
   return (
     <Card variant="elevated" className="p-5 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <Alert variant="info" className="text-xs">
           Campos com <span className="font-semibold text-primary">*</span> são obrigatórios. Os demais são opcionais.
         </Alert>
@@ -249,6 +249,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                     interactive
                     onClick={() => removeCategory(value)}
                     title="Remover categoria"
+                    className="ui-chip"
                   >
                     {value} ×
                   </Chip>
@@ -271,7 +272,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                 placeholder="Digite e pressione Enter"
                 className="shadow-none"
               />
-              <Button type="button" variant="secondary" size="sm" onClick={() => void addCategory(categoryInput)}>
+              <Button type="button" variant="secondary" size="sm" className="ui-cta-secondary" onClick={() => void addCategory(categoryInput)}>
                 Adicionar
               </Button>
             </div>
@@ -299,7 +300,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
             {availableOptions.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {availableOptions.slice(0, 8).map((option) => (
-                  <Chip key={option} interactive variant="subtle" onClick={() => void addCategory(option)}>
+                  <Chip key={option} interactive variant="subtle" className="ui-chip" onClick={() => void addCategory(option)}>
                     + {option}
                   </Chip>
                 ))}
@@ -344,7 +345,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         {error && <Alert variant="danger">{error}</Alert>}
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="submit" loading={saving}>
+          <Button type="submit" loading={saving} className="ui-cta-primary">
             {saving ? "Salvando..." : "Salvar"}
           </Button>
           {isEdit && onDelete && initialPerson && (

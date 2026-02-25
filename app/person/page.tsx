@@ -52,17 +52,17 @@ function PersonPageContent() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      <div className="flex items-center justify-between gap-3">
+    <div className="mx-auto max-w-2xl space-y-5">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-text sm:text-[2rem]">
+          <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">
             {id ? "Editar pessoa" : "Adicionar pessoa"}
           </h1>
-          <p className="text-sm text-muted">Preencha com calma. Você pode ajustar depois.</p>
+          <p className="ui-subtitle-editorial mt-2 text-sm sm:text-[15px]">Preencha com calma. Você pode ajustar depois.</p>
         </div>
         <Link
           href="/today"
-          className="inline-flex h-10 items-center justify-center rounded-xl border border-border/90 bg-surface2/80 px-4 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/25 focus-visible:ring-2 focus-visible:ring-primary/45"
+          className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
         >
           Voltar
         </Link>
