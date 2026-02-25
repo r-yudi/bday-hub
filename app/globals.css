@@ -1,38 +1,57 @@
+﻿@import "./styles/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-  --color-ink: 11 18 32;
-  --color-paper: 255 247 237;
-  --color-accent: 255 77 79;
-  --color-accent-hover: 224 67 69;
-  --color-warm: 255 200 87;
-  --color-surface: 255 255 255;
-  --color-surface-soft: 255 255 255;
-  --color-border: 0 0 0;
-}
-
-.dark {
-  color-scheme: dark;
-  --color-ink: 241 245 249;
-  --color-paper: 22 18 24;
-  --color-accent: 255 102 106;
-  --color-accent-hover: 255 87 90;
-  --color-warm: 255 200 87;
-  --color-surface: 33 28 36;
-  --color-surface-soft: 40 34 44;
-  --color-border: 255 255 255;
-}
-
 @layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-text antialiased leading-relaxed;
+    background-image:
+      radial-gradient(circle at 14% 10%, hsl(var(--primary) / 0.14), transparent 38%),
+      radial-gradient(circle at 88% 8%, hsl(var(--lilac) / 0.12), transparent 34%),
+      radial-gradient(circle at 70% 0%, hsl(var(--warning) / 0.08), transparent 42%);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-size: 38px 38px;
+    background-image:
+      linear-gradient(to right, hsl(var(--text) / 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--text) / 0.03) 1px, transparent 1px);
+    z-index: -1;
+  }
+
   button,
   a,
-  label {
+  label,
+  input,
+  textarea,
+  select {
     transition-property: background-color, border-color, color, box-shadow, transform, opacity;
-    transition-duration: 160ms;
-    transition-timing-function: ease;
+    transition-duration: var(--dur-1);
+    transition-timing-function: var(--ease);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.25);
+  }
+
+  a {
+    @apply text-inherit no-underline;
   }
 }
 
@@ -43,35 +62,33 @@
 
   .btn-primary-brand:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(225, 77, 80, 0.18);
+    box-shadow: var(--shadow-md);
   }
-}
-
-body {
-  @apply bg-paper text-ink antialiased leading-relaxed;
-  background-image:
-    radial-gradient(circle at 12% 8%, rgba(255, 90, 95, 0.12), transparent 42%),
-    radial-gradient(circle at 88% 0%, rgba(253, 186, 116, 0.14), transparent 38%);
-}
-
-.dark body {
-  background-image:
-    radial-gradient(circle at 12% 8%, rgba(255, 90, 95, 0.15), transparent 45%),
-    radial-gradient(circle at 88% 0%, rgba(255, 200, 87, 0.12), transparent 40%);
 }
 
 @layer utilities {
   .surface-card {
-    background-color: rgb(var(--color-surface) / 0.92);
-    border-color: rgb(var(--color-border) / 0.1);
+    background-color: hsl(var(--surface) / 0.92);
+    border-color: hsl(var(--border) / 0.9);
   }
 
   .surface-soft {
-    background-color: rgb(var(--color-surface-soft) / 0.85);
-    border-color: rgb(var(--color-border) / 0.1);
+    background-color: hsl(var(--surface-2) / 0.88);
+    border-color: hsl(var(--border) / 0.85);
   }
-}
 
-a {
-  @apply text-inherit no-underline;
+  .bg-grid-subtle {
+    background-size: 34px 34px;
+    background-image:
+      linear-gradient(to right, hsl(var(--text) / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--text) / 0.04) 1px, transparent 1px);
+  }
+
+  .glow-coral {
+    background: radial-gradient(circle, hsl(var(--primary) / 0.22), transparent 70%);
+  }
+
+  .glow-lilac {
+    background: radial-gradient(circle, hsl(var(--lilac) / 0.18), transparent 70%);
+  }
 }
