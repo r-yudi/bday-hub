@@ -8,6 +8,9 @@ type Orb = {
   style: CSSProperties;
 };
 
+// Debug visual temporário para calibrar bounding boxes/camadas da cena da landing.
+const DEBUG_LANDING_SCENE = false;
+
 // Ajuste aqui a quantidade/posição/intensidade dos glows (máx. 10 desktop; mobile <=4 visíveis).
 const ORBS: Orb[] = [
   { id: 1, className: "glow-orb", style: { left: "58%", top: "10%", width: 30, height: 30, background: "hsl(var(--lilac) / 0.10)", animationDelay: "0s", animationDuration: "32s" } },
@@ -30,7 +33,7 @@ function OutdoorPartyIllustration() {
       alt=""
       width={680}
       height={520}
-      className="outdoor-party-illustration h-full w-full object-contain"
+      className={`outdoor-party-illustration h-full w-full object-contain ${DEBUG_LANDING_SCENE ? "opacity-100" : ""}`}
       loading="lazy"
       decoding="async"
     />
@@ -184,28 +187,32 @@ export function LandingCelebrationScene() {
   }, []);
 
   return (
-    <div ref={sceneRef} className="celebration-scene pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden>
+    <div
+      ref={sceneRef}
+      className={`celebration-scene pointer-events-none absolute inset-0 overflow-visible ${DEBUG_LANDING_SCENE ? "z-[20]" : "z-[20]"}`}
+      aria-hidden
+    >
       {/* Mantém a cena fora da área do headline/CTA: cluster concentrado na metade direita. */}
-      <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0">
+      <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0 z-[10]">
         {ORBS.map((orb) => (
           <div key={orb.id} className={orb.className} style={orb.style} />
         ))}
       </div>
 
-      <div className="celebration-parallax-layer celebration-parallax-strong absolute inset-0">
+      <div className="celebration-parallax-layer celebration-parallax-strong absolute inset-0 z-[20]">
         {/* Ajuste aqui tamanho/posição da ilustração para “abraçar” melhor o mock card. */}
-        <div className="outdoor-party-wrap absolute right-[-8%] top-[4%] hidden h-[420px] w-[420px] md:block lg:right-[-4%] lg:top-[-4%] lg:h-[580px] lg:w-[580px] xl:right-[0%] xl:top-[-6%] xl:h-[680px] xl:w-[680px]">
+        <div className={`outdoor-party-wrap absolute right-[-8%] top-[4%] hidden h-[420px] w-[420px] md:block lg:right-[-4%] lg:top-[-4%] lg:h-[580px] lg:w-[580px] xl:right-[0%] xl:top-[-6%] xl:h-[680px] xl:w-[680px] ${DEBUG_LANDING_SCENE ? "outline outline-2 outline-fuchsia-400" : ""}`}>
           <div className="absolute inset-[7%] rounded-full bg-primary/8 blur-3xl dark:bg-primary/14" />
           <div className="absolute left-[14%] top-[18%] h-24 w-24 rounded-full bg-lilac/8 blur-2xl dark:bg-lilac/12" />
-          <div className="absolute inset-0 outdoor-party-fade">
+          <div className={`absolute inset-0 ${DEBUG_LANDING_SCENE ? "" : "outdoor-party-fade"}`}>
             <OutdoorPartyIllustration />
           </div>
           {/* Overlay para integrar ilustração com o card (fade orgânico próximo ao mock card). */}
-          <div className="outdoor-party-card-blend absolute inset-0" />
+          {!DEBUG_LANDING_SCENE && <div className="outdoor-party-card-blend absolute inset-0" />}
         </div>
       </div>
 
-      <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0">
+      <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0 z-[25]">
         {/* Ajuste aqui composição dos balões (triângulo visual sem cobrir texto/CTA). */}
         <Balloon className="absolute right-[4%] top-[3%] h-14 w-7 sm:h-18 sm:w-9 lg:right-[9%] lg:top-[1%] lg:h-20 lg:w-10" color="hsl(var(--primary) / 0.68)" delay="-2s" duration="13s" />
         <Balloon className="absolute right-[19%] top-[2%] hidden h-18 w-9 sm:block lg:right-[22%] lg:h-22 lg:w-11" color="hsl(var(--lilac) / 0.64)" delay="-7s" duration="16s" />

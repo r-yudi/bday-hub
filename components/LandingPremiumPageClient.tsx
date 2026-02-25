@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/ui/Reveal";
 
+const DEBUG_LANDING_SCENE = false;
+
 export function LandingPremiumPageClient() {
   const { configured, initialized, user } = useAuth();
   const isLoggedIn = Boolean(user);
@@ -45,7 +47,7 @@ export function LandingPremiumPageClient() {
         <section className="relative grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
           <LandingCelebrationScene />
 
-          <div className="relative z-10 space-y-5">
+          <div className="relative z-[40] space-y-5">
             <Reveal delay={0}>
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1 text-xs font-medium text-muted shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -110,10 +112,10 @@ export function LandingPremiumPageClient() {
             </Reveal>
           </div>
 
-          <Reveal delay={170} className="relative z-10">
+          <Reveal delay={170} className="relative z-[30]">
             <Card
               variant="elevated"
-              className="feature-spotlight shine-sweep relative overflow-hidden p-5 sm:p-6 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg"
+              className={`feature-spotlight shine-sweep relative overflow-hidden p-5 sm:p-6 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg ${DEBUG_LANDING_SCENE ? "outline outline-2 outline-cyan-400" : ""}`}
               onPointerMove={handleFeaturePointerMove}
             >
               <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/15 blur-2xl landing-glow-a" />
