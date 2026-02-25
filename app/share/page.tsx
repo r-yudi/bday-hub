@@ -54,29 +54,29 @@ function QuickAddBirthdayModal({
 
   return (
     <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-5 shadow-xl">
-        <h2 className="text-lg font-semibold tracking-tight">Adicionar meu aniversÃ¡rio</h2>
-        <p className="mt-2 text-sm text-black/70">Cadastre nome e dia/mÃªs para gerar seu link de compartilhamento.</p>
+      <div className="w-full max-w-md rounded-2xl border border-border/70 bg-surface p-5 shadow-xl">
+        <h2 className="text-lg font-semibold tracking-tight text-text">Adicionar meu aniversÃ¡rio</h2>
+        <p className="mt-2 text-sm text-muted">Cadastre nome e dia/mÃªs para gerar seu link de compartilhamento.</p>
 
         <div className="mt-4 space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-black/60">Nome</label>
+            <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted">Nome</label>
             <input
               ref={nameInputRef}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex.: Ana"
-              className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:border-black/25"
+              className="w-full rounded-xl border border-border/80 bg-surface2/70 px-3 py-2 text-sm text-text outline-none placeholder:text-muted/70 focus:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-black/60">Dia</label>
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted">Dia</label>
               <select
                 value={day}
                 onChange={(e) => setDay(Number(e.target.value))}
-                className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/25"
+                className="w-full rounded-xl border border-border/80 bg-surface2/70 px-3 py-2 text-sm text-text outline-none focus:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map((value) => (
                   <option key={value} value={value}>
@@ -86,11 +86,11 @@ function QuickAddBirthdayModal({
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-black/60">MÃªs</label>
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted">MÃªs</label>
               <select
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
-                className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/25"
+                className="w-full rounded-xl border border-border/80 bg-surface2/70 px-3 py-2 text-sm text-text outline-none focus:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((value) => (
                   <option key={value} value={value}>
@@ -107,7 +107,7 @@ function QuickAddBirthdayModal({
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:opacity-60"
+            className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm disabled:opacity-70 focus-visible:outline-none"
           >
             Cancelar
           </button>
@@ -115,7 +115,7 @@ function QuickAddBirthdayModal({
             type="button"
             onClick={() => void onSave({ name: name.trim(), day, month })}
             disabled={!canSave}
-            className="btn-primary-brand rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none"
           >
             {saving ? "Salvando..." : "Salvar e gerar link"}
           </button>
@@ -199,11 +199,11 @@ export default function ShareLandingPage() {
 
   return (
     <>
-      <div className="space-y-7">
-        <section className="rounded-3xl border border-black/10 bg-white/95 p-6 shadow-sm sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-wide text-black/60">Lembra â€¢ Compartilhamento</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-black/90 sm:text-[2rem]">Compartilhe aniversÃ¡rios com um link</h1>
-          <p className="mt-2 text-sm text-black/70">
+      <div className="space-y-8 lg:space-y-10">
+        <section className="ui-copy-backdrop px-1 py-1 sm:px-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra â€¢ Compartilhamento</p>
+          <h1 className="ui-title-editorial mt-2 text-3xl sm:text-[2.15rem]">Compartilhe aniversÃ¡rios com um link</h1>
+          <p className="ui-subtitle-editorial mt-3 max-w-[64ch] text-sm sm:text-[15px]">
             O link mostra apenas nome e dia/mÃªs (sem ano). Escolha um aniversÃ¡rio abaixo para gerar ou copiar.
           </p>
         </section>
@@ -211,32 +211,32 @@ export default function ShareLandingPage() {
         {loading ? (
           <p className="text-sm text-black/60">Carregando...</p>
         ) : sortedPeople.length === 0 ? (
-          <section className="rounded-2xl border border-dashed border-black/15 bg-white/80 p-8 text-center">
-            <p className="text-lg font-semibold tracking-tight text-black/90">VocÃª ainda nÃ£o tem aniversÃ¡rios cadastrados</p>
-            <p className="mt-2 text-sm text-black/65">
+          <section className="rounded-2xl border border-dashed border-border/70 bg-surface/70 p-8 text-center shadow-sm dark:bg-surface/20">
+            <p className="text-lg font-semibold tracking-tight text-text">VocÃª ainda nÃ£o tem aniversÃ¡rios cadastrados</p>
+            <p className="mt-2 text-sm text-muted">
               Adicione o seu primeiro aniversÃ¡rio para gerar um link de compartilhamento em segundos.
             </p>
             <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
               <button
                 type="button"
                 onClick={() => setShowQuickAdd(true)}
-                className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover"
+                className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
               >
                 Adicionar meu aniversÃ¡rio
               </button>
-              <Link href="/person" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm">
+              <Link href="/person" className="ui-cta-secondary inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm focus-visible:outline-none">
                 Abrir cadastro completo
               </Link>
             </div>
           </section>
         ) : (
-          <section className="rounded-2xl border border-black/10 bg-white/90 p-4 shadow-sm">
+          <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-black/60">Seus aniversÃ¡rios</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Seus aniversÃ¡rios</h2>
               <button
                 type="button"
                 onClick={() => setShowQuickAdd(true)}
-                className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-sm hover:bg-black/5"
+                className="ui-focus-surface rounded-lg border px-3 py-1.5 text-sm focus-visible:outline-none"
               >
                 Adicionar outro
               </button>
@@ -246,21 +246,21 @@ export default function ShareLandingPage() {
               {sortedPeople.map((person) => {
                 const relativeUrl = buildShareUrl(person);
                 return (
-                  <div key={person.id} className="rounded-2xl border border-black/10 bg-white p-4">
+                  <div key={person.id} className="rounded-2xl border border-border/65 bg-surface/80 p-4 shadow-sm dark:bg-surface/15">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="font-medium text-black/90">{person.name}</p>
-                        <p className="text-sm text-black/60">{formatDayMonth(person.day, person.month)}</p>
+                        <p className="font-medium text-text">{person.name}</p>
+                        <p className="text-sm text-muted">{formatDayMonth(person.day, person.month)}</p>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        <Link href={relativeUrl} className="btn-primary-brand rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover">
+                        <Link href={relativeUrl} className="btn-primary-brand ui-cta-primary inline-flex items-center justify-center rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
                           Gerar link
                         </Link>
                         <button
                           type="button"
                           onClick={() => void copyLink(person)}
-                          className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/5"
+                          className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm focus-visible:outline-none"
                         >
                           Copiar link
                         </button>
