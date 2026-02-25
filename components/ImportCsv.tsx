@@ -43,10 +43,10 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
   }
 
   return (
-    <Card variant="elevated" className="p-4">
+    <Card variant="elevated" className="p-4 sm:p-5">
       <div className="flex flex-wrap items-center gap-3">
         <label className="cursor-pointer">
-          <span className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-medium text-accentForeground shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:shadow-md hover:brightness-95">
+          <span className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-medium text-accentForeground shadow-sm hover:brightness-95">
             Selecionar CSV
           </span>
           <input
@@ -61,11 +61,11 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
         </label>
 
         <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <Chip as="span" variant="warning">Obrigatório</Chip>
+          <Chip as="span" variant="warning" className="ui-chip">Obrigatório</Chip>
           <span className="text-muted">
             Cabeçalho: <code className="rounded bg-surface2 px-1.5 py-0.5 text-[11px] sm:text-xs">name,day,month</code>
           </span>
-          <Chip as="span" variant="subtle">Opcional</Chip>
+          <Chip as="span" variant="subtle" className="ui-chip">Opcional</Chip>
           <span className="text-muted">
             <code className="rounded bg-surface2 px-1.5 py-0.5 text-[11px] sm:text-xs">tags, whatsapp, instagram, notes</code>
           </span>
@@ -79,8 +79,8 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
       {parsed && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-3 text-sm">
-            <Chip as="span" variant="accent">Válidas: {parsed.valid.length}</Chip>
-            <Chip as="span" variant="danger">Inválidas: {parsed.invalid.length}</Chip>
+            <Chip as="span" variant="accent" className="ui-chip ui-chip-accent">Válidas: {parsed.valid.length}</Chip>
+            <Chip as="span" variant="danger" className="ui-chip">Inválidas: {parsed.invalid.length}</Chip>
           </div>
 
           {parsed.warnings.length > 0 && (
@@ -123,6 +123,7 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
             disabled={parsed.valid.length === 0 || importing}
             onClick={() => void handleImport()}
             loading={importing}
+            className="ui-cta-primary"
           >
             {importing ? "Importando..." : "Importar"}
           </Button>

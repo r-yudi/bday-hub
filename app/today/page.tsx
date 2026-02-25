@@ -220,20 +220,20 @@ export default function TodayPage() {
 
   return (
     <>
-      <div className="space-y-7">
+      <div className="space-y-8 lg:space-y-10">
         <section className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-[2rem]">Hoje</h1>
-            <p className="text-sm text-black/70">Veja quem faz aniversário hoje e registre pessoas com categorias quando precisar.</p>
+            <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">Hoje</h1>
+            <p className="ui-subtitle-editorial mt-2 max-w-[60ch] text-sm sm:text-[15px]">Veja quem faz aniversário hoje e registre pessoas com categorias quando precisar.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/person" className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover">
+            <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
               Adicionar
             </Link>
             <button
               type="button"
               onClick={() => setShowImport((v) => !v)}
-              className="rounded-xl border border-border/90 bg-surface2/80 px-4 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md"
+              className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
             >
               {showImport ? "Fechar CSV" : "Importar CSV"}
             </button>
@@ -242,7 +242,7 @@ export default function TodayPage() {
 
         {!loading && <OnboardingBanner count={people.length} mounted={mounted} />}
 
-        {banner && <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{banner}</div>}
+        {banner && <div className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">{banner}</div>}
 
         <section className="grid gap-4 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-4">
@@ -251,19 +251,19 @@ export default function TodayPage() {
             {loading ? (
               <p className="text-sm text-black/60">Carregando...</p>
             ) : todayPeople.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-black/15 bg-white/70 p-8 text-center">
+              <div className="rounded-2xl border border-dashed border-border/70 bg-surface/65 p-8 text-center shadow-sm dark:bg-surface/20">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper text-2xl shadow-sm">🎂</div>
-                <p className="mt-4 text-lg font-semibold tracking-tight text-black/90">Hoje está tranquilo por aqui 🎉</p>
-                <p className="mt-1 text-sm text-black/65">Nenhum aniversário hoje. Que tal revisar os próximos dias?</p>
+                <p className="mt-4 text-lg font-semibold tracking-tight text-text">Hoje está tranquilo por aqui 🎉</p>
+                <p className="mt-2 text-sm text-muted">Nenhum aniversário hoje. Que tal revisar os próximos dias?</p>
                 <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
                   <Link
                     href="/person"
                     aria-label="Criar novo aniversario"
-                    className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover"
+                    className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
                   >
                     Adicionar aniversário
                   </Link>
-                  <Link href="/upcoming" className="rounded-xl border border-border/90 bg-surface2/80 px-4 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md">
+                  <Link href="/upcoming" className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none">
                     Ver próximos 7 dias
                   </Link>
                 </div>
@@ -278,7 +278,7 @@ export default function TodayPage() {
           </div>
 
           <aside className="space-y-4">
-            <section className="rounded-2xl border border-black/10 bg-white/80 p-4">
+            <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-black/70">Lembretes</h2>
                 {reminderSentToday && (
@@ -294,7 +294,7 @@ export default function TodayPage() {
                 type="button"
                 onClick={() => void handleEnableNotifications()}
                 disabled={!mounted || !support.supported || (support.permission === "granted" && Boolean(settings?.notificationEnabled))}
-                className="btn-primary-brand mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white shadow-sm hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted disabled:shadow-none"
+                className="btn-primary-brand ui-cta-primary mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white shadow-sm hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted disabled:shadow-none focus-visible:outline-none"
               >
                 {notificationCtaLabel}
               </button>
@@ -320,20 +320,20 @@ export default function TodayPage() {
               )}
             </section>
 
-            <section className="rounded-2xl border border-black/10 bg-white/80 p-4">
+            <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-black/70">Dados</h2>
               <p className="mt-2 text-sm text-black/70">Seus aniversários ficam salvos localmente neste dispositivo.</p>
               <button
                 type="button"
                 onClick={openClearModal}
-                className="mt-3 rounded-lg border border-border/90 bg-surface2/80 px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md"
+                className="ui-focus-surface mt-3 rounded-lg border px-3 py-2 text-sm font-medium focus-visible:outline-none"
               >
                 Limpar todos os dados
               </button>
               <a
                 href="/sample-birthdays.csv"
                 download
-                className="mt-2 block rounded-lg border border-border/90 bg-surface2/80 px-3 py-2 text-center text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md"
+                className="ui-focus-surface mt-2 block rounded-lg border px-3 py-2 text-center text-sm font-medium focus-visible:outline-none"
               >
                 Baixar CSV de exemplo
               </a>
