@@ -42,8 +42,8 @@ function ClearDataModal({
   const canConfirm = value.trim().toUpperCase() === "LIMPAR" && !loading;
 
   return (
-    <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border/80 bg-surface p-5 shadow-xl dark:bg-surface2/70">
+    <div className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4">
+      <div className="ui-modal-surface w-full max-w-md rounded-2xl border p-5">
         <h3 className="text-lg font-semibold tracking-tight text-text">Tem certeza?</h3>
         <p className="mt-2 text-sm text-muted">
           Todos os aniversários salvos localmente neste dispositivo serão apagados. Esta ação não pode ser desfeita.
@@ -309,7 +309,7 @@ export default function TodayPage() {
               <button
                 type="button"
                 onClick={() => setShowNotificationDetails((v) => !v)}
-                className="mt-2 block text-xs text-muted underline decoration-border underline-offset-2 hover:text-text"
+                className="ui-link-tertiary block text-xs"
               >
                 {showNotificationDetails ? "Ocultar detalhes técnicos" : "Ver detalhes técnicos"}
               </button>

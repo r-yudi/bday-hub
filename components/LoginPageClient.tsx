@@ -60,7 +60,7 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
             <span>Você volta para: {returnTo}</span>
-            <Link href="/debug/supabase" className="font-medium underline decoration-border underline-offset-2 hover:text-text">
+            <Link href="/debug/supabase" className="ui-link-tertiary text-xs font-medium">
               Diagnóstico
             </Link>
           </div>

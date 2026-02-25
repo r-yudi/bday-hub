@@ -169,11 +169,11 @@ function PwaInstallBanner() {
         </div>
       </div>
 
-      <div className="mt-1.5">
+      <div className="mt-1.5 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setShowInstructions((value) => !value)}
-          className="text-xs text-muted underline decoration-border underline-offset-2 hover:text-text"
+          className="ui-link-tertiary text-xs"
           aria-expanded={showInstructions}
         >
           {showInstructions ? "Ocultar" : "Saiba mais"}
@@ -181,14 +181,26 @@ function PwaInstallBanner() {
       </div>
 
       {showInstructions && (
-        <div className="mt-2 rounded-xl border border-border/60 bg-surface2/55 px-3 py-2 text-xs text-muted dark:bg-surface/20">
-          {showIosInstructions && <p>No iPhone/iPad (Safari): toque em "Compartilhar" e depois em "Adicionar à Tela de Início".</p>}
-          {showDesktopInstructions && (
-            <p>No Chrome (desktop): clique em "Instalar" ou use o ícone de instalação na barra de endereço.</p>
-          )}
-          {!showIosInstructions && !showDesktopInstructions && (
-            <p>Se seu navegador mostrar opção de instalar, use o menu ou o ícone da barra de endereço.</p>
-          )}
+        <div className="mt-2 rounded-xl border border-border/60 bg-surface2/55 px-3 py-2 dark:bg-surface/20">
+          <div className="flex items-start gap-2 text-xs text-muted">
+            <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full border border-border/70 text-[10px] text-text">i</span>
+            <p className="leading-5">Instale para abrir mais rápido e acessar sua lista direto da tela inicial.</p>
+          </div>
+
+          <details className="mt-2 group">
+            <summary className="ui-link-tertiary cursor-pointer list-none text-xs marker:content-none">
+              Como instalar
+            </summary>
+            <div className="mt-2 space-y-1 text-xs leading-5 text-muted">
+              {showIosInstructions && <p>No iPhone/iPad (Safari): toque em \"Compartilhar\" e depois em \"Adicionar à Tela de Início\".</p>}
+              {showDesktopInstructions && (
+                <p>No Chrome (desktop): clique em \"Instalar\" ou use o ícone de instalação na barra de endereço.</p>
+              )}
+              {!showIosInstructions && !showDesktopInstructions && (
+                <p>Se seu navegador mostrar opção de instalar, use o menu ou o ícone da barra de endereço.</p>
+              )}
+            </div>
+          </details>
         </div>
       )}
     </section>

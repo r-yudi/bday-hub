@@ -53,8 +53,8 @@ function QuickAddBirthdayModal({
   const canSave = name.trim().length > 0 && !saving;
 
   return (
-    <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border/75 bg-surface p-5 shadow-xl dark:bg-surface2/70">
+    <div className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4">
+      <div className="ui-modal-surface w-full max-w-md rounded-2xl border p-5">
         <h2 className="text-lg font-semibold tracking-tight text-text">Adicionar meu aniversário</h2>
         <p className="mt-2 text-sm text-muted">Cadastre nome e dia/mês para gerar seu link de compartilhamento.</p>
 
@@ -261,7 +261,7 @@ export default function ShareLandingPage() {
                         >
                           Copiar link
                         </button>
-                        <Link href={relativeUrl} className="text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text">
+                        <Link href={relativeUrl} className="ui-link-tertiary text-xs font-medium">
                           Abrir prévia
                         </Link>
                       </div>
