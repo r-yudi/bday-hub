@@ -52,7 +52,7 @@ export function LandingCelebrationScene() {
       ))}
 
       {/* Ajuste aqui o tamanho/posição da arte (wrapper e transform) para calibrar protagonismo. */}
-      <div className="hero-art-stage relative z-[20] mx-auto w-full max-w-[420px] md:max-w-[520px] lg:max-w-[660px] xl:max-w-[720px]">
+      <div className="hero-art-stage relative z-[20] mx-auto w-full max-w-[420px] md:max-w-[520px] lg:max-w-[700px] lg:translate-x-2 xl:max-w-[760px] xl:translate-x-4">
         <OutdoorPartyIllustration />
       </div>
 
