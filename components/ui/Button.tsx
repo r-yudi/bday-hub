@@ -14,12 +14,13 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-primaryForeground shadow-sm hover:-translate-y-px hover:shadow-md active:translate-y-0 disabled:hover:translate-y-0",
+    "bg-primary text-primaryForeground shadow-sm hover:-translate-y-px hover:shadow-md hover:brightness-[0.98] active:translate-y-0 active:brightness-95 disabled:hover:translate-y-0",
   secondary:
-    "bg-surface text-text border border-border shadow-sm hover:-translate-y-px hover:bg-surface2 hover:shadow-sm disabled:hover:translate-y-0",
-  ghost: "bg-transparent text-text hover:bg-text/5 disabled:hover:bg-transparent",
+    "border border-border/80 bg-surface2/70 text-text shadow-sm hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-sm active:bg-surface2/90 dark:border-border/90 dark:bg-surface2/80 dark:hover:bg-surface2 dark:hover:border-border disabled:hover:translate-y-0",
+  ghost:
+    "border border-transparent bg-transparent text-text hover:border-border/70 hover:bg-surface2/45 active:bg-surface2/65 dark:text-text dark:hover:border-border/90 dark:hover:bg-surface2/60 dark:active:bg-surface2/80 disabled:hover:bg-transparent",
   destructive:
-    "bg-danger text-white shadow-sm hover:-translate-y-px hover:shadow-md disabled:hover:translate-y-0"
+    "bg-danger text-white shadow-sm hover:-translate-y-px hover:shadow-md hover:brightness-95 active:brightness-90 disabled:hover:translate-y-0"
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -36,7 +37,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-150 ease-brand disabled:cursor-not-allowed disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-primary/30",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-150 ease-brand disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/25 focus-visible:ring-2 focus-visible:ring-primary/45",
         variantClasses[variant],
         sizeClasses[size],
         className

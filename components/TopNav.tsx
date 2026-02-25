@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,15 +18,15 @@ export function TopNav() {
   const isLanding = pathname === "/" || pathname === "/landing";
 
   const themeSelectClass =
-    "rounded-full border border-black/10 bg-white/85 px-3 py-1.5 text-black/75 hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15";
+    "rounded-full border border-black/10 bg-white/90 px-3 py-1.5 text-black/80 shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/25 focus-visible:ring-2 focus-visible:ring-primary/45 dark:border-border/90 dark:bg-surface2/90 dark:text-text dark:hover:bg-surface2";
 
   if (isLanding) {
     return (
-      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-white/5">
+      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/50">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link href="/" className="group inline-flex flex-col font-semibold tracking-tight">
             <span>Lembra.</span>
-            <span className="mt-1 h-0.5 w-10 rounded-full bg-accent transition-all duration-150 ease-out group-hover:w-12" />
+            <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -43,15 +43,15 @@ export function TopNav() {
               <option value="light">Claro</option>
               <option value="dark">Escuro</option>
             </select>
-            <Link href="/today" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm dark:bg-white/10 dark:hover:bg-white/15">
+            <Link href="/today" className="rounded-full border border-transparent bg-white/90 px-3 py-1.5 text-sm text-black/85 shadow-sm hover:bg-white hover:shadow-sm dark:border-border/80 dark:bg-surface2/85 dark:text-text dark:hover:bg-surface2">
               Hoje
             </Link>
-            <Link href="/upcoming" className="rounded-full bg-white/85 px-3 py-1.5 text-sm hover:bg-white hover:shadow-sm dark:bg-white/10 dark:hover:bg-white/15">
+            <Link href="/upcoming" className="rounded-full border border-transparent bg-white/90 px-3 py-1.5 text-sm text-black/85 shadow-sm hover:bg-white hover:shadow-sm dark:border-border/80 dark:bg-surface2/85 dark:text-text dark:hover:bg-surface2">
               Próximos 7 dias
             </Link>
             <Link
               href={user ? "/today" : "/login?returnTo=%2Ftoday"}
-              className="btn-primary-brand rounded-full bg-accent px-3 py-1.5 text-sm text-white hover:bg-accentHover"
+              className="btn-primary-brand rounded-full bg-primary px-3 py-1.5 text-sm text-primaryForeground hover:bg-accentHover"
             >
               {configured && initialized && user ? "Continuar" : "Entrar"}
             </Link>
@@ -62,11 +62,11 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-white/5">
+    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/50">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href="/today" className="group inline-flex flex-col font-semibold tracking-tight">
           <span>Lembra.</span>
-          <span className="mt-1 h-0.5 w-10 rounded-full bg-accent transition-all duration-150 ease-out group-hover:w-12" />
+          <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
         </Link>
 
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -93,10 +93,10 @@ export function TopNav() {
                   key={item.href}
                   href={item.href}
                   className={[
-                    "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-out",
+                    "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-brand",
                     active
-                      ? "scale-[1.02] bg-accent text-white shadow-sm"
-                      : "bg-white/80 hover:-translate-y-px hover:bg-white hover:shadow-sm dark:bg-white/10 dark:hover:bg-white/15"
+                      ? "scale-[1.02] bg-primary text-primaryForeground shadow-sm"
+                      : "border border-transparent bg-white/90 text-black/85 shadow-sm hover:-translate-y-px hover:bg-white hover:shadow-sm dark:border-border/80 dark:bg-surface2/85 dark:text-text dark:hover:bg-surface2"
                   ].join(" ")}
                 >
                   {item.label}
@@ -106,36 +106,36 @@ export function TopNav() {
           </nav>
 
           {configured && (
-            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/85 px-2 py-1 dark:border-white/15 dark:bg-white/10">
+            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-2 py-1 shadow-sm dark:border-border/90 dark:bg-surface2/85">
               {user && syncMessage && (
                 <span
                   className={[
                     "rounded-full px-2 py-0.5 text-[11px] font-medium",
                     syncStatus === "syncing"
-                      ? "bg-amber-50 text-amber-800"
+                      ? "bg-warning/15 text-warning dark:bg-warning/20 dark:text-warning"
                       : syncStatus === "synced"
-                        ? "bg-emerald-50 text-emerald-700"
+                        ? "bg-success/15 text-success dark:bg-success/20 dark:text-success"
                         : syncStatus === "error"
-                          ? "bg-rose-50 text-rose-700"
-                          : "bg-black/5 text-black/60"
+                          ? "bg-danger/12 text-danger dark:bg-danger/18 dark:text-danger"
+                          : "bg-surface2 text-muted dark:bg-surface2/90 dark:text-muted"
                   ].join(" ")}
                 >
                   {syncStatus === "syncing" ? "Atualizando..." : syncStatus === "synced" ? "Tudo em dia" : syncMessage}
                 </span>
               )}
-              <span className="max-w-40 truncate px-2 text-xs text-black/70 sm:max-w-52 dark:text-white/75" title={displayName}>
+              <span className="max-w-40 truncate px-2 text-xs text-black/75 sm:max-w-52 dark:text-text" title={displayName}>
                 {!initialized ? "Carregando sessão..." : user ? displayName : "Não conectado"}
               </span>
               {user ? (
                 <button
                   type="button"
                   onClick={() => void signOut()}
-                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
+                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs text-black/80 hover:bg-black/5 dark:border-border/90 dark:bg-surface2 dark:text-text dark:hover:bg-surface2/90"
                 >
                   Sair
                 </button>
               ) : (
-                <Link href="/login" className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15">
+                <Link href="/login" className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs text-black/80 hover:bg-black/5 dark:border-border/90 dark:bg-surface2 dark:text-text dark:hover:bg-surface2/90">
                   Entrar
                 </Link>
               )}
