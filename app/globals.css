@@ -190,27 +190,32 @@
     opacity: 1;
   }
 
+  .ui-cta-primary,
   .landing-cta-premium {
     position: relative;
     box-shadow: var(--shadow-sm);
     will-change: transform, box-shadow;
   }
 
+  .ui-cta-primary:hover,
   .landing-cta-premium:hover {
     transform: translateY(-1px) scale(1.01);
     box-shadow: var(--shadow-lg);
   }
 
+  .ui-cta-primary:active,
   .landing-cta-premium:active {
     transform: translateY(0) scale(0.99);
   }
 
+  .dark .ui-cta-primary,
   .dark .landing-cta-premium {
     box-shadow:
       0 0 0 1px hsl(var(--primary) / 0.14),
       0 10px 28px hsl(var(--primary) / 0.14);
   }
 
+  .dark .ui-cta-primary:hover,
   .dark .landing-cta-premium:hover {
     box-shadow:
       0 0 0 1px hsl(var(--primary) / 0.24),
@@ -218,6 +223,7 @@
       0 18px 36px hsl(var(--bg) / 0.55);
   }
 
+  .ui-cta-primary:focus-visible,
   .landing-cta-premium:focus-visible {
     box-shadow:
       0 0 0 2px hsl(var(--surface) / 0.9),
@@ -225,6 +231,7 @@
       var(--shadow-md);
   }
 
+  .ui-cta-secondary,
   .landing-cta-secondary {
     position: relative;
     border-color: hsl(var(--border) / 0.8) !important;
@@ -235,6 +242,7 @@
     will-change: transform, box-shadow, background-color;
   }
 
+  .ui-cta-secondary:hover,
   .landing-cta-secondary:hover {
     transform: translateY(-1px);
     border-color: hsl(var(--border) / 0.95) !important;
@@ -243,10 +251,12 @@
     box-shadow: var(--shadow-sm);
   }
 
+  .ui-cta-secondary:active,
   .landing-cta-secondary:active {
     transform: translateY(0) scale(0.99);
   }
 
+  .ui-cta-secondary:focus-visible,
   .landing-cta-secondary:focus-visible {
     box-shadow:
       0 0 0 2px hsl(var(--surface) / 0.95),
@@ -254,6 +264,7 @@
       var(--shadow-sm);
   }
 
+  .ui-cta-secondary:disabled,
   .landing-cta-secondary:disabled {
     border-color: hsl(var(--border) / 0.75) !important;
     background: hsl(var(--surface-2) / 0.72) !important;
@@ -262,6 +273,7 @@
     box-shadow: none;
   }
 
+  .dark .ui-cta-secondary,
   .dark .landing-cta-secondary {
     border-color: hsl(var(--border) / 0.95) !important;
     background:
@@ -271,6 +283,7 @@
       0 8px 18px hsl(var(--bg) / 0.28);
   }
 
+  .dark .ui-cta-secondary:hover,
   .dark .landing-cta-secondary:hover {
     border-color: hsl(var(--border) / 1) !important;
     background:
@@ -311,11 +324,13 @@
   .landing-sparkle-5 { left: 78%; top: 14px; color: hsl(var(--primary)); animation-delay: 90ms; }
   .landing-sparkle-6 { left: 90%; top: 6px; color: hsl(var(--lilac)); animation-delay: 110ms; }
 
+  .ui-copy-backdrop,
   .hero-copy-backdrop {
     position: relative;
     padding: 0.25rem 0.4rem 0.35rem 0;
   }
 
+  .ui-copy-backdrop::before,
   .hero-copy-backdrop::before {
     content: "";
     position: absolute;
@@ -330,6 +345,7 @@
     opacity: 0.86;
   }
 
+  .dark .ui-copy-backdrop::before,
   .dark .hero-copy-backdrop::before {
     background:
       radial-gradient(circle at 18% 20%, hsl(var(--primary) / 0.09), transparent 58%),
@@ -339,6 +355,7 @@
     opacity: 0.94;
   }
 
+  .ui-chip,
   .landing-chip {
     border-color: hsl(var(--border) / 0.48) !important;
     background: hsl(var(--surface) / 0.34) !important;
@@ -350,12 +367,14 @@
     box-shadow: none;
   }
 
+  .ui-chip:hover,
   .landing-chip:hover {
     border-color: hsl(var(--border) / 0.65) !important;
     background: hsl(var(--surface) / 0.48) !important;
     transform: translateY(-1px);
   }
 
+  .ui-chip-accent,
   .landing-chip-accent {
     border-color: hsl(var(--primary) / 0.22) !important;
     background:
@@ -363,17 +382,20 @@
     color: hsl(var(--primary)) !important;
   }
 
+  .dark .ui-chip,
   .dark .landing-chip {
     border-color: hsl(var(--border) / 0.62) !important;
     background: hsl(var(--surface) / 0.20) !important;
     color: hsl(var(--text) / 0.96) !important;
   }
 
+  .dark .ui-chip:hover,
   .dark .landing-chip:hover {
     border-color: hsl(var(--border) / 0.82) !important;
     background: hsl(var(--surface-2) / 0.34) !important;
   }
 
+  .dark .ui-chip-accent,
   .dark .landing-chip-accent {
     border-color: hsl(var(--primary) / 0.34) !important;
     background:
@@ -512,6 +534,73 @@
     background: hsl(var(--border) / 0.38);
     margin: 0 1rem;
   }
+
+  .ui-title-editorial {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 0.96;
+    color: hsl(var(--text));
+    text-wrap: balance;
+  }
+
+  .ui-subtitle-editorial {
+    color: hsl(var(--muted) / 0.95);
+    line-height: 1.58;
+  }
+
+  .ui-inline-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: hsl(var(--muted));
+  }
+
+  .ui-inline-status-dot {
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--accent) / 0.18);
+    background: hsl(var(--accent) / 0.10);
+    color: hsl(var(--accent));
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+
+  .ui-focus-surface {
+    border-color: hsl(var(--border) / 0.9);
+    background: hsl(var(--surface-2) / 0.80);
+    color: hsl(var(--text));
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ui-focus-surface:hover {
+    transform: translateY(-1px);
+    border-color: hsl(var(--border) / 1);
+    background: hsl(var(--surface-2) / 0.92);
+    box-shadow: var(--shadow-md);
+  }
+
+  .ui-focus-surface:focus-visible {
+    box-shadow:
+      0 0 0 2px hsl(var(--surface) / 0.95),
+      0 0 0 5px hsl(var(--primary) / 0.22),
+      var(--shadow-sm);
+  }
+
+  .dark .ui-focus-surface {
+    border-color: hsl(var(--border) / 0.92);
+    background: hsl(var(--surface-2) / 0.70);
+    box-shadow: 0 8px 16px hsl(var(--bg) / 0.22);
+  }
+
+  .dark .ui-focus-surface:hover {
+    background: hsl(var(--surface-2) / 0.84);
+    box-shadow: 0 10px 20px hsl(var(--bg) / 0.28);
+  }
 }
 
 @keyframes landingGlowA {
@@ -598,7 +687,11 @@
 
   .landing-cta-premium:hover,
   .landing-cta-secondary:hover,
-  .landing-chip:hover {
+  .ui-cta-primary:hover,
+  .ui-cta-secondary:hover,
+  .landing-chip:hover,
+  .ui-chip:hover,
+  .ui-focus-surface:hover {
     transform: none !important;
   }
 }
@@ -621,7 +714,8 @@
     min-height: 220px;
   }
 
-  .hero-copy-backdrop::before {
+  .hero-copy-backdrop::before,
+  .ui-copy-backdrop::before {
     inset: -8px -10px -10px -10px;
     filter: blur(6px);
   }
