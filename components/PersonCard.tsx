@@ -75,14 +75,14 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
                 rel="noreferrer"
                 aria-label={`Abrir Instagram de ${person.name}`}
                 title="Abrir Instagram"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 text-xs text-black/70 hover:bg-black/5 dark:border-white/15 dark:text-white/75 dark:hover:bg-white/10"
+                className="ui-focus-surface inline-flex h-7 w-7 items-center justify-center rounded-full border p-0 text-xs focus-visible:outline-none"
               >
                 IG
               </a>
             )}
           </div>
 
-          <p className="mt-0.5 text-sm text-black/70 dark:text-white/70">
+          <p className="mt-0.5 text-sm text-muted">
             {formatDayMonth(person.day, person.month)}
             {typeof relativeDays === "number" ? ` • ${formatRelativeLabel(relativeDays)}` : ""}
           </p>
@@ -161,7 +161,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         </div>
       )}
 
-      {person.notes && <p className="mt-3 text-sm text-black/70 dark:text-white/70">{normalizeNfc(person.notes)}</p>}
+      {person.notes && <p className="mt-3 text-sm text-muted">{normalizeNfc(person.notes)}</p>}
 
       <div className="mt-4">
         <Templates person={person} />

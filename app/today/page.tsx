@@ -43,25 +43,25 @@ function ClearDataModal({
 
   return (
     <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-5 shadow-xl">
-        <h3 className="text-lg font-semibold tracking-tight text-black/90">Tem certeza?</h3>
-        <p className="mt-2 text-sm text-black/70">
+      <div className="w-full max-w-md rounded-2xl border border-border/80 bg-surface p-5 shadow-xl dark:bg-surface2/70">
+        <h3 className="text-lg font-semibold tracking-tight text-text">Tem certeza?</h3>
+        <p className="mt-2 text-sm text-muted">
           Todos os aniversários salvos localmente neste dispositivo serão apagados. Esta ação não pode ser desfeita.
         </p>
-        <p className="mt-3 text-xs text-black/60">Digite "LIMPAR" para confirmar.</p>
+        <p className="mt-3 text-xs text-muted">Digite "LIMPAR" para confirmar.</p>
         <input
           autoFocus
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Digite LIMPAR"
-          className="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none ring-0 placeholder:text-black/35 focus:border-black/25"
+          className="mt-2 w-full rounded-xl border border-border/80 bg-surface2/60 px-3 py-2 text-sm text-text outline-none ring-0 placeholder:text-muted/70 focus:border-border focus-visible:ring-2 focus-visible:ring-primary/35"
         />
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm disabled:opacity-60"
+            className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm disabled:opacity-70 focus-visible:outline-none"
           >
             Cancelar
           </button>
@@ -249,7 +249,7 @@ export default function TodayPage() {
             {showImport && <ImportCsv onImport={handleImport} />}
 
             {loading ? (
-              <p className="text-sm text-black/60">Carregando...</p>
+              <p className="text-sm text-muted">Carregando...</p>
             ) : todayPeople.length === 0 ? (
               <div className="rounded-2xl border border-border/60 bg-surface/65 p-6 text-center shadow-sm dark:bg-surface/20 sm:p-7">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper text-2xl shadow-sm">🎂</div>
@@ -287,7 +287,7 @@ export default function TodayPage() {
           <aside className="space-y-4">
             <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-black/70">Lembretes</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Lembretes</h2>
                 {reminderSentToday && (
                   <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 shadow-sm">
                     Lembrete enviado hoje
@@ -295,7 +295,7 @@ export default function TodayPage() {
                 )}
               </div>
 
-              <p className="mt-2 text-sm leading-5 text-black/75">{notificationSummary}</p>
+              <p className="mt-2 text-sm leading-5 text-muted">{notificationSummary}</p>
 
               <button
                 type="button"
@@ -309,13 +309,13 @@ export default function TodayPage() {
               <button
                 type="button"
                 onClick={() => setShowNotificationDetails((v) => !v)}
-                className="mt-2 block text-xs text-black/60 underline decoration-black/20 underline-offset-2 hover:text-black/80"
+                className="mt-2 block text-xs text-muted underline decoration-border underline-offset-2 hover:text-text"
               >
                 {showNotificationDetails ? "Ocultar detalhes técnicos" : "Ver detalhes técnicos"}
               </button>
 
               {showNotificationDetails && (
-                <div className="mt-3 rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-xs text-black/65">
+                <div className="mt-3 rounded-xl border border-border/60 bg-surface2/50 px-3 py-2 text-xs text-muted dark:bg-surface/20">
                   <p>Estratégia MVP: melhor esforço (notifica ao abrir o app, quando suportado).</p>
                   <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não") : "..."}</p>
                   <p>Permissão: {mounted ? String(support.permission) : "..."}</p>
@@ -328,8 +328,8 @@ export default function TodayPage() {
             </section>
 
             <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-black/70">Dados</h2>
-              <p className="mt-2 text-sm leading-5 text-black/70">Seus aniversários ficam salvos neste dispositivo e você pode exportar em CSV quando quiser.</p>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Dados</h2>
+              <p className="mt-2 text-sm leading-5 text-muted">Seus aniversários ficam salvos neste dispositivo e você pode exportar em CSV quando quiser.</p>
               <button
                 type="button"
                 onClick={openClearModal}

@@ -18,11 +18,11 @@ export function TopNav() {
   const isLanding = pathname === "/" || pathname === "/landing";
 
   const themeSelectClass =
-    "rounded-full border border-black/10 bg-white/90 px-3 py-1.5 text-black/80 shadow-sm hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/25 focus-visible:ring-2 focus-visible:ring-primary/45 dark:border-border/90 dark:bg-surface2/90 dark:text-text dark:hover:bg-surface2";
+    "ui-focus-surface rounded-full border px-3 py-1.5 text-black/80 focus-visible:outline-none dark:text-text";
 
   if (isLanding) {
     return (
-      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/50">
+      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/40 dark:bg-background/80">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link href="/" className="group inline-flex flex-col font-semibold tracking-tight">
             <span>Lembra.</span>
@@ -43,15 +43,15 @@ export function TopNav() {
               <option value="light">Claro</option>
               <option value="dark">Escuro</option>
             </select>
-            <Link href="/today" className="rounded-full border border-transparent bg-white/90 px-3 py-1.5 text-sm text-black/85 shadow-sm hover:bg-white hover:shadow-sm dark:border-border/80 dark:bg-surface2/85 dark:text-text dark:hover:bg-surface2">
+            <Link href="/today" className="ui-focus-surface inline-flex items-center rounded-full border px-3 py-1.5 text-sm text-black/85 focus-visible:outline-none dark:text-text">
               Hoje
             </Link>
-            <Link href="/upcoming" className="rounded-full border border-transparent bg-white/90 px-3 py-1.5 text-sm text-black/85 shadow-sm hover:bg-white hover:shadow-sm dark:border-border/80 dark:bg-surface2/85 dark:text-text dark:hover:bg-surface2">
+            <Link href="/upcoming" className="ui-focus-surface inline-flex items-center rounded-full border px-3 py-1.5 text-sm text-black/85 focus-visible:outline-none dark:text-text">
               Próximos 7 dias
             </Link>
             <Link
               href={user ? "/today" : "/login?returnTo=%2Ftoday"}
-              className="btn-primary-brand rounded-full bg-primary px-3 py-1.5 text-sm text-primaryForeground hover:bg-accentHover"
+              className="btn-primary-brand ui-cta-primary rounded-full bg-primary px-3 py-1.5 text-sm text-primaryForeground hover:bg-accentHover focus-visible:outline-none"
             >
               {configured && initialized && user ? "Continuar" : "Entrar"}
             </Link>
@@ -62,7 +62,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/50">
+    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/40 dark:bg-background/80">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href="/today" className="group inline-flex flex-col font-semibold tracking-tight">
           <span>Lembra.</span>
@@ -96,7 +96,7 @@ export function TopNav() {
                     "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-brand",
                     active
                       ? "scale-[1.02] bg-primary text-primaryForeground shadow-sm"
-                      : "border border-transparent bg-white/90 text-black/85 shadow-sm hover:-translate-y-px hover:bg-white hover:shadow-sm dark:border-border/80 dark:bg-surface2/85 dark:text-text dark:hover:bg-surface2"
+                      : "ui-focus-surface border text-black/85 focus-visible:outline-none dark:text-text"
                   ].join(" ")}
                 >
                   {item.label}
@@ -106,7 +106,7 @@ export function TopNav() {
           </nav>
 
           {configured && (
-            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-2 py-1 shadow-sm dark:border-border/90 dark:bg-surface2/85">
+            <div className="ui-surface-elevated flex items-center gap-2 rounded-full border px-2 py-1">
               {user && syncMessage && (
                 <span
                   className={[
@@ -123,19 +123,19 @@ export function TopNav() {
                   {syncStatus === "syncing" ? "Atualizando..." : syncStatus === "synced" ? "Tudo em dia" : syncMessage}
                 </span>
               )}
-              <span className="max-w-40 truncate px-2 text-xs text-black/75 sm:max-w-52 dark:text-text" title={displayName}>
+              <span className="max-w-40 truncate px-2 text-xs text-muted sm:max-w-52 dark:text-text" title={displayName}>
                 {!initialized ? "Carregando sessão..." : user ? displayName : "Não conectado"}
               </span>
               {user ? (
                 <button
                   type="button"
                   onClick={() => void signOut()}
-                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs text-black/80 hover:bg-black/5 dark:border-border/90 dark:bg-surface2 dark:text-text dark:hover:bg-surface2/90"
+                  className="ui-focus-surface rounded-full border px-2.5 py-1 text-xs focus-visible:outline-none"
                 >
                   Sair
                 </button>
               ) : (
-                <Link href="/login" className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs text-black/80 hover:bg-black/5 dark:border-border/90 dark:bg-surface2 dark:text-text dark:hover:bg-surface2/90">
+                <Link href="/login" className="ui-focus-surface inline-flex items-center rounded-full border px-2.5 py-1 text-xs focus-visible:outline-none">
                   Entrar
                 </Link>
               )}

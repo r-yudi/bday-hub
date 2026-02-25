@@ -215,12 +215,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
 
         {showGlobalFooter && (
-          <footer className="mt-10 border-t border-black/10 pt-5 text-center text-xs text-black/55 sm:text-right dark:border-white/10 dark:text-white/55">
+          <footer className="mt-10 border-t border-black/10 pt-5 text-center text-xs text-black/55 sm:text-right dark:border-border/50 dark:text-muted">
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-end sm:gap-4">
-              <Link href="/privacy" className="hover:text-black/75 dark:hover:text-white/80">
+              <Link href="/privacy" className="hover:text-black/75 dark:hover:text-text">
                 Política de Privacidade
               </Link>
-              <Link href="/terms" className="hover:text-black/75 dark:hover:text-white/80">
+              <Link href="/terms" className="hover:text-black/75 dark:hover:text-text">
                 Termos
               </Link>
             </div>

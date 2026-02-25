@@ -20,6 +20,16 @@
 
   --ring: var(--primary);
 
+  --ui-bg: var(--bg);
+  --ui-surface: var(--surface);
+  --ui-surface-2: var(--surface-2);
+  --ui-border: var(--border);
+  --ui-text: var(--text);
+  --ui-muted: var(--muted);
+  --ui-accent: var(--accent);
+  --ui-accent-contrast: var(--accent-foreground);
+  --ui-ring: var(--ring);
+
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
@@ -55,6 +65,16 @@
   --success: 152 62% 46%;
 
   --ring: var(--primary);
+
+  --ui-bg: 228 18% 9%;
+  --ui-surface: 228 16% 14%;
+  --ui-surface-2: 228 14% 18%;
+  --ui-border: 228 12% 30%;
+  --ui-text: 34 24% 96%;
+  --ui-muted: 220 14% 78%;
+  --ui-accent: var(--accent);
+  --ui-accent-contrast: var(--accent-foreground);
+  --ui-ring: var(--primary);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.22);
   --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.28);

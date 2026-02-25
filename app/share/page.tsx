@@ -54,7 +54,7 @@ function QuickAddBirthdayModal({
 
   return (
     <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border/70 bg-surface p-5 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-border/75 bg-surface p-5 shadow-xl dark:bg-surface2/70">
         <h2 className="text-lg font-semibold tracking-tight text-text">Adicionar meu aniversário</h2>
         <p className="mt-2 text-sm text-muted">Cadastre nome e dia/mês para gerar seu link de compartilhamento.</p>
 
@@ -209,7 +209,7 @@ export default function ShareLandingPage() {
         </section>
 
         {loading ? (
-          <p className="text-sm text-black/60">Carregando...</p>
+          <p className="text-sm text-muted">Carregando...</p>
         ) : sortedPeople.length === 0 ? (
           <section className="rounded-2xl border border-dashed border-border/70 bg-surface/70 p-8 text-center shadow-sm dark:bg-surface/20">
             <p className="text-lg font-semibold tracking-tight text-text">Você ainda não tem aniversários cadastrados</p>
