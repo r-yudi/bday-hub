@@ -24,6 +24,10 @@ Todos os releases acompanham o padrao SemVer.
 - Toast discreto de onboarding ao adicionar aniversario (incluindo estado especial ao completar setup)
 
 ### Fixed
+- `/` (entrypoint) agora renderiza a landing de marketing/premium como página inicial do produto (sem redirect automático para `/today`)
+- Bug visual no dark em `PersonCard` ("Mais mensagens") com superfícies brancas; sugestões de mensagem agora respeitam o contrato `ui-*`
+- `/login` e `/share/[token]` com superfícies e copy UTF-8 alinhadas ao design system (dark premium)
+- Disclosure de "Detalhes técnicos" em `/today` convertido para padrão de DS com melhor legibilidade
 - Hardening de producao: rotas `/debug/*` agora ficam indisponiveis (404) em `NODE_ENV=production`
 - `/debug/supabase` exibe aviso amigavel quando env vars publicas do Supabase estao ausentes
 - Debug de DB em `/debug/supabase` agora usa `user_settings.user_id` (sem depender de coluna `id`) e valida RLS com upsert/select do proprio usuario
@@ -43,6 +47,7 @@ Todos os releases acompanham o padrao SemVer.
 
 ### Chore
 - Adicionado `docs/sql/verify_schema.sql` para verificar/preparar PK/FK/RLS de `user_settings` e `birthdays` no Supabase
+- Consolidado contrato visual em utilitários `ui-*` para links tertiary, callouts/disclosures, page shell e overlays/modais
 
 ---
 

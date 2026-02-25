@@ -1,242 +1,200 @@
-﻿# BdayHub â€” SPEC (MVP)
+﻿# Lembra. — SPEC (baseline atual)
 
-## Status de implementacao (atualizado em 2026-02-24)
+## Status de implementação (atualizado em 2026-02-24)
 
 ### Estado geral
-- SPEC do MVP implementada e publicada em producao.
-- URL de producao: https://bday-hub.vercel.app
-- Repositorio: https://github.com/r-yudi/bday-hub
-- Releases: v0.1.0 (MVP), v0.1.1 (patch UX/manutencao) e v0.1.2 (patch QA/documentacao)
+- App em produção com branding **Lembra.**
+- Domínio canônico configurado em metadata/SEO: `https://uselembra.com.br`
+- Deploy ativo: `https://bday-hub.vercel.app`
+- Repositório: `https://github.com/r-yudi/bday-hub`
+- Fluxo atual: **guest/local-first** + **Supabase Auth/Sync** quando logado
 
-### Implementado (conforme SPEC)
-- Rotas:
-  - /today
-  - /upcoming
-  - /person (page; modal ficou opcional na SPEC)
-  - /share/[token] (v1)
-- Componentes:
-  - PersonCard
-  - PersonForm
-  - ImportCsv
-  - Templates
-  - TopNav
-- Libs:
-  - storage.ts (IndexedDB + fallback localStorage)
-  - dates.ts
-  - share.ts
-  - csv.ts
-- PWA:
-  - next-pwa configurado
-  - manifest.json + icones
-  - service worker gerado no build (artefato)
-- Dados de exemplo:
-  - public/sample-birthdays.csv
-  - public/sample-birthdays-invalid.csv (QA/manual)
-- README com passos de execucao e limitacoes
+### Implementado (baseline atual)
+- Rotas públicas:
+  - `/` (landing)
+  - `/privacy`
+  - `/terms`
+  - `/healthz`
+- Rotas do app:
+  - `/today`
+  - `/upcoming`
+  - `/person`
+  - `/share`
+  - `/share/[token]`
+- Auth:
+  - `/login`
+  - `/auth/callback`
+  - sessão persistente via Supabase
+  - fallback resiliente para sessão inválida (retorna para guest sem crash)
+- Debug (dev only; 404 em produção):
+  - `/debug/auth`
+  - `/debug/supabase`
+- Sync:
+  - birthdays sincronizados com Supabase quando usuário está logado
+  - fallback local quando não logado
+- UX:
+  - dark mode (light/dark/system)
+  - onboarding leve e toasts
+  - banner PWA contextual
+  - links de privacidade/termos no footer interno
+- Categorias:
+  - predefinidas + custom (guest + `user_categories` no Supabase)
+  - birthdays usam `categories` (texto / array de texto no banco)
 
-### Decisoes de implementacao (alinhadas ao escopo)
-- Notificacao:
-  - implementado fallback aceito na SPEC: notificar ao abrir o app
-  - estado visual claro para granted, denied e sem suporte
-  - sem agendamento confiavel em background (limitacao documentada)
-- Share v1:
-  - token client-only sem assinatura (base64url JSON)
-  - sem revogacao individual (limitacao aceita no MVP)
-- Dedupe CSV:
-  - warning de possivel duplicata e importacao permitida (sem merge no MVP)
-
-### Testes e validacao
-- Unit tests implementados:
-  - proximos 7 dias
-  - CSV parse/validacao
-  - share token roundtrip (extra)
-- Playwright E2E smoke tests implementados:
-  - CRUD de aniversario
-  - import CSV (preview + import)
-  - persistencia apos reload
-  - /share/[token] -> adicionar a lista
-- Script de execucao E2E:
-  - npm run test:e2e
-- Smoke test manual validado:
-  - CRUD
-  - import CSV valido/invalido
-  - persistencia apos reload
-  - fluxo /share/[token]
-  - notificacao ao abrir (best-effort)
-
-### Proximo uso desta SPEC (continuidade de escopo)
-- Manter esta SPEC como baseline do MVP entregue.
-- Para evolucao de escopo total, criar secao nova (ex.: SPEC vNext) com:
-  - backend minimo para revogacao/share
-  - notificacoes mais confiaveis
-  - regras de dedupe/merge
-  - integracoes futuras
-  sem alterar retroativamente os criterios do MVP ja concluido.
-## 1) Stack (mÃ­nimo custo)
+## 1) Stack (mantida)
 - Frontend: Next.js (App Router) + TypeScript
 - UI: Tailwind CSS
-- PersistÃªncia local: IndexedDB (via idb) com fallback localStorage
-- PWA: next-pwa (service worker) para suporte a notificaÃ§Ãµes
-- Deploy: Vercel (ou qualquer static hosting)
+- Design System:
+  - tokens em `app/styles/tokens.css`
+  - utilitários globais `ui-*` em `app/globals.css`
+- Persistência local: IndexedDB (via `idb`) com fallback localStorage
+- PWA: `next-pwa`
+- Deploy: Vercel
+- Auth/DB/Sync: Supabase (client-side com ANON key + RLS)
 
-> Sem backend no MVP para reduzir custo e complexidade.
-> v1 de "link de compartilhamento" pode ser feito client-only usando token no URL com payload assinado localmente (ver seÃ§Ã£o 8).
+> Não usar `service_role` no client.
+> Manter modo local-first funcionando sem login.
 
-## 2) Estrutura de pastas
-/ (repo)
-  /app
-    / (pages)
-    /today
-    /upcoming
-    /person
-    /share/[token]          # v1: pÃ¡gina de link compartilhÃ¡vel
-    layout.tsx
-    page.tsx                # redirect p/ today
-  /components
-    PersonCard.tsx
-    PersonForm.tsx
-    ImportCsv.tsx
-    Templates.tsx
-    TopNav.tsx
-  /lib
-    storage.ts              # IndexedDB/localStorage abstraction
-    dates.ts                # helpers de data (dia/mÃªs)
-    share.ts                # token encode/decode
-    csv.ts                  # parse/validate CSV
-  /public
-    manifest.json
-    icons/
-  /scripts
-    seed.ts                 # opcional: dados de exemplo
-  README.md
+## 2) Estrutura de pastas (resumo atual)
+- `/app`
+  - `/` (landing)
+  - `/today`
+  - `/upcoming`
+  - `/person`
+  - `/share`
+  - `/share/[token]`
+  - `/login`
+  - `/auth/callback`
+  - `/privacy`
+  - `/terms`
+  - `/debug/auth`
+  - `/debug/supabase`
+  - `/healthz`
+- `/components`
+  - `TopNav`, `PersonCard`, `PersonForm`, `ImportCsv`, `Templates`, `AppShell`, etc.
+- `/lib`
+  - `storage.ts` (local)
+  - `birthdaysRepo.ts` (repo local/Supabase)
+  - `categoriesRepo.ts`
+  - `supabase-browser.ts`
+  - `csv.ts`, `csv-file.ts`, `dates.ts`, `share.ts`, `theme.ts`
+- `/supabase/migrations`
+  - migrations de theme, categories e ajustes de schema/RLS
+- `/docs/sql`
+  - scripts de verificação/hardening (quando aplicável)
 
-## 3) Modelo de dados
+## 3) Modelo de dados (baseline atual)
 
-### 3.1 Types
-- SourceType: "manual" | "csv" | "shared"
-- Tag: string
+### 3.1 Tipos locais (app)
+- `SourceType`: `manual | csv | shared`
+- `BirthdayPerson` (compatível com legado):
+  - `id`, `name`, `day`, `month`, `source`
+  - `categories?: string[]` (preferencial)
+  - `tags: string[]` (compatibilidade)
+  - `notes?`, `links?`, `createdAt`, `updatedAt`
+- `AppSettings`:
+  - `notificationEnabled`, `notificationTime`, `lastNotifiedDate?`
 
-### 3.2 Entity: BirthdayPerson
-- id: string (uuid)
-- name: string
-- day: number (1-31)
-- month: number (1-12)
-- source: SourceType
-- tags: string[]
-- notes?: string
-- links?: {
-    whatsapp?: string
-    instagram?: string
-    other?: string
-  }
-- createdAt: number (epoch ms)
-- updatedAt: number (epoch ms)
+### 3.2 Supabase (atual)
+- `birthdays`
+  - inclui `user_id`
+  - usa `categories text[]` (schema atual)
+  - RLS owner-only
+- `user_settings`
+  - PK em `user_id`
+  - preferências (ex.: `theme`)
+  - RLS owner-only
+- `user_categories`
+  - categorias custom por usuário
+  - RLS owner-only
+- `share_links` (hardening documentado)
+  - leitura pública via RPC segura (sem SELECT público direto)
 
-### 3.3 Settings
-- notificationEnabled: boolean
-- notificationTime: string ("09:00")
-- lastNotifiedDate?: string ("YYYY-MM-DD")  # evita duplicar quando abrir o app
+## 4) Regras de negócio (vigentes)
+- Ano não é armazenado/exibido em fluxos de share.
+- `/share/[token]` expõe apenas nome + dia/mês.
+- Sync de birthdays:
+  - se logado -> Supabase é source of truth
+  - se deslogado -> storage local
+  - merge simples por `id` + `updatedAt` (last write wins) no bootstrap de login
+- Sessão inválida do Supabase:
+  - limpar sessão local
+  - fallback para guest
+  - aviso discreto de sessão expirada
 
-## 4) Regras de negÃ³cio
-- OrdenaÃ§Ã£o:
-  - "Hoje": day/month == hoje
-  - "PrÃ³ximos 7 dias": prÃ³ximos 7 dias a partir de hoje, incluindo virada de ano
-- Ano nÃ£o Ã© armazenado (evita idade).
-- ValidaÃ§Ã£o:
-  - day/month vÃ¡lidos (considerar meses com 30/31 e fevereiro com 29 permitido para simplificar)
-  - nome obrigatÃ³rio
-- Dedupe opcional:
-  - se importar CSV com mesmo nome+dia+mes, pedir â€œmesclarâ€ ou duplicar (no MVP: duplicar Ã© ok, mas ideal alertar)
+## 5) UI / Rotas (estado atual)
+### `/`
+- Landing pública (entrypoint padrão) com CTA para `/today` e `/login`
+- Não deve haver redirect automático de `/` para `/today`/`/login`
 
-## 5) UI/Rotas
+### `/today`
+- Lista de aniversários de hoje
+- CTA adicionar, importar CSV, lembretes best-effort
+- onboarding e feedbacks de cópia
 
-### /today
-- Header: "Hoje"
-- Lista de PersonCard
-- CTA: "Adicionar" (abre modal/form)
-- CTA secundÃ¡rio: "Importar CSV"
+### `/upcoming`
+- Lista próximos 7 dias
 
-### /upcoming
-- Header: "PrÃ³ximos 7 dias"
-- Lista agrupada por dia (opcional) ou lista simples
+### `/person`
+- Form de cadastro/edição
+- categorias (multi-select leve + criação rápida)
 
-### /person (modal ou page)
-- Form com campos:
-  - Nome
-  - Dia / MÃªs (select)
-  - Tags (input simples com enter)
-  - Links opcionais
-  - Notas
-- BotÃµes: Salvar / Excluir (se edit)
+### `/share`
+- Hub para gerar/copiar links de compartilhamento
 
-### /share/[token] (v1)
-- Exibe: Nome + Dia/MÃªs
-- BotÃ£o: "Adicionar Ã  minha lista"
-  - Ao clicar: cria BirthdayPerson com source="shared"
-- ObservaÃ§Ã£o: link revogÃ¡vel Ã© desejÃ¡vel no futuro (ver seÃ§Ã£o 8).
+### `/share/[token]`
+- Adicionar aniversário compartilhado à própria lista
 
-## 6) ImportaÃ§Ã£o CSV
-- Componente ImportCsv:
-  - upload do arquivo
-  - preview das linhas vÃ¡lidas e invÃ¡lidas
-  - botÃ£o â€œImportarâ€
-- Formato CSV suportado (header obrigatÃ³rio):
-  - name,day,month,tags,whatsapp,instagram,notes
-- tags separado por ";" (ex: "amigos;trabalho")
+### `/login` / `/auth/callback`
+- Login Google via Supabase OAuth redirect
+- callback com retry curto de sessão + painel de diagnóstico em erro
 
-## 7) NotificaÃ§Ãµes (MVP)
-### EstratÃ©gia
-- Solicitar permissÃ£o de Notification com CTA claro.
-- No carregamento do app:
-  - se notificationsEnabled e lastNotifiedDate != hoje e existem aniversariantes hoje:
-    - disparar notificaÃ§Ã£o imediata (nÃ£o â€œagendadaâ€, mas efetiva)
-    - atualizar lastNotifiedDate
-- Se viÃ¡vel com service worker:
-  - usar periodic background sync quando suportado (best-effort)
-> Nota: confiabilidade varia por browser/OS. Aceito no MVP.
+## 6) Importação CSV (estado atual)
+- Header suportado: `name,day,month,tags,whatsapp,instagram,notes`
+- `tags` funciona como fonte de categorias
+- Separadores suportados em `tags`: `,`, `;`, `|`
+- Decode robusto UTF-8/Latin1 com fallback para evitar mojibake
+- Normalização NFC
 
-## 8) Compartilhar (v1) â€” Link privado
-Objetivo: permitir que o usuÃ¡rio compartilhe seu aniversÃ¡rio sem criar â€œrede socialâ€.
+## 7) Notificações (baseline)
+- Estratégia MVP mantida: best-effort ao abrir o app
+- Sem agendamento confiável em background (limitação conhecida/documentada)
 
-### Token
-- Payload mÃ­nimo:
-  - name
-  - day
-  - month
-  - issuedAt
-- Encode: base64url(JSON) + assinatura HMAC opcional (mas sem backend Ã© complexo).
-- MVP simples:
-  - token sem assinatura (risco baixo porque sÃ³ contÃ©m nome + dia/mÃªs).
-  - NÃ£o usar ano.
-- RevogaÃ§Ã£o:
-  - Sem backend nÃ£o dÃ¡ revogar individualmente; no MVP aceitar limitaÃ§Ã£o.
-  - EvoluÃ§Ã£o: backend mÃ­nimo ou chave rotativa por usuÃ¡rio.
+## 8) Segurança e privacidade
+- RLS em tabelas de usuário (`birthdays`, `user_settings`, `user_categories`)
+- Links compartilháveis sem ano
+- Hardening de `share_links` para evitar SELECT público direto (via RPC)
+- Rotas `/debug/*` bloqueadas em produção (404)
 
-## 9) Storage
-- IndexedDB:
-  - store: "people" (keyPath id)
-  - store: "settings" (keyPath key)
-- Fallback localStorage se IndexedDB indisponÃ­vel.
+## 9) Testes e validação
+- Unit tests:
+  - datas / próximos dias
+  - CSV parse/validação/encoding
+  - share token roundtrip
+- Playwright smoke E2E:
+  - CRUD
+  - import CSV
+  - persistência após reload
+  - `/share/[token]` -> adicionar à lista
+- Comandos obrigatórios em mudanças relevantes:
+  - `npm run build`
+  - `npm test`
+  - `npm run test:e2e`
 
-## 10) Testes (mÃ­nimo)
-- Unit:
-  - cÃ¡lculo de prÃ³ximos 7 dias
-  - validaÃ§Ã£o CSV
-- Smoke test manual:
-  - adicionar, editar, excluir
-  - importar CSV
-  - persistÃªncia apÃ³s reload
-  - notificaÃ§Ã£o ao abrir app com aniversariante hoje
+## 9.1 Contrato de UI (DS)
+- Reutilizar utilitários `ui-*` antes de criar classes ad hoc:
+  - superfícies/níveis: `ui-surface`, `ui-surface-elevated`, `ui-border-subtle`
+  - CTAs e ações: `ui-cta-primary`, `ui-cta-secondary`, `ui-focus-surface`
+  - links tertiary: `ui-link-tertiary` / `ui-link-tertiary-muted`
+  - callouts/disclosures: `ui-callout`, `ui-disclosure`, `ui-disclosure-summary`
+  - shells centrados/overlays: `ui-page-shell`, `ui-page-shell-centered`, `ui-overlay-backdrop`, `ui-modal-surface`
+- Em dark mode, o fundo deve recuar (grid/glows discretos); conteúdo deve viver em superfícies previsíveis.
 
-## 11) SeguranÃ§a e privacidade
-- NÃ£o armazenar ano de nascimento.
-- Dados ficam localmente no dispositivo no MVP.
-- Link compartilhÃ¡vel expÃµe apenas nome + dia/mÃªs.
-- Fornecer opÃ§Ã£o â€œLimpar todos os dadosâ€ nas configuraÃ§Ãµes.
+## 10) Limitações / próximos focos (vNext)
+- Revogação completa de links compartilhados com UX de gestão
+- Dedupe/merge avançado de CSV
+- Notificações mais confiáveis (push/email/cron)
+- Fluxos avançados de gestão (ex.: `/manage`)
 
-## 12) Passos de execuÃ§Ã£o
-- npm install
-- npm run dev
-- acessar /today
-- (opcional) instalar como PWA
-
+## 11) Nota de compatibilidade
+O app mantém compatibilidade de leitura com dados legados (`tags` / formatos anteriores), mas o schema atual de `birthdays` no Supabase deve usar `categories` e **não depender** da coluna legada `category`.
