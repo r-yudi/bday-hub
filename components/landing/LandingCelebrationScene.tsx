@@ -7,12 +7,12 @@ const ORBS: Array<{ id: number; className: string; style: CSSProperties }> = [
   {
     id: 1,
     className: "hero-art-orb hidden lg:block",
-    style: { left: "10%", top: "18%", width: 86, height: 86, background: "hsl(var(--lilac) / 0.06)", animationDelay: "-4s" }
+    style: { left: "14%", top: "12%", width: 86, height: 86, background: "hsl(var(--lilac) / 0.05)", animationDelay: "-4s" }
   },
   {
     id: 2,
     className: "hero-art-orb hidden lg:block",
-    style: { right: "6%", top: "36%", width: 110, height: 110, background: "hsl(var(--primary) / 0.06)", animationDelay: "-10s" }
+    style: { right: "4%", top: "30%", width: 106, height: 106, background: "hsl(var(--primary) / 0.05)", animationDelay: "-10s" }
   }
 ];
 
@@ -52,13 +52,13 @@ export function LandingCelebrationScene() {
       ))}
 
       {/* Ajuste aqui o tamanho/posição da arte (wrapper e transform) para calibrar protagonismo. */}
-      <div className="hero-art-stage relative z-[20] mx-auto w-full max-w-[420px] md:max-w-[520px] lg:max-w-[700px] lg:translate-x-2 xl:max-w-[760px] xl:translate-x-4">
+      <div className="hero-art-stage relative z-[20] mx-auto w-full max-w-[420px] md:max-w-[540px] md:-translate-y-1 lg:max-w-[740px] lg:-translate-x-2 lg:-translate-y-1 xl:max-w-[800px] xl:-translate-x-3 xl:-translate-y-2 2xl:max-w-[840px]">
         <OutdoorPartyIllustration />
       </div>
 
       {/* Ajuste aqui os balões (quantidade/posição); mantidos fora da área do texto. */}
-      <Balloon className="hidden lg:block absolute right-[10%] top-[4%] h-20 w-10" color="hsl(var(--primary) / 0.68)" delay="-2s" duration="14s" />
-      <Balloon className="hidden lg:block absolute right-[26%] top-[2%] h-16 w-8" color="hsl(var(--lilac) / 0.64)" delay="-8s" duration="17s" />
+      <Balloon className="hidden lg:block absolute right-[6%] top-[2%] h-[4.5rem] w-[2.25rem] opacity-75" color="hsl(var(--primary) / 0.62)" delay="-2s" duration="14s" />
+      <Balloon className="hidden lg:block absolute right-[21%] top-[0%] h-[3.5rem] w-[1.75rem] opacity-70" color="hsl(var(--lilac) / 0.58)" delay="-8s" duration="17s" />
     </div>
   );
 }

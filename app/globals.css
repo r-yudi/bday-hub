@@ -298,6 +298,12 @@
     animation: sparkleBurst 320ms var(--ease) forwards;
   }
 
+  html:not(.dark) .landing-sparkle {
+    opacity: 0;
+    filter: saturate(0.9);
+    box-shadow: 0 0 12px currentColor;
+  }
+
   .landing-sparkle-1 { left: 2%; top: 12px; color: hsl(var(--primary)); }
   .landing-sparkle-2 { left: 22%; top: 0; color: hsl(var(--warning)); animation-delay: 30ms; }
   .landing-sparkle-3 { left: 44%; top: 10px; color: hsl(var(--lilac)); animation-delay: 50ms; }

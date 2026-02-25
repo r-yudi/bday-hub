@@ -30,7 +30,7 @@ export function LandingPremiumPageClient() {
       <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full glow-lilac blur-3xl landing-glow-b" />
 
       <div className="relative mx-auto max-w-6xl space-y-10 lg:space-y-12">
-        <section className="relative grid items-center gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16">
+        <section className="relative grid items-start gap-8 lg:grid-cols-2 lg:gap-10 xl:gap-12">
           <Reveal delay={40} className="relative z-[40]">
             <div className="hero-copy-backdrop">
               <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/70 px-3 py-1 text-[11px] font-semibold tracking-[0.02em] text-muted shadow-sm dark:bg-surface/35">
@@ -95,7 +95,7 @@ export function LandingPremiumPageClient() {
             </div>
           </Reveal>
 
-          <Reveal delay={90} className="relative z-[20]">
+          <Reveal delay={90} className="relative z-[20] lg:pt-1 xl:pt-0">
             <LandingCelebrationScene />
           </Reveal>
         </section>
