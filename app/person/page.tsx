@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
@@ -53,20 +53,25 @@ function PersonPageContent() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-[2rem]">{id ? "Editar pessoa" : "Adicionar pessoa"}</h1>
-          <p className="text-sm text-black/70">Cadastro manual de aniversário.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-text sm:text-[2rem]">
+            {id ? "Editar pessoa" : "Adicionar pessoa"}
+          </h1>
+          <p className="text-sm text-muted">Preencha com calma. Você pode ajustar depois.</p>
         </div>
-        <Link href="/today" className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm">
+        <Link
+          href="/today"
+          className="inline-flex h-10 items-center justify-center rounded-xl border border-border/90 bg-surface2/80 px-4 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/25 focus-visible:ring-2 focus-visible:ring-primary/45"
+        >
           Voltar
         </Link>
       </div>
 
       {loading ? (
-        <p className="text-sm text-black/60">Carregando...</p>
+        <p className="text-sm text-muted">Carregando...</p>
       ) : id && !initialPerson ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm text-text">
           Pessoa não encontrada.
         </div>
       ) : (
@@ -78,7 +83,7 @@ function PersonPageContent() {
 
 export default function PersonPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-black/60">Carregando...</p>}>
+    <Suspense fallback={<p className="text-sm text-muted">Carregando...</p>}>
       <PersonPageContent />
     </Suspense>
   );

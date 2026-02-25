@@ -20,7 +20,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Card } from "@/components/ui/Card";
-import { FieldGroup, FieldLabel, SelectField, TextArea, TextInput } from "@/components/ui/Field";
+import { FieldGroup, FieldHelper, FieldLabel, SelectField, TextArea, TextInput } from "@/components/ui/Field";
 
 type PersonFormProps = {
   initialPerson?: BirthdayPerson | null;
@@ -34,6 +34,10 @@ const days = Array.from({ length: 31 }, (_, i) => i + 1);
 function initialCategoriesFromPerson(person?: BirthdayPerson | null) {
   if (!person) return [];
   return extractCategoriesFromPerson(person);
+}
+
+function RequiredMark() {
+  return <span className="rounded-full bg-primary/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">*</span>;
 }
 
 export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps) {
@@ -170,18 +174,42 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
     }
   }
 
+  function HelpDot({ title }: { title: string }) {
+    return (
+      <span
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-border bg-surface2 text-[10px] font-semibold leading-none text-muted"
+        title={title}
+        aria-label={title}
+      >
+        ?
+      </span>
+    );
+  }
+
   return (
     <Card variant="elevated" className="p-5 sm:p-6">
       <form onSubmit={handleSubmit} className="space-y-5">
+        <Alert variant="info" className="text-xs">
+          Campos com <span className="font-semibold text-primary">*</span> são obrigatórios. Os demais são opcionais.
+        </Alert>
+
         <FieldGroup>
-          <FieldLabel htmlFor="person-name">Nome</FieldLabel>
-          <TextInput id="person-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Ana Silva" />
+          <FieldLabel htmlFor="person-name" className="flex items-center gap-1.5">
+            <span>Nome</span>
+            <RequiredMark />
+            <HelpDot title="Use o nome como você prefere ver nos lembretes." />
+          </FieldLabel>
+          <TextInput id="person-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Ana Silva" />
+          <FieldHelper>Esse nome aparece nos lembretes e nas mensagens prontas.</FieldHelper>
         </FieldGroup>
 
         <div className="grid grid-cols-2 gap-3">
           <FieldGroup>
-            <FieldLabel htmlFor="person-day">Dia</FieldLabel>
-            <SelectField id="person-day" value={day} onChange={(e) => setDay(Number(e.target.value))}>
+            <FieldLabel htmlFor="person-day" className="flex items-center gap-1.5">
+              <span>Dia</span>
+              <RequiredMark />
+            </FieldLabel>
+            <SelectField id="person-day" required value={day} onChange={(e) => setDay(Number(e.target.value))}>
               {days.map((d) => (
                 <option key={d} value={d}>
                   {d}
@@ -191,8 +219,11 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
           </FieldGroup>
 
           <FieldGroup>
-            <FieldLabel htmlFor="person-month">Mês</FieldLabel>
-            <SelectField id="person-month" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+            <FieldLabel htmlFor="person-month" className="flex items-center gap-1.5">
+              <span>Mês</span>
+              <RequiredMark />
+            </FieldLabel>
+            <SelectField id="person-month" required value={month} onChange={(e) => setMonth(Number(e.target.value))}>
               {months.map((m) => (
                 <option key={m} value={m}>
                   {m}
@@ -203,7 +234,11 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         </div>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-category-input">Categorias</FieldLabel>
+          <FieldLabel htmlFor="person-category-input" className="flex items-center gap-1.5">
+            <span>Categorias</span>
+            <HelpDot title="Categorias ajudam a organizar sua lista (ex.: Família, Amigos, Trabalho)." />
+          </FieldLabel>
+          <FieldHelper>Opcional. Use para organizar sua lista com mais facilidade.</FieldHelper>
           <div className="space-y-2 rounded-lg border border-border bg-surface2/70 p-3">
             {categories.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
@@ -240,6 +275,9 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                 Adicionar
               </Button>
             </div>
+            <FieldHelper>
+              Dica: você pode criar categorias livres e reaproveitar sugestões da sua lista.
+            </FieldHelper>
 
             {typoSuggestion && (
               <Alert variant="warning" className="text-xs">
@@ -272,22 +310,34 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldGroup>
-            <FieldLabel htmlFor="person-whatsapp">WhatsApp (link)</FieldLabel>
+            <FieldLabel htmlFor="person-whatsapp" className="flex items-center gap-1.5">
+              <span>WhatsApp (link)</span>
+              <HelpDot title="Opcional. Cole um link para abrir conversa ou perfil." />
+            </FieldLabel>
             <TextInput id="person-whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="https://wa.me/..." />
           </FieldGroup>
           <FieldGroup>
-            <FieldLabel htmlFor="person-instagram">Instagram (link)</FieldLabel>
+            <FieldLabel htmlFor="person-instagram" className="flex items-center gap-1.5">
+              <span>Instagram (link)</span>
+              <HelpDot title="Opcional. Pode ser perfil ou link direto." />
+            </FieldLabel>
             <TextInput id="person-instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/..." />
           </FieldGroup>
         </div>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-other">Outro link (opcional)</FieldLabel>
+          <FieldLabel htmlFor="person-other" className="flex items-center gap-1.5">
+            <span>Outro link (opcional)</span>
+            <HelpDot title="Você pode salvar qualquer link útil: perfil, site, presente, etc." />
+          </FieldLabel>
           <TextInput id="person-other" value={otherLink} onChange={(e) => setOtherLink(e.target.value)} placeholder="https://..." />
         </FieldGroup>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-notes">Observações</FieldLabel>
+          <FieldLabel htmlFor="person-notes" className="flex items-center gap-1.5">
+            <span>Observações</span>
+            <HelpDot title="Anote preferências, detalhes de presente ou mensagens." />
+          </FieldLabel>
           <TextArea id="person-notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observações" />
         </FieldGroup>
 

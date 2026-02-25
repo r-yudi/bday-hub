@@ -26,7 +26,7 @@ export function LandingPremiumPageClient() {
             <Reveal delay={0}>
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1 text-xs font-medium text-muted shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Lembra. • Warm Premium Celebration
+                Lembra. • Seu app de aniversários
               </div>
             </Reveal>
 
@@ -36,8 +36,8 @@ export function LandingPremiumPageClient() {
                   Nunca mais esqueça aniversários.
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-                  Um app caloroso e rápido para lembrar quem importa. Use sem login no seu dispositivo e, quando quiser,
-                  entre com Google para sincronizar sua lista.
+                  Um app acolhedor e rápido para lembrar quem importa. Comece sem login no seu dispositivo e, quando
+                  quiser, entre com Google para manter sua lista com você.
                 </p>
               </div>
             </Reveal>
@@ -61,8 +61,8 @@ export function LandingPremiumPageClient() {
               <div className="flex flex-wrap gap-2">
                 <Chip as="span" variant="accent">Lembretes rápidos</Chip>
                 <Chip as="span" variant="subtle">CSV import</Chip>
-                <Chip as="span" variant="subtle">Modo local-first</Chip>
-                <Chip as="span" variant="subtle">Sync ao entrar</Chip>
+                <Chip as="span" variant="subtle">Sem login para começar</Chip>
+                <Chip as="span" variant="subtle">Sincronize quando quiser</Chip>
               </div>
             </Reveal>
           </div>
@@ -100,8 +100,8 @@ export function LandingPremiumPageClient() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-12">
-          <Reveal delay={70}>
-            <Card variant="bento" className="shine-sweep lg:col-span-4 p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+          <Reveal delay={70} className="lg:col-span-4">
+            <Card variant="bento" className="shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted">Como funciona</p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">1. Cadastre rápido</h2>
               <p className="mt-2 text-sm text-muted">
@@ -110,22 +110,22 @@ export function LandingPremiumPageClient() {
             </Card>
           </Reveal>
 
-          <Reveal delay={130}>
-            <Card variant="bento" className="shine-sweep lg:col-span-4 p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+          <Reveal delay={130} className="lg:col-span-4">
+            <Card variant="bento" className="shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted">Sem atrito</p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">2. Use sem login</h2>
               <p className="mt-2 text-sm text-muted">
-                Tudo funciona no modo local-first. Se quiser sincronizar, entre com Google mais tarde.
+                Tudo funciona no seu dispositivo desde o primeiro uso. Se quiser, você pode entrar depois.
               </p>
             </Card>
           </Reveal>
 
-          <Reveal delay={190}>
-            <Card variant="bento" className="shine-sweep lg:col-span-4 p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+          <Reveal delay={190} className="lg:col-span-4">
+            <Card variant="bento" className="shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted">Em qualquer lugar</p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">3. Sincronize sua lista</h2>
               <p className="mt-2 text-sm text-muted">
-                Com login, seus aniversários acompanham você em outros dispositivos com RLS no Supabase.
+                Com login, sua lista acompanha você em outros dispositivos com segurança e privacidade.
               </p>
             </Card>
           </Reveal>
@@ -133,7 +133,7 @@ export function LandingPremiumPageClient() {
 
         <Reveal delay={220}>
           <footer className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border bg-surface/85 px-4 py-3 text-sm text-muted sm:flex-row sm:items-center">
-            <p>Lembra. • Celebração premium com experiência simples</p>
+            <p>Lembra. • Nunca mais esqueça um aniversário 🎉</p>
             <div className="flex items-center gap-3">
               <Link href="/privacy" className="hover:text-text">Privacidade</Link>
               <Link href="/terms" className="hover:text-text">Termos</Link>

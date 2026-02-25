@@ -1,6 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Chip } from "@/components/ui/Chip";
 import { decodeCsvBytes } from "@/lib/csv-file";
 import { parseBirthdayCsv } from "@/lib/csv";
 import type { BirthdayPerson } from "@/lib/types";
@@ -39,10 +43,12 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
   }
 
   return (
-    <section className="rounded-2xl border border-black/10 bg-white/80 p-4">
+    <Card variant="elevated" className="p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <label className="btn-primary-brand cursor-pointer rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover">
-          Selecionar CSV
+        <label className="cursor-pointer">
+          <span className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-medium text-accentForeground shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:shadow-md hover:brightness-95">
+            Selecionar CSV
+          </span>
           <input
             type="file"
             accept=".csv,text/csv"
@@ -53,34 +59,42 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
             }}
           />
         </label>
-        <span className="text-sm text-black/70">
-          Header obrigatório: `name,day,month,tags,whatsapp,instagram,notes` (coluna `tags` = categorias)
-        </span>
+
+        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+          <Chip as="span" variant="warning">Obrigatório</Chip>
+          <span className="text-muted">
+            Cabeçalho: <code className="rounded bg-surface2 px-1.5 py-0.5 text-[11px] sm:text-xs">name,day,month</code>
+          </span>
+          <Chip as="span" variant="subtle">Opcional</Chip>
+          <span className="text-muted">
+            <code className="rounded bg-surface2 px-1.5 py-0.5 text-[11px] sm:text-xs">tags, whatsapp, instagram, notes</code>
+          </span>
+        </div>
       </div>
+
+      <p className="mt-2 text-xs text-muted">
+        A coluna <code className="rounded bg-surface2 px-1 py-0.5">tags</code> vira categorias e aceita vírgula, ponto e vírgula ou pipe.
+      </p>
 
       {parsed && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-3 text-sm">
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
-              Válidas: {parsed.valid.length}
-            </span>
-            <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-rose-700">
-              Inválidas: {parsed.invalid.length}
-            </span>
+            <Chip as="span" variant="accent">Válidas: {parsed.valid.length}</Chip>
+            <Chip as="span" variant="danger">Inválidas: {parsed.invalid.length}</Chip>
           </div>
 
           {parsed.warnings.length > 0 && (
-            <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+            <Alert variant="warning" className="text-sm">
               {parsed.warnings.map((warning) => (
                 <p key={warning}>{warning}</p>
               ))}
-            </div>
+            </Alert>
           )}
 
           {parsed.valid.length > 0 && (
-            <div className="rounded-xl border border-black/10 p-3">
-              <p className="mb-2 text-sm font-medium">Prévia (válidas)</p>
-              <ul className="space-y-1 text-sm text-black/75">
+            <div className="rounded-xl border border-border bg-surface p-3">
+              <p className="mb-2 text-sm font-medium text-text">Prévia (válidas)</p>
+              <ul className="space-y-1 text-sm text-muted">
                 {parsed.valid.slice(0, 8).map((row, idx) => (
                   <li key={`${row.name}-${idx}`}>
                     {row.name} • {String(row.day).padStart(2, "0")}/{String(row.month).padStart(2, "0")}
@@ -92,9 +106,9 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
           )}
 
           {parsed.invalid.length > 0 && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
-              <p className="mb-2 text-sm font-medium text-rose-800">Linhas inválidas</p>
-              <ul className="space-y-1 text-sm text-rose-700">
+            <div className="rounded-xl border border-danger/25 bg-danger/10 p-3">
+              <p className="mb-2 text-sm font-medium text-danger">Linhas inválidas</p>
+              <ul className="space-y-1 text-sm text-danger">
                 {parsed.invalid.slice(0, 8).map((row) => (
                   <li key={row.rowNumber}>
                     Linha {row.rowNumber}: {row.errors.join(", ")}
@@ -104,16 +118,16 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
             </div>
           )}
 
-          <button
+          <Button
             type="button"
             disabled={parsed.valid.length === 0 || importing}
             onClick={() => void handleImport()}
-            className="btn-primary-brand rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:opacity-50"
+            loading={importing}
           >
             {importing ? "Importando..." : "Importar"}
-          </button>
+          </Button>
         </div>
       )}
-    </section>
+    </Card>
   );
 }

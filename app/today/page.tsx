@@ -233,7 +233,7 @@ export default function TodayPage() {
             <button
               type="button"
               onClick={() => setShowImport((v) => !v)}
-              className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm"
+              className="rounded-xl border border-border/90 bg-surface2/80 px-4 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md"
             >
               {showImport ? "Fechar CSV" : "Importar CSV"}
             </button>
@@ -263,7 +263,7 @@ export default function TodayPage() {
                   >
                     Adicionar aniversário
                   </Link>
-                  <Link href="/upcoming" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm">
+                  <Link href="/upcoming" className="rounded-xl border border-border/90 bg-surface2/80 px-4 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md">
                     Ver próximos 7 dias
                   </Link>
                 </div>
@@ -294,7 +294,7 @@ export default function TodayPage() {
                 type="button"
                 onClick={() => void handleEnableNotifications()}
                 disabled={!mounted || !support.supported || (support.permission === "granted" && Boolean(settings?.notificationEnabled))}
-                className="btn-primary-brand mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-primary-brand mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white shadow-sm hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted disabled:shadow-none"
               >
                 {notificationCtaLabel}
               </button>
@@ -326,14 +326,14 @@ export default function TodayPage() {
               <button
                 type="button"
                 onClick={openClearModal}
-                className="mt-3 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black/75 hover:bg-black/5"
+                className="mt-3 rounded-lg border border-border/90 bg-surface2/80 px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md"
               >
                 Limpar todos os dados
               </button>
               <a
                 href="/sample-birthdays.csv"
                 download
-                className="mt-2 block rounded-lg border border-black/10 px-3 py-2 text-center text-sm hover:bg-black/5"
+                className="mt-2 block rounded-lg border border-border/90 bg-surface2/80 px-3 py-2 text-center text-sm font-medium text-text shadow-sm transition-all duration-150 ease-brand hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-md"
               >
                 Baixar CSV de exemplo
               </a>

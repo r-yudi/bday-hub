@@ -34,10 +34,10 @@ export function Chip(props: ChipProps) {
   );
 
   if (props.as === "span") {
-    const { as, className, ...rest } = props;
+    const { as, className, interactive: _interactive, ...rest } = props;
     return <span className={cn(base, className)} {...rest} />;
   }
 
-  const { as, className, type = "button", ...rest } = props;
+  const { as, className, type = "button", interactive: _interactive, ...rest } = props;
   return <button type={type} className={cn(base, interactive && "cursor-pointer", className)} {...rest} />;
 }

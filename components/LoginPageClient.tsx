@@ -45,7 +45,7 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
             type="button"
             onClick={() => void handleGoogleLogin()}
             disabled={!initialized || submitting}
-            className="btn-primary-brand mt-5 w-full rounded-xl bg-accent px-4 py-2.5 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-primary-brand mt-5 w-full rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-accentHover hover:shadow-md disabled:cursor-not-allowed disabled:bg-accent/70 disabled:text-white/95 disabled:shadow-none"
           >
             {submitting ? "Redirecionando..." : "Entrar com Google"}
           </button>
