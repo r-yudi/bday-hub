@@ -55,8 +55,8 @@ function QuickAddBirthdayModal({
   return (
     <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
       <div className="w-full max-w-md rounded-2xl border border-border/70 bg-surface p-5 shadow-xl">
-        <h2 className="text-lg font-semibold tracking-tight text-text">Adicionar meu aniversÃ¡rio</h2>
-        <p className="mt-2 text-sm text-muted">Cadastre nome e dia/mÃªs para gerar seu link de compartilhamento.</p>
+        <h2 className="text-lg font-semibold tracking-tight text-text">Adicionar meu aniversário</h2>
+        <p className="mt-2 text-sm text-muted">Cadastre nome e dia/mês para gerar seu link de compartilhamento.</p>
 
         <div className="mt-4 space-y-3">
           <div>
@@ -86,7 +86,7 @@ function QuickAddBirthdayModal({
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted">MÃªs</label>
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted">Mês</label>
               <select
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
@@ -164,7 +164,7 @@ export default function ShareLandingPage() {
       setCopiedPersonId(person.id);
       window.setTimeout(() => setCopiedPersonId(null), 1500);
     } catch {
-      window.alert("NÃ£o foi possÃ­vel copiar o link.");
+      window.alert("Não foi possível copiar o link.");
     }
   }
 
@@ -201,10 +201,10 @@ export default function ShareLandingPage() {
     <>
       <div className="space-y-8 lg:space-y-10">
         <section className="ui-copy-backdrop px-1 py-1 sm:px-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra â€¢ Compartilhamento</p>
-          <h1 className="ui-title-editorial mt-2 text-3xl sm:text-[2.15rem]">Compartilhe aniversÃ¡rios com um link</h1>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra • Compartilhamento</p>
+          <h1 className="ui-title-editorial mt-2 text-3xl sm:text-[2.15rem]">Compartilhe aniversários com um link</h1>
           <p className="ui-subtitle-editorial mt-3 max-w-[64ch] text-sm sm:text-[15px]">
-            O link mostra apenas nome e dia/mÃªs (sem ano). Escolha um aniversÃ¡rio abaixo para gerar ou copiar.
+            O link mostra apenas nome e dia/mês (sem ano). Escolha um aniversário abaixo e copie em 1 clique.
           </p>
         </section>
 
@@ -212,9 +212,9 @@ export default function ShareLandingPage() {
           <p className="text-sm text-black/60">Carregando...</p>
         ) : sortedPeople.length === 0 ? (
           <section className="rounded-2xl border border-dashed border-border/70 bg-surface/70 p-8 text-center shadow-sm dark:bg-surface/20">
-            <p className="text-lg font-semibold tracking-tight text-text">VocÃª ainda nÃ£o tem aniversÃ¡rios cadastrados</p>
+            <p className="text-lg font-semibold tracking-tight text-text">Você ainda não tem aniversários cadastrados</p>
             <p className="mt-2 text-sm text-muted">
-              Adicione o seu primeiro aniversÃ¡rio para gerar um link de compartilhamento em segundos.
+              Adicione seu primeiro aniversário para compartilhar em segundos.
             </p>
             <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
               <button
@@ -222,7 +222,7 @@ export default function ShareLandingPage() {
                 onClick={() => setShowQuickAdd(true)}
                 className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
               >
-                Adicionar meu aniversÃ¡rio
+                Adicionar
               </button>
               <Link href="/person" className="ui-cta-secondary inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm focus-visible:outline-none">
                 Abrir cadastro completo
@@ -232,7 +232,7 @@ export default function ShareLandingPage() {
         ) : (
           <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Seus aniversÃ¡rios</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Seus aniversários</h2>
               <button
                 type="button"
                 onClick={() => setShowQuickAdd(true)}
@@ -253,20 +253,20 @@ export default function ShareLandingPage() {
                         <p className="text-sm text-muted">{formatDayMonth(person.day, person.month)}</p>
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
-                        <Link href={relativeUrl} className="btn-primary-brand ui-cta-primary inline-flex items-center justify-center rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
-                          Gerar link
-                        </Link>
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={() => void copyLink(person)}
-                          className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm focus-visible:outline-none"
+                          className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
                         >
                           Copiar link
                         </button>
+                        <Link href={relativeUrl} className="text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text">
+                          Abrir prévia
+                        </Link>
                       </div>
                     </div>
-                    <p className="mt-2 min-h-5 text-xs text-emerald-700">{copiedPersonId === person.id ? "Link copiado âœ“" : ""}</p>
+                    <p className="mt-2 min-h-5 text-xs text-emerald-700">{copiedPersonId === person.id ? "Link copiado ✓" : ""}</p>
                   </div>
                 );
               })}
