@@ -9,8 +9,6 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/ui/Reveal";
 
-const DEBUG_LANDING_SCENE = false;
-
 export function LandingPremiumPageClient() {
   const { configured, initialized, user } = useAuth();
   const isLoggedIn = Boolean(user);
@@ -22,7 +20,7 @@ export function LandingPremiumPageClient() {
     if (window.sessionStorage.getItem(key)) return;
     window.sessionStorage.setItem(key, "1");
     setShowSparkles(true);
-    const timer = window.setTimeout(() => setShowSparkles(false), 320);
+    const timer = window.setTimeout(() => setShowSparkles(false), 260);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -39,112 +37,67 @@ export function LandingPremiumPageClient() {
       <div className="pointer-events-none absolute inset-0 bg-grid-subtle landing-grid-drift opacity-60" />
       <div className="pointer-events-none absolute -left-16 top-10 h-56 w-56 rounded-full glow-coral blur-3xl landing-glow-a" />
       <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full glow-lilac blur-3xl landing-glow-b" />
-      <div className="pointer-events-none absolute bottom-10 right-16 h-40 w-40 rounded-full bg-warning/15 blur-3xl landing-glow-a" />
-      <div className="pointer-events-none absolute left-[12%] top-[22%] h-2 w-2 rounded-full bg-primary/60 shadow-[0_0_18px_hsl(var(--primary)/0.4)] landing-glow-b" />
-      <div className="pointer-events-none absolute right-[18%] top-[32%] h-2 w-2 rounded-full bg-lilac/70 shadow-[0_0_18px_hsl(var(--lilac)/0.45)] landing-glow-a" />
 
       <div className="relative mx-auto max-w-6xl space-y-10">
-        <section className="relative grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <LandingCelebrationScene />
-
-          <div className="relative z-[40] space-y-5">
-            <Reveal delay={0}>
-              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1 text-xs font-medium text-muted shadow-sm">
+        <section className="relative grid items-center gap-6 lg:grid-cols-2 lg:gap-10">
+          <Reveal delay={40} className="relative z-[40]">
+            <div className="hero-text-card">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/85 px-3 py-1 text-xs font-medium text-muted shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Lembra. • Seu app de aniversários
               </div>
-            </Reveal>
 
-            <Reveal delay={50}>
-              <div className="relative">
+              <div className="mt-4 relative">
                 {showSparkles && (
-                  <div className="pointer-events-none absolute inset-x-0 -top-4 h-10">
+                  <div className="pointer-events-none absolute inset-x-0 -top-4 h-8">
                     <span className="landing-sparkle landing-sparkle-1" />
-                    <span className="landing-sparkle landing-sparkle-2" />
                     <span className="landing-sparkle landing-sparkle-3" />
-                    <span className="landing-sparkle landing-sparkle-4" />
                     <span className="landing-sparkle landing-sparkle-5" />
-                    <span className="landing-sparkle landing-sparkle-6" />
                   </div>
                 )}
-                <h1 className="max-w-3xl text-4xl font-semibold leading-[0.95] tracking-tight text-text sm:text-6xl lg:text-7xl">
+                <h1 className="text-4xl font-semibold leading-[0.95] tracking-tight text-text sm:text-5xl lg:text-6xl">
                   Celebre todas as pessoas que <span className="landing-gradient-word">importam</span>.
                 </h1>
               </div>
-            </Reveal>
 
-            <Reveal delay={100}>
-              <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-                O Lembra. organiza aniversários de um jeito simples e acolhedor. Comece no seu dispositivo e, quando
-                quiser, entre com Google para continuar sua lista em outros lugares.
+              <p className="mt-4 max-w-[44ch] text-base leading-relaxed text-muted sm:text-lg">
+                Organize aniversários em minutos e lembre no momento certo, com uma experiência bonita e simples.
               </p>
-            </Reveal>
 
-            <Reveal delay={150}>
-              <div className="flex flex-wrap gap-2">
-                <Chip as="span" variant="accent">Lembretes no tempo certo</Chip>
-                <Chip as="span" variant="subtle">Importação CSV</Chip>
-                <Chip as="span" variant="subtle">Comece sem login</Chip>
-                <Chip as="span" variant="subtle">Sincronize depois</Chip>
-              </div>
-            </Reveal>
-
-            <Reveal delay={200}>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link href="/today">
-                  <Button size="lg" className="landing-cta-premium w-full sm:w-auto">
-                    {isLoggedIn ? "Continuar no app" : "Começar agora"}
-                  </Button>
-                </Link>
-                <Link href="/login?returnTo=%2Ftoday">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                    {configured ? (initialized && isLoggedIn ? "Trocar conta" : "Entrar com Google") : "Entrar com Google"}
-                  </Button>
-                </Link>
-              </div>
-            </Reveal>
-
-            <Reveal delay={240}>
-              <div className="grid gap-2 text-sm text-muted sm:grid-cols-2">
-                <p className="rounded-xl border border-border/70 bg-surface/70 px-3 py-2">• Veja quem faz aniversário hoje e nos próximos dias.</p>
-                <p className="rounded-xl border border-border/70 bg-surface/70 px-3 py-2">• Compartilhe carinho com mensagens prontas e links simples.</p>
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal delay={170} className="relative z-[30]">
-            <Card
-              variant="elevated"
-              className={`feature-spotlight shine-sweep relative overflow-hidden p-5 sm:p-6 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg ${DEBUG_LANDING_SCENE ? "outline outline-2 outline-cyan-400" : ""}`}
-              onPointerMove={handleFeaturePointerMove}
-            >
-              <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/15 blur-2xl landing-glow-a" />
-              <div className="absolute -left-6 bottom-8 h-24 w-24 rounded-full bg-lilac/15 blur-2xl landing-glow-b" />
-              <div className="relative space-y-4">
-                <div className="rounded-lg border border-border bg-surface2 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">Hoje</p>
-                  <p className="mt-1 text-lg font-semibold text-text">3 aniversários 🎉</p>
-                  <p className="mt-1 text-sm text-muted">João, Ana e Marina estão na sua lista de hoje.</p>
+              <Reveal delay={100}>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Chip as="span" variant="accent">Lembretes no tempo certo</Chip>
+                  <Chip as="span" variant="subtle">Importação CSV</Chip>
+                  <Chip as="span" variant="subtle">Comece sem login</Chip>
                 </div>
+              </Reveal>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="feature-spotlight rounded-lg border border-border bg-surface p-4 shadow-sm transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-md" onPointerMove={handleFeaturePointerMove}>
-                    <p className="text-sm font-medium text-text">Categorias</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <Chip as="span" variant="warning">Família</Chip>
-                      <Chip as="span" variant="subtle">Amigos</Chip>
-                      <Chip as="span" variant="subtle">Trabalho</Chip>
-                    </div>
-                  </div>
-                  <div className="feature-spotlight rounded-lg border border-border bg-surface p-4 shadow-sm transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-md" onPointerMove={handleFeaturePointerMove}>
-                    <p className="text-sm font-medium text-text">Mensagem pronta</p>
-                    <p className="mt-2 text-xs leading-relaxed text-muted">
-                      “Parabéns! Que seu dia seja leve, feliz e cheio de boas surpresas 🎂”
-                    </p>
-                  </div>
+              <Reveal delay={150}>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <Link href="/today">
+                    <Button size="lg" className="landing-cta-premium w-full sm:w-auto">
+                      {isLoggedIn ? "Continuar no app" : "Começar agora"}
+                    </Button>
+                  </Link>
+                  <Link href="/login?returnTo=%2Ftoday">
+                    <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                      {configured ? (initialized && isLoggedIn ? "Trocar conta" : "Entrar com Google") : "Entrar com Google"}
+                    </Button>
+                  </Link>
                 </div>
-              </div>
-            </Card>
+              </Reveal>
+
+              <Reveal delay={190}>
+                <div className="mt-5 inline-flex max-w-full items-center gap-2 rounded-xl border border-border/80 bg-surface/70 px-3 py-2 text-sm text-muted shadow-sm">
+                  <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+                  Hoje: 3 aniversários na sua lista • mensagens prontas e links rápidos.
+                </div>
+              </Reveal>
+            </div>
+          </Reveal>
+
+          <Reveal delay={90} className="relative z-[20]">
+            <LandingCelebrationScene />
           </Reveal>
         </section>
 

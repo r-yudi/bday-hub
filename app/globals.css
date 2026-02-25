@@ -242,121 +242,118 @@
   .landing-sparkle-5 { left: 78%; top: 14px; color: hsl(var(--primary)); animation-delay: 90ms; }
   .landing-sparkle-6 { left: 90%; top: 6px; color: hsl(var(--lilac)); animation-delay: 110ms; }
 
+  .hero-text-card {
+    border: 1px solid hsl(var(--border) / 0.9);
+    background:
+      linear-gradient(180deg, hsl(var(--surface) / 0.94), hsl(var(--surface) / 0.9));
+    border-radius: var(--radius-xl);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .dark .hero-text-card {
+    background:
+      linear-gradient(180deg, hsl(var(--surface) / 0.78), hsl(var(--surface-2) / 0.54));
+    backdrop-filter: blur(10px);
+    border-color: hsl(var(--border) / 0.9);
+    box-shadow:
+      0 1px 0 hsl(var(--surface) / 0.18) inset,
+      0 18px 42px hsl(var(--bg) / 0.46);
+  }
+
   .celebration-scene {
     contain: layout paint;
-    --landing-parallax-x: 0px;
-    --landing-parallax-y: 0px;
   }
 
-  .celebration-parallax-layer {
-    will-change: transform;
-    transition: transform 220ms var(--ease);
+  .hero-art-shell {
+    position: relative;
+    min-height: 260px;
+    border-radius: var(--radius-xl);
+    border: 1px solid hsl(var(--border) / 0.65);
+    background:
+      radial-gradient(circle at 22% 24%, hsl(var(--warning) / 0.08), transparent 50%),
+      radial-gradient(circle at 76% 18%, hsl(var(--lilac) / 0.08), transparent 52%),
+      linear-gradient(180deg, hsl(var(--surface) / 0.86), hsl(var(--surface) / 0.8));
+    padding: 0.75rem;
+    overflow: hidden;
   }
 
-  .celebration-parallax-soft {
-    transform: translate3d(var(--landing-parallax-x), var(--landing-parallax-y), 0);
+  .dark .hero-art-shell {
+    background:
+      radial-gradient(circle at 20% 24%, hsl(var(--primary) / 0.10), transparent 54%),
+      radial-gradient(circle at 78% 18%, hsl(var(--lilac) / 0.12), transparent 56%),
+      linear-gradient(180deg, hsl(var(--surface) / 0.56), hsl(var(--surface-2) / 0.38));
+    border-color: hsl(var(--border) / 0.85);
+    box-shadow:
+      0 18px 42px hsl(var(--bg) / 0.5),
+      0 0 0 1px hsl(var(--lilac) / 0.06) inset;
   }
 
-  .celebration-parallax-strong {
-    transform: translate3d(calc(var(--landing-parallax-x) * 1.35), calc(var(--landing-parallax-y) * 1.35), 0);
+  .hero-art-backdrop {
+    position: absolute;
+    inset: 14% 8% 10% 8%;
+    border-radius: 9999px;
+    background:
+      radial-gradient(circle, hsl(var(--primary) / 0.10), transparent 68%);
+    filter: blur(28px);
+    opacity: 0.8;
+    z-index: 0;
+  }
+
+  .dark .hero-art-backdrop {
+    background:
+      radial-gradient(circle, hsl(var(--primary) / 0.16), transparent 72%),
+      radial-gradient(circle at 70% 30%, hsl(var(--lilac) / 0.14), transparent 72%);
+    opacity: 0.95;
   }
 
   .outdoor-party-wrap {
-    z-index: 2;
+    z-index: 1;
   }
 
   .outdoor-party-illustration {
-    opacity: 0.9;
+    opacity: 1;
     filter:
-      saturate(1.05)
-      contrast(1.02)
-      drop-shadow(0 10px 22px hsl(var(--text) / 0.08));
-    animation: celebrateFloat 16s ease-in-out infinite;
-    transform-origin: 50% 60%;
+      saturate(1.08)
+      contrast(1.04)
+      drop-shadow(0 8px 16px hsl(var(--text) / 0.06));
+    animation: heroArtFloat 14s ease-in-out infinite;
+    transform-origin: 50% 55%;
   }
 
   .dark .outdoor-party-illustration {
-    opacity: 0.86;
+    opacity: 0.98;
     filter:
-      drop-shadow(0 12px 28px hsl(var(--bg) / 0.45))
-      drop-shadow(0 0 22px hsl(var(--lilac) / 0.11))
-      drop-shadow(0 0 18px hsl(var(--primary) / 0.08));
+      saturate(1.03)
+      drop-shadow(0 14px 28px hsl(var(--bg) / 0.44))
+      drop-shadow(0 0 18px hsl(var(--lilac) / 0.09));
   }
 
-  .outdoor-party-fade {
-    -webkit-mask-image:
-      radial-gradient(ellipse at 46% 44%, black 56%, transparent 96%),
-      linear-gradient(to left, black 68%, transparent 100%);
-    mask-image:
-      radial-gradient(ellipse at 46% 44%, black 56%, transparent 96%),
-      linear-gradient(to left, black 68%, transparent 100%);
-    -webkit-mask-composite: source-over;
-    mask-composite: add;
-  }
-
-  .outdoor-party-card-blend {
-    background:
-      radial-gradient(ellipse at 18% 50%, hsl(var(--surface) / 0.55), transparent 58%),
-      radial-gradient(ellipse at 32% 74%, hsl(var(--surface) / 0.35), transparent 60%),
-      linear-gradient(to left, transparent 52%, hsl(var(--surface) / 0.14) 76%, transparent 100%);
-    opacity: 0.85;
-  }
-
-  .dark .outdoor-party-card-blend {
-    background:
-      radial-gradient(ellipse at 18% 50%, hsl(var(--surface) / 0.34), transparent 58%),
-      radial-gradient(ellipse at 30% 72%, hsl(var(--bg) / 0.24), transparent 62%),
-      linear-gradient(to left, transparent 56%, hsl(var(--bg) / 0.18) 78%, transparent 100%);
-    opacity: 0.9;
-  }
-
-  .balloon {
+  .hero-art-balloon {
     position: absolute;
     z-index: 3;
-    opacity: 0.75;
+    opacity: 0.72;
     transform-origin: 50% 86%;
-    animation: balloonBob 16s cubic-bezier(.25,.7,.25,1) infinite;
+    animation: balloonBob 15s cubic-bezier(.25,.7,.25,1) infinite;
   }
 
-  .dark .balloon {
-    opacity: 0.88;
-    filter: drop-shadow(0 0 10px hsl(var(--lilac) / 0.06));
+  .dark .hero-art-balloon {
+    opacity: 0.82;
+    filter: drop-shadow(0 0 8px hsl(var(--lilac) / 0.05));
   }
 
-  .glow-orb {
+  .hero-art-orb {
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     border-radius: 9999px;
-    filter: blur(11px);
-    opacity: 0.48;
-    animation: glowDrift 34s cubic-bezier(.3,.7,.3,1) infinite;
+    filter: blur(18px);
+    opacity: 0.22;
+    animation: glowDrift 28s cubic-bezier(.3,.7,.3,1) infinite;
   }
 
-  .dark .glow-orb {
-    opacity: 0.62;
-    filter: blur(13px);
-  }
-
-  .glow-orb-bokeh {
-    filter: blur(20px);
-    opacity: 0.24;
-  }
-
-  .dark .glow-orb-bokeh {
-    filter: blur(24px);
+  .dark .hero-art-orb {
     opacity: 0.34;
-  }
-
-  .spark-burst {
-    position: absolute;
-    z-index: 4;
-    opacity: 0;
-    animation: sparkleBurst 620ms var(--ease) forwards;
-    filter: drop-shadow(0 0 6px currentColor);
-  }
-
-  .spark-burst svg {
-    animation: twinkle 520ms ease-in-out 1;
+    filter: blur(22px);
   }
 }
 
@@ -385,6 +382,11 @@
 @keyframes celebrateFloat {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
   50% { transform: translate3d(0, -10px, 0) rotate(-0.6deg); }
+}
+
+@keyframes heroArtFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -3px, 0); }
 }
 
 @keyframes balloonBob {
@@ -428,17 +430,19 @@
     opacity: 0.55;
   }
 
-  .spark-burst {
-    display: none !important;
+  .outdoor-party-illustration {
+    animation: none !important;
   }
 
-  .outdoor-party-illustration {
+  .hero-art-orb,
+  .hero-art-balloon {
     animation: none !important;
   }
 }
 
 @media (max-width: 767px) {
-  .celebration-scene {
-    opacity: 0.62;
+  .hero-art-shell {
+    min-height: 220px;
+    padding: 0.5rem;
   }
 }
