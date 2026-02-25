@@ -58,7 +58,7 @@ function PersonPageContent() {
           <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">
             {id ? "Editar pessoa" : "Adicionar pessoa"}
           </h1>
-          <p className="ui-subtitle-editorial mt-2 text-sm sm:text-[15px]">Preencha com calma. Você pode ajustar depois.</p>
+          <p className="ui-subtitle-editorial mt-2 text-sm sm:text-[15px]">Adicione nome, data e categorias em poucos passos.</p>
         </div>
         <Link
           href="/today"

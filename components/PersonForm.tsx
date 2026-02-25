@@ -51,6 +51,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   const [categories, setCategories] = useState<string[]>(initialCategoriesFromPerson(initialPerson));
   const [categoryInput, setCategoryInput] = useState("");
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -64,6 +65,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
     setOtherLink(initialPerson?.links?.other ?? "");
     setCategories(initialCategoriesFromPerson(initialPerson));
     setCategoryInput("");
+    setShowAllSuggestions(false);
     setError(null);
   }, [initialPerson]);
 
@@ -75,6 +77,10 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   const availableOptions = useMemo(
     () => categoryOptions.filter((option) => !selectedKeys.has(normalizeCategory(option))),
     [categoryOptions, selectedKeys]
+  );
+  const visibleCategoryOptions = useMemo(
+    () => (showAllSuggestions ? availableOptions : availableOptions.slice(0, 6)),
+    [availableOptions, showAllSuggestions]
   );
 
   const typoSuggestion = useMemo(() => {
@@ -188,7 +194,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
   return (
     <Card variant="elevated" className="p-5 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <Alert variant="info" className="text-xs">
           Campos com <span className="font-semibold text-primary">*</span> são obrigatórios. Os demais são opcionais.
         </Alert>
@@ -238,7 +244,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
             <span>Categorias</span>
             <HelpDot title="Categorias ajudam a organizar sua lista (ex.: Família, Amigos, Trabalho)." />
           </FieldLabel>
-          <FieldHelper>Opcional. Use para organizar sua lista com mais facilidade.</FieldHelper>
+          <FieldHelper>Opcional. Ex.: Família, Amigos, Trabalho.</FieldHelper>
           <div className="space-y-2 rounded-lg border border-border bg-surface2/70 p-3">
             {categories.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
@@ -269,16 +275,14 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                   }
                 }}
                 list="category-options"
-                placeholder="Digite e pressione Enter"
+                placeholder="Digite uma categoria"
                 className="shadow-none"
               />
               <Button type="button" variant="secondary" size="sm" className="ui-cta-secondary" onClick={() => void addCategory(categoryInput)}>
                 Adicionar
               </Button>
             </div>
-            <FieldHelper>
-              Dica: você pode criar categorias livres e reaproveitar sugestões da sua lista.
-            </FieldHelper>
+            <FieldHelper>Pressione Enter para adicionar rapidamente.</FieldHelper>
 
             {typoSuggestion && (
               <Alert variant="warning" className="text-xs">
@@ -299,11 +303,29 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
             {availableOptions.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {availableOptions.slice(0, 8).map((option) => (
+                {visibleCategoryOptions.map((option) => (
                   <Chip key={option} interactive variant="subtle" className="ui-chip" onClick={() => void addCategory(option)}>
                     + {option}
                   </Chip>
                 ))}
+                {availableOptions.length > 6 && !showAllSuggestions && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllSuggestions(true)}
+                    className="text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text"
+                  >
+                    Mostrar mais
+                  </button>
+                )}
+                {availableOptions.length > 6 && showAllSuggestions && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllSuggestions(false)}
+                    className="text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text"
+                  >
+                    Mostrar menos
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -344,7 +366,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
         {error && <Alert variant="danger">{error}</Alert>}
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <Button type="submit" loading={saving} className="ui-cta-primary">
             {saving ? "Salvando..." : "Salvar"}
           </Button>
