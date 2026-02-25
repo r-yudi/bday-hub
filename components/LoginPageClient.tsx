@@ -27,8 +27,8 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
   }
 
   return (
-    <div className="grid min-h-[calc(100vh-9.5rem)] place-items-center">
-      <div className="mx-auto w-full max-w-md">
+    <div className="ui-page-shell ui-page-shell-centered max-w-md">
+      <div className="mx-auto w-full">
         <section className="ui-surface-elevated ui-border-subtle rounded-3xl border p-6 shadow-md sm:p-8">
           <div className="ui-copy-backdrop">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra. • Login</p>

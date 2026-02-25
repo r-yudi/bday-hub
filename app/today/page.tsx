@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -86,7 +86,6 @@ export default function TodayPage() {
   const [loading, setLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
-  const [showNotificationDetails, setShowNotificationDetails] = useState(false);
   const [support, setSupport] = useState<NotificationSupport>(INITIAL_NOTIFICATION_SUPPORT);
   const [showClearModal, setShowClearModal] = useState(false);
   const [clearConfirmText, setClearConfirmText] = useState("");
@@ -100,7 +99,7 @@ export default function TodayPage() {
       : support.permission === "granted" && settings?.notificationEnabled
         ? "Lembretes ativados"
         : support.permission === "denied"
-          ? "Permissão bloqueada"
+          ? "PermissÃ£o bloqueada"
           : "Ativar lembretes";
 
   async function loadData() {
@@ -215,7 +214,7 @@ export default function TodayPage() {
       : support.permission === "denied"
         ? "Permissão bloqueada. Reative no navegador se quiser receber lembretes."
         : support.permission === "granted" && settings?.notificationEnabled
-          ? "Lembretes ativos: ao abrir o app, você recebe um aviso dos aniversários de hoje."
+          ? "Lembretes ativos: ao abrir o app, vocÃª recebe um aviso dos aniversários de hoje."
           : "Ative os lembretes para ser avisado ao abrir o app nos dias com aniversários.";
 
   return (
@@ -252,8 +251,8 @@ export default function TodayPage() {
               <p className="text-sm text-muted">Carregando...</p>
             ) : todayPeople.length === 0 ? (
               <div className="rounded-2xl border border-border/60 bg-surface/65 p-6 text-center shadow-sm dark:bg-surface/20 sm:p-7">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper text-2xl shadow-sm">🎂</div>
-                <p className="mt-4 text-lg font-semibold tracking-tight text-text">Nenhum aniversário hoje 🎈</p>
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper text-2xl shadow-sm">ðŸŽ‚</div>
+                <p className="mt-4 text-lg font-semibold tracking-tight text-text">Nenhum aniversário hoje ðŸŽˆ</p>
                 <p className="mt-2 text-sm text-muted">Aproveite para revisar os próximos dias ou adicionar alguém agora.</p>
                 <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
                   <Link
@@ -306,25 +305,18 @@ export default function TodayPage() {
                 {notificationCtaLabel}
               </button>
 
-              <button
-                type="button"
-                onClick={() => setShowNotificationDetails((v) => !v)}
-                className="ui-link-tertiary block text-xs"
-              >
-                {showNotificationDetails ? "Ocultar detalhes técnicos" : "Ver detalhes técnicos"}
-              </button>
-
-              {showNotificationDetails && (
-                <div className="mt-3 rounded-xl border border-border/60 bg-surface2/50 px-3 py-2 text-xs text-muted dark:bg-surface/20">
+              <details className="ui-disclosure mt-3 px-3 py-2">
+                <summary className="ui-disclosure-summary">Ver detalhes técnicos</summary>
+                <div className="ui-callout mt-2 px-3 py-2 text-xs leading-5">
                   <p>Estratégia MVP: melhor esforço (notifica ao abrir o app, quando suportado).</p>
                   <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não") : "..."}</p>
                   <p>Permissão: {mounted ? String(support.permission) : "..."}</p>
                   <p>Ativado no app: {mounted ? (settings?.notificationEnabled ? "sim" : "não") : "..."}</p>
                   {support.permission === "denied" && (
-                    <p className="mt-1 text-amber-700">Permissão negada no navegador. Reative nas configurações do site.</p>
+                    <p className="mt-1 text-amber-700 dark:text-amber-300">Permissão negada no navegador. Reative nas configurações do site.</p>
                   )}
                 </div>
-              )}
+              </details>
             </section>
 
             <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
@@ -362,3 +354,4 @@ export default function TodayPage() {
     </>
   );
 }
+

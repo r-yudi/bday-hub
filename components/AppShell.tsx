@@ -181,20 +181,20 @@ function PwaInstallBanner() {
       </div>
 
       {showInstructions && (
-        <div className="mt-2 rounded-xl border border-border/60 bg-surface2/55 px-3 py-2 dark:bg-surface/20">
-          <div className="flex items-start gap-2 text-xs text-muted">
+        <div className="ui-callout mt-2 px-3 py-2">
+          <div className="flex items-start gap-2 text-xs">
             <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full border border-border/70 text-[10px] text-text">i</span>
             <p className="leading-5">Instale para abrir mais rápido e acessar sua lista direto da tela inicial.</p>
           </div>
 
-          <details className="mt-2 group">
-            <summary className="ui-link-tertiary cursor-pointer list-none text-xs marker:content-none">
+          <details className="ui-disclosure mt-2 px-3 py-2">
+            <summary className="ui-disclosure-summary">
               Como instalar
             </summary>
             <div className="mt-2 space-y-1 text-xs leading-5 text-muted">
-              {showIosInstructions && <p>No iPhone/iPad (Safari): toque em \"Compartilhar\" e depois em \"Adicionar à Tela de Início\".</p>}
+              {showIosInstructions && <p>No iPhone/iPad (Safari): toque em "Compartilhar" e depois em "Adicionar à Tela de Início".</p>}
               {showDesktopInstructions && (
-                <p>No Chrome (desktop): clique em \"Instalar\" ou use o ícone de instalação na barra de endereço.</p>
+                <p>No Chrome (desktop): clique em "Instalar" ou use o ícone de instalação na barra de endereço.</p>
               )}
               {!showIosInstructions && !showDesktopInstructions && (
                 <p>Se seu navegador mostrar opção de instalar, use o menu ou o ícone da barra de endereço.</p>
@@ -212,6 +212,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isLanding = pathname === "/" || pathname === "/landing";
   const isLegalPage = pathname === "/privacy" || pathname === "/terms";
   const isDebugRoute = Boolean(pathname?.startsWith("/debug"));
+  const isLoginPage = pathname === "/login";
   const showGlobalFooter = !isLanding && !isLegalPage && !isDebugRoute;
 
   useEffect(() => {
@@ -221,9 +222,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <TopNav />
-      <main className="mx-auto w-full max-w-5xl px-4 pb-12 pt-6 sm:px-6">
+      <main className={["mx-auto w-full max-w-5xl px-4 pb-12 sm:px-6", isLoginPage ? "pt-4 sm:pt-5" : "pt-6"].join(" ")}>
         {!isDebugRoute && <SessionGuardNotice />}
-        {!isLanding && <PwaInstallBanner />}
+        {!isLanding && (
+          <div className={isLoginPage ? "mx-auto w-full max-w-md" : undefined}>
+            <PwaInstallBanner />
+          </div>
+        )}
         {children}
 
         {showGlobalFooter && (

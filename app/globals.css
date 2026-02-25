@@ -612,13 +612,14 @@
 
   .ui-link-tertiary {
     color: hsl(var(--ui-text) / 0.72);
-    text-decoration-line: underline;
+    text-decoration-line: none;
     text-decoration-color: hsl(var(--ui-border) / 0.75);
     text-underline-offset: 2px;
   }
 
   .ui-link-tertiary:hover {
     color: hsl(var(--ui-text) / 0.94);
+    text-decoration-line: underline;
     text-decoration-color: hsl(var(--ui-text) / 0.26);
   }
 
@@ -626,17 +627,19 @@
     outline: none;
     box-shadow: 0 0 0 3px hsl(var(--ui-ring) / 0.2);
     border-radius: 6px;
+    text-decoration-line: underline;
   }
 
   .ui-link-tertiary-muted {
     color: hsl(var(--ui-muted));
-    text-decoration-line: underline;
+    text-decoration-line: none;
     text-decoration-color: hsl(var(--ui-border) / 0.7);
     text-underline-offset: 2px;
   }
 
   .ui-link-tertiary-muted:hover {
     color: hsl(var(--ui-text) / 0.92);
+    text-decoration-line: underline;
     text-decoration-color: hsl(var(--ui-text) / 0.22);
   }
 
@@ -644,6 +647,7 @@
     outline: none;
     box-shadow: 0 0 0 3px hsl(var(--ui-ring) / 0.2);
     border-radius: 6px;
+    text-decoration-line: underline;
   }
 
   .ui-overlay-backdrop {
@@ -656,6 +660,49 @@
       linear-gradient(180deg, hsl(var(--ui-surface) / 0.98), hsl(var(--ui-surface-2) / 0.94));
     border-color: hsl(var(--ui-border) / 0.8);
     box-shadow: 0 24px 48px hsl(var(--bg) / 0.34);
+  }
+
+  .ui-callout {
+    border: 1px solid hsl(var(--ui-border) / 0.62);
+    background: hsl(var(--ui-surface-2) / 0.55);
+    color: hsl(var(--ui-muted));
+    border-radius: var(--radius-lg);
+  }
+
+  .ui-disclosure {
+    border: 1px solid hsl(var(--ui-border) / 0.58);
+    background: hsl(var(--ui-surface) / 0.4);
+    border-radius: var(--radius-lg);
+  }
+
+  .ui-disclosure-summary {
+    cursor: pointer;
+    list-style: none;
+    color: hsl(var(--ui-text) / 0.78);
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .ui-disclosure-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ui-disclosure-summary:hover {
+    color: hsl(var(--ui-text) / 0.94);
+    text-decoration: underline;
+    text-decoration-color: hsl(var(--ui-border) / 0.7);
+  }
+
+  .ui-page-shell {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .ui-page-shell-centered {
+    min-height: clamp(22rem, calc(100dvh - 14rem), 40rem);
+    display: grid;
+    align-content: start;
+    padding-top: clamp(0.5rem, 2.5vw, 1.5rem);
   }
 }
 

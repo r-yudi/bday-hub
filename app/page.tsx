@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import { LandingPageClient } from "@/components/LandingPageClient";
+import { LandingPremiumPageClient } from "@/components/LandingPremiumPageClient";
 
 export const metadata: Metadata = {
   title: "Nunca mais esqueça aniversários",
@@ -18,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <LandingPageClient />;
+  return <LandingPremiumPageClient />;
 }
