@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 
 type Orb = {
   id: number;
@@ -8,15 +8,19 @@ type Orb = {
   style: CSSProperties;
 };
 
+// Ajuste aqui a quantidade/posição/intensidade dos glows (máx. 10 desktop; mobile <=4 visíveis).
 const ORBS: Orb[] = [
-  { id: 1, className: "glow-orb", style: { left: "56%", top: "8%", width: 34, height: 34, background: "hsl(var(--lilac) / 0.14)", animationDelay: "0s", animationDuration: "32s" } },
-  { id: 2, className: "glow-orb", style: { left: "64%", top: "18%", width: 22, height: 22, background: "hsl(var(--primary) / 0.12)", animationDelay: "-5s", animationDuration: "28s" } },
-  { id: 3, className: "glow-orb", style: { left: "82%", top: "14%", width: 26, height: 26, background: "hsl(var(--accent) / 0.10)", animationDelay: "-8s", animationDuration: "36s" } },
-  { id: 4, className: "glow-orb", style: { left: "74%", top: "34%", width: 18, height: 18, background: "hsl(var(--warning) / 0.08)", animationDelay: "-12s", animationDuration: "30s" } },
-  { id: 5, className: "glow-orb", style: { left: "90%", top: "28%", width: 42, height: 42, background: "hsl(var(--lilac) / 0.08)", animationDelay: "-4s", animationDuration: "38s" } },
-  { id: 6, className: "glow-orb", style: { left: "68%", top: "52%", width: 28, height: 28, background: "hsl(var(--primary) / 0.10)", animationDelay: "-16s", animationDuration: "34s" } },
-  { id: 7, className: "glow-orb hidden sm:block", style: { left: "60%", top: "62%", width: 20, height: 20, background: "hsl(var(--accent) / 0.08)", animationDelay: "-10s", animationDuration: "40s" } },
-  { id: 8, className: "glow-orb hidden lg:block", style: { left: "86%", top: "58%", width: 24, height: 24, background: "hsl(var(--warning) / 0.07)", animationDelay: "-20s", animationDuration: "28s" } }
+  { id: 1, className: "glow-orb", style: { left: "58%", top: "10%", width: 30, height: 30, background: "hsl(var(--lilac) / 0.10)", animationDelay: "0s", animationDuration: "32s" } },
+  { id: 2, className: "glow-orb", style: { left: "66%", top: "18%", width: 22, height: 22, background: "hsl(var(--primary) / 0.09)", animationDelay: "-5s", animationDuration: "28s" } },
+  { id: 3, className: "glow-orb hidden md:block", style: { left: "82%", top: "14%", width: 26, height: 26, background: "hsl(var(--accent) / 0.08)", animationDelay: "-8s", animationDuration: "36s" } },
+  { id: 4, className: "glow-orb hidden sm:block", style: { left: "76%", top: "34%", width: 18, height: 18, background: "hsl(var(--warning) / 0.06)", animationDelay: "-12s", animationDuration: "30s" } },
+  { id: 5, className: "glow-orb hidden lg:block", style: { left: "90%", top: "28%", width: 44, height: 44, background: "hsl(var(--lilac) / 0.07)", animationDelay: "-4s", animationDuration: "38s" } },
+  { id: 6, className: "glow-orb hidden md:block", style: { left: "70%", top: "54%", width: 26, height: 26, background: "hsl(var(--primary) / 0.08)", animationDelay: "-16s", animationDuration: "34s" } },
+  { id: 7, className: "glow-orb hidden lg:block", style: { left: "62%", top: "62%", width: 22, height: 22, background: "hsl(var(--accent) / 0.06)", animationDelay: "-10s", animationDuration: "40s" } },
+  { id: 8, className: "glow-orb hidden xl:block", style: { left: "86%", top: "58%", width: 24, height: 24, background: "hsl(var(--warning) / 0.06)", animationDelay: "-20s", animationDuration: "28s" } },
+  // Bokeh extra premium (dark mais perceptível, light bem sutil)
+  { id: 9, className: "glow-orb glow-orb-bokeh hidden lg:block", style: { left: "74%", top: "8%", width: 110, height: 110, background: "hsl(var(--lilac) / 0.04)", animationDelay: "-6s", animationDuration: "44s" } },
+  { id: 10, className: "glow-orb glow-orb-bokeh hidden lg:block", style: { left: "88%", top: "42%", width: 96, height: 96, background: "hsl(var(--primary) / 0.04)", animationDelay: "-14s", animationDuration: "48s" } }
 ];
 
 function OutdoorPartyIllustration() {
@@ -49,17 +53,17 @@ function SparkBurst({ className, delay }: { className?: string; delay: string })
   return (
     <div className={`spark-burst ${className ?? ""}`} style={{ animationDelay: delay }}>
       <svg viewBox="0 0 64 64" className="h-full w-full" aria-hidden>
-        <g stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" opacity="0.92">
-          <path d="M32 6v10" />
-          <path d="M32 48v10" />
-          <path d="M6 32h10" />
-          <path d="M48 32h10" />
-          <path d="M13 13l7 7" />
-          <path d="M44 44l7 7" />
-          <path d="M51 13l-7 7" />
-          <path d="M20 44l-7 7" />
+        <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.85">
+          <path d="M32 8v9" />
+          <path d="M32 47v9" />
+          <path d="M8 32h9" />
+          <path d="M47 32h9" />
+          <path d="M14 14l6 6" />
+          <path d="M44 44l6 6" />
+          <path d="M50 14l-6 6" />
+          <path d="M20 44l-6 6" />
         </g>
-        <circle cx="32" cy="32" r="3.5" fill="currentColor" opacity="0.95" />
+        <circle cx="32" cy="32" r="2.4" fill="currentColor" opacity="0.85" />
       </svg>
     </div>
   );
@@ -67,42 +71,154 @@ function SparkBurst({ className, delay }: { className?: string; delay: string })
 
 export function LandingCelebrationScene() {
   const [showBursts, setShowBursts] = useState(false);
+  const sceneRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const targetRef = useRef({ x: 0, y: 0 });
+  const parallaxEnabledRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const desktop = window.matchMedia("(min-width: 1024px)");
+
+    const syncFlags = () => {
+      parallaxEnabledRef.current = !reduceMotion.matches && desktop.matches;
+      if (!parallaxEnabledRef.current && sceneRef.current) {
+        sceneRef.current.style.setProperty("--landing-parallax-x", "0px");
+        sceneRef.current.style.setProperty("--landing-parallax-y", "0px");
+      }
+    };
+
+    syncFlags();
+    reduceMotion.addEventListener?.("change", syncFlags);
+    desktop.addEventListener?.("change", syncFlags);
+
+    // Ajuste aqui o timing dos spark bursts (1x por sessão + duração/atrasos abaixo).
     const key = "lembra_landing_celebration_bursts_seen";
-    if (window.sessionStorage.getItem(key)) return;
-    window.sessionStorage.setItem(key, "1");
-    setShowBursts(true);
-    const timer = window.setTimeout(() => setShowBursts(false), 1200);
-    return () => window.clearTimeout(timer);
+    if (!reduceMotion.matches && !window.matchMedia("(max-width: 767px)").matches && !window.sessionStorage.getItem(key)) {
+      window.sessionStorage.setItem(key, "1");
+      setShowBursts(true);
+      const timer = window.setTimeout(() => setShowBursts(false), 900);
+      const cleanupBurst = () => window.clearTimeout(timer);
+
+      const onPointerMove = (event: PointerEvent) => {
+        if (!parallaxEnabledRef.current || !sceneRef.current) return;
+        const rect = sceneRef.current.getBoundingClientRect();
+        const nx = (event.clientX - rect.left) / rect.width - 0.5;
+        const ny = (event.clientY - rect.top) / rect.height - 0.5;
+        targetRef.current.x = Math.max(-1, Math.min(1, nx));
+        targetRef.current.y = Math.max(-1, Math.min(1, ny));
+        if (rafRef.current != null) return;
+        rafRef.current = window.requestAnimationFrame(() => {
+          rafRef.current = null;
+          if (!sceneRef.current) return;
+          // Ajuste aqui a intensidade do parallax (2-6px recomendado).
+          sceneRef.current.style.setProperty("--landing-parallax-x", `${targetRef.current.x * 4}px`);
+          sceneRef.current.style.setProperty("--landing-parallax-y", `${targetRef.current.y * 3}px`);
+        });
+      };
+
+      const onPointerLeave = () => {
+        targetRef.current.x = 0;
+        targetRef.current.y = 0;
+        if (rafRef.current != null) return;
+        rafRef.current = window.requestAnimationFrame(() => {
+          rafRef.current = null;
+          if (!sceneRef.current) return;
+          sceneRef.current.style.setProperty("--landing-parallax-x", "0px");
+          sceneRef.current.style.setProperty("--landing-parallax-y", "0px");
+        });
+      };
+
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        cleanupBurst();
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerleave", onPointerLeave);
+        if (rafRef.current != null) window.cancelAnimationFrame(rafRef.current);
+        reduceMotion.removeEventListener?.("change", syncFlags);
+        desktop.removeEventListener?.("change", syncFlags);
+      };
+    }
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!parallaxEnabledRef.current || !sceneRef.current) return;
+      const rect = sceneRef.current.getBoundingClientRect();
+      const nx = (event.clientX - rect.left) / rect.width - 0.5;
+      const ny = (event.clientY - rect.top) / rect.height - 0.5;
+      targetRef.current.x = Math.max(-1, Math.min(1, nx));
+      targetRef.current.y = Math.max(-1, Math.min(1, ny));
+      if (rafRef.current != null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        if (!sceneRef.current) return;
+        sceneRef.current.style.setProperty("--landing-parallax-x", `${targetRef.current.x * 4}px`);
+        sceneRef.current.style.setProperty("--landing-parallax-y", `${targetRef.current.y * 3}px`);
+      });
+    };
+    const onPointerLeave = () => {
+      targetRef.current.x = 0;
+      targetRef.current.y = 0;
+      if (rafRef.current != null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        if (!sceneRef.current) return;
+        sceneRef.current.style.setProperty("--landing-parallax-x", "0px");
+        sceneRef.current.style.setProperty("--landing-parallax-y", "0px");
+      });
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
+      if (rafRef.current != null) window.cancelAnimationFrame(rafRef.current);
+      reduceMotion.removeEventListener?.("change", syncFlags);
+      desktop.removeEventListener?.("change", syncFlags);
+    };
   }, []);
 
   return (
-    <div className="celebration-scene pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden>
-      {ORBS.map((orb) => (
-        <div key={orb.id} className={orb.className} style={orb.style} />
-      ))}
+    <div ref={sceneRef} className="celebration-scene pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden>
+      {/* Mantém a cena fora da área do headline/CTA: cluster concentrado na metade direita. */}
+      <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0">
+        {ORBS.map((orb) => (
+          <div key={orb.id} className={orb.className} style={orb.style} />
+        ))}
+      </div>
 
-      <div className="outdoor-party-wrap absolute right-[-6%] top-[6%] hidden h-[420px] w-[420px] md:block lg:right-[-2%] lg:top-[-2%] lg:h-[560px] lg:w-[560px] xl:right-[2%] xl:h-[640px] xl:w-[640px]">
-        <div className="absolute inset-[8%] rounded-full bg-primary/8 blur-3xl dark:bg-primary/14" />
-        <div className="absolute left-[8%] top-[22%] h-28 w-28 rounded-full bg-lilac/8 blur-2xl dark:bg-lilac/14" />
-        <div className="absolute inset-0 outdoor-party-fade">
-          <OutdoorPartyIllustration />
+      <div className="celebration-parallax-layer celebration-parallax-strong absolute inset-0">
+        {/* Ajuste aqui tamanho/posição da ilustração para “abraçar” melhor o mock card. */}
+        <div className="outdoor-party-wrap absolute right-[-8%] top-[4%] hidden h-[420px] w-[420px] md:block lg:right-[-4%] lg:top-[-4%] lg:h-[580px] lg:w-[580px] xl:right-[0%] xl:top-[-6%] xl:h-[680px] xl:w-[680px]">
+          <div className="absolute inset-[7%] rounded-full bg-primary/8 blur-3xl dark:bg-primary/14" />
+          <div className="absolute left-[14%] top-[18%] h-24 w-24 rounded-full bg-lilac/8 blur-2xl dark:bg-lilac/12" />
+          <div className="absolute inset-0 outdoor-party-fade">
+            <OutdoorPartyIllustration />
+          </div>
+          {/* Overlay para integrar ilustração com o card (fade orgânico próximo ao mock card). */}
+          <div className="outdoor-party-card-blend absolute inset-0" />
         </div>
       </div>
 
-      <Balloon className="absolute right-[4%] top-[4%] h-16 w-8 sm:h-20 sm:w-10 lg:right-[10%] lg:top-[2%]" color="hsl(var(--primary) / 0.74)" delay="-2s" duration="13s" />
-      <Balloon className="absolute right-[20%] top-[2%] hidden h-20 w-10 sm:block lg:right-[24%] lg:h-24 lg:w-12" color="hsl(var(--lilac) / 0.68)" delay="-7s" duration="16s" />
-      <Balloon className="absolute right-[2%] top-[24%] hidden h-14 w-8 md:block lg:right-[6%]" color="hsl(var(--accent) / 0.66)" delay="-11s" duration="12s" />
-      <Balloon className="absolute right-[30%] top-[18%] hidden h-14 w-8 lg:block" color="hsl(var(--warning) / 0.58)" delay="-4s" duration="18s" />
+      <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0">
+        {/* Ajuste aqui composição dos balões (triângulo visual sem cobrir texto/CTA). */}
+        <Balloon className="absolute right-[4%] top-[3%] h-14 w-7 sm:h-18 sm:w-9 lg:right-[9%] lg:top-[1%] lg:h-20 lg:w-10" color="hsl(var(--primary) / 0.68)" delay="-2s" duration="13s" />
+        <Balloon className="absolute right-[19%] top-[2%] hidden h-18 w-9 sm:block lg:right-[22%] lg:h-22 lg:w-11" color="hsl(var(--lilac) / 0.64)" delay="-7s" duration="16s" />
+        <Balloon className="absolute right-[4%] top-[24%] hidden h-12 w-7 md:block lg:right-[7%]" color="hsl(var(--accent) / 0.62)" delay="-11s" duration="12s" />
+        <Balloon className="absolute right-[28%] top-[18%] hidden h-12 w-7 lg:block" color="hsl(var(--warning) / 0.52)" delay="-4s" duration="18s" />
+      </div>
 
       {showBursts && (
-        <>
-          <SparkBurst className="absolute right-[22%] top-[12%] hidden h-10 w-10 text-primary/70 sm:block dark:text-primary/80" delay="120ms" />
-          <SparkBurst className="absolute right-[8%] top-[26%] h-8 w-8 text-lilac/50 dark:text-lilac/70" delay="240ms" />
-          <SparkBurst className="absolute right-[30%] top-[28%] hidden h-9 w-9 text-accent/45 md:block dark:text-accent/65" delay="420ms" />
-        </>
+        <div className="celebration-parallax-layer celebration-parallax-soft absolute inset-0 hidden md:block">
+          <SparkBurst className="absolute right-[18%] top-[14%] h-9 w-9 text-primary/60 dark:text-primary/76" delay="80ms" />
+          <SparkBurst className="absolute right-[8%] top-[29%] h-7 w-7 text-lilac/45 dark:text-lilac/64" delay="220ms" />
+          <SparkBurst className="absolute right-[30%] top-[30%] h-8 w-8 text-accent/40 dark:text-accent/56" delay="360ms" />
+        </div>
       )}
     </div>
   );

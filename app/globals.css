@@ -244,6 +244,21 @@
 
   .celebration-scene {
     contain: layout paint;
+    --landing-parallax-x: 0px;
+    --landing-parallax-y: 0px;
+  }
+
+  .celebration-parallax-layer {
+    will-change: transform;
+    transition: transform 220ms var(--ease);
+  }
+
+  .celebration-parallax-soft {
+    transform: translate3d(var(--landing-parallax-x), var(--landing-parallax-y), 0);
+  }
+
+  .celebration-parallax-strong {
+    transform: translate3d(calc(var(--landing-parallax-x) * 1.35), calc(var(--landing-parallax-y) * 1.35), 0);
   }
 
   .outdoor-party-wrap {
@@ -252,7 +267,10 @@
 
   .outdoor-party-illustration {
     opacity: 0.9;
-    filter: drop-shadow(0 10px 22px hsl(var(--text) / 0.08));
+    filter:
+      saturate(1.05)
+      contrast(1.02)
+      drop-shadow(0 10px 22px hsl(var(--text) / 0.08));
     animation: celebrateFloat 16s ease-in-out infinite;
     transform-origin: 50% 60%;
   }
@@ -266,47 +284,79 @@
   }
 
   .outdoor-party-fade {
-    -webkit-mask-image: radial-gradient(circle at 42% 42%, black 58%, transparent 100%);
-    mask-image: radial-gradient(circle at 42% 42%, black 58%, transparent 100%);
+    -webkit-mask-image:
+      radial-gradient(ellipse at 46% 44%, black 56%, transparent 96%),
+      linear-gradient(to left, black 68%, transparent 100%);
+    mask-image:
+      radial-gradient(ellipse at 46% 44%, black 56%, transparent 96%),
+      linear-gradient(to left, black 68%, transparent 100%);
+    -webkit-mask-composite: source-over;
+    mask-composite: add;
+  }
+
+  .outdoor-party-card-blend {
+    background:
+      radial-gradient(ellipse at 18% 50%, hsl(var(--surface) / 0.55), transparent 58%),
+      radial-gradient(ellipse at 32% 74%, hsl(var(--surface) / 0.35), transparent 60%),
+      linear-gradient(to left, transparent 52%, hsl(var(--surface) / 0.14) 76%, transparent 100%);
+    opacity: 0.85;
+  }
+
+  .dark .outdoor-party-card-blend {
+    background:
+      radial-gradient(ellipse at 18% 50%, hsl(var(--surface) / 0.34), transparent 58%),
+      radial-gradient(ellipse at 30% 72%, hsl(var(--bg) / 0.24), transparent 62%),
+      linear-gradient(to left, transparent 56%, hsl(var(--bg) / 0.18) 78%, transparent 100%);
+    opacity: 0.9;
   }
 
   .balloon {
     position: absolute;
     z-index: 3;
-    opacity: 0.82;
+    opacity: 0.75;
     transform-origin: 50% 86%;
-    animation: balloonBob 14s ease-in-out infinite;
+    animation: balloonBob 16s cubic-bezier(.25,.7,.25,1) infinite;
   }
 
   .dark .balloon {
     opacity: 0.88;
-    filter: drop-shadow(0 0 10px hsl(var(--lilac) / 0.08));
+    filter: drop-shadow(0 0 10px hsl(var(--lilac) / 0.06));
   }
 
   .glow-orb {
     position: absolute;
     z-index: 1;
     border-radius: 9999px;
-    filter: blur(10px);
-    opacity: 0.58;
-    animation: glowDrift 30s ease-in-out infinite;
+    filter: blur(11px);
+    opacity: 0.48;
+    animation: glowDrift 34s cubic-bezier(.3,.7,.3,1) infinite;
   }
 
   .dark .glow-orb {
-    opacity: 0.72;
-    filter: blur(12px);
+    opacity: 0.62;
+    filter: blur(13px);
+  }
+
+  .glow-orb-bokeh {
+    filter: blur(20px);
+    opacity: 0.24;
+  }
+
+  .dark .glow-orb-bokeh {
+    filter: blur(24px);
+    opacity: 0.34;
   }
 
   .spark-burst {
     position: absolute;
     z-index: 4;
     opacity: 0;
-    animation: sparkleBurst 820ms var(--ease) forwards;
-    filter: drop-shadow(0 0 8px currentColor);
+    animation: sparkleBurst 620ms var(--ease) forwards;
+    filter: drop-shadow(0 0 6px currentColor);
   }
 
   .spark-burst svg {
-    animation: twinkle 600ms ease-in-out 1;
+    animation: twinkle 520ms ease-in-out 1;
   }
 }
 
@@ -334,7 +384,7 @@
 
 @keyframes celebrateFloat {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  50% { transform: translate3d(0, -8px, 0) rotate(-0.6deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(-0.6deg); }
 }
 
 @keyframes balloonBob {
@@ -379,7 +429,7 @@
   }
 
   .spark-burst {
-    opacity: 0.18;
+    display: none !important;
   }
 
   .outdoor-party-illustration {
@@ -389,6 +439,6 @@
 
 @media (max-width: 767px) {
   .celebration-scene {
-    opacity: 0.7;
+    opacity: 0.62;
   }
 }
