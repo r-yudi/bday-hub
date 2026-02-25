@@ -241,6 +241,58 @@
   .landing-sparkle-4 { left: 61%; top: 2px; color: hsl(var(--accent)); animation-delay: 70ms; }
   .landing-sparkle-5 { left: 78%; top: 14px; color: hsl(var(--primary)); animation-delay: 90ms; }
   .landing-sparkle-6 { left: 90%; top: 6px; color: hsl(var(--lilac)); animation-delay: 110ms; }
+
+  .celebration-scene {
+    contain: layout paint;
+  }
+
+  .hug-illustration {
+    filter: drop-shadow(0 10px 24px hsl(var(--text) / 0.08));
+    opacity: 0.92;
+    animation: celebrateFloat 14s ease-in-out infinite;
+  }
+
+  .dark .hug-illustration {
+    filter:
+      drop-shadow(0 10px 24px hsl(var(--bg) / 0.42))
+      drop-shadow(0 0 20px hsl(var(--lilac) / 0.10));
+    opacity: 0.96;
+  }
+
+  .balloon {
+    position: absolute;
+    opacity: 0.9;
+    transform-origin: 50% 86%;
+    animation: balloonBob 14s ease-in-out infinite;
+  }
+
+  .dark .balloon {
+    filter: drop-shadow(0 0 12px hsl(var(--lilac) / 0.10));
+  }
+
+  .glow-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(12px);
+    opacity: 0.75;
+    animation: glowDrift 30s ease-in-out infinite;
+  }
+
+  .dark .glow-orb {
+    opacity: 0.95;
+    filter: blur(14px);
+  }
+
+  .spark-burst {
+    position: absolute;
+    opacity: 0;
+    animation: sparkleBurst 820ms var(--ease) forwards;
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+
+  .spark-burst svg {
+    animation: twinkle 600ms ease-in-out 1;
+  }
 }
 
 @keyframes landingGlowA {
@@ -265,6 +317,29 @@
   100% { opacity: 0; transform: translate3d(0, -14px, 0) scale(1); }
 }
 
+@keyframes celebrateFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -8px, 0) rotate(-0.6deg); }
+}
+
+@keyframes balloonBob {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  25% { transform: translate3d(-3px, -8px, 0) rotate(1.5deg); }
+  50% { transform: translate3d(2px, -14px, 0) rotate(-0.8deg); }
+  75% { transform: translate3d(4px, -6px, 0) rotate(1deg); }
+}
+
+@keyframes glowDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+  33% { transform: translate3d(6px, -10px, 0) scale(1.06); opacity: 0.9; }
+  66% { transform: translate3d(-5px, 8px, 0) scale(0.96); opacity: 0.72; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
 @keyframes celebrationDarkBgA {
   0%, 100% { background-position: 14% 22%, 78% 18%, 62% 70%, 0 0; }
   50% { background-position: 16% 19%, 75% 21%, 65% 66%, 0 0; }
@@ -273,4 +348,22 @@
 @keyframes celebrationDarkBgB {
   0%, 100% { filter: saturate(1); }
   50% { filter: saturate(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebration-scene *,
+  .landing-glow-a,
+  .landing-glow-b,
+  .landing-grid-drift {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .glow-orb {
+    opacity: 0.55;
+  }
+
+  .spark-burst {
+    opacity: 0.18;
+  }
 }

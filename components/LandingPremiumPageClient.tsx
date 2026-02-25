@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { LandingCelebrationScene } from "@/components/landing/LandingCelebrationScene";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -41,8 +42,10 @@ export function LandingPremiumPageClient() {
       <div className="pointer-events-none absolute right-[18%] top-[32%] h-2 w-2 rounded-full bg-lilac/70 shadow-[0_0_18px_hsl(var(--lilac)/0.45)] landing-glow-a" />
 
       <div className="relative mx-auto max-w-6xl space-y-10">
-        <section className="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="space-y-5">
+        <section className="relative grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+          <LandingCelebrationScene />
+
+          <div className="relative z-10 space-y-5">
             <Reveal delay={0}>
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1 text-xs font-medium text-muted shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -107,7 +110,7 @@ export function LandingPremiumPageClient() {
             </Reveal>
           </div>
 
-          <Reveal delay={170}>
+          <Reveal delay={170} className="relative z-10">
             <Card
               variant="elevated"
               className="feature-spotlight shine-sweep relative overflow-hidden p-5 sm:p-6 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg"
