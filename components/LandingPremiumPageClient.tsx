@@ -24,7 +24,7 @@ export function LandingPremiumPageClient() {
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-background px-4 py-6 sm:px-6 sm:py-10">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-background bg-celebration-light px-4 py-6 dark:bg-celebration-dark sm:px-6 sm:py-10">
       <div className="pointer-events-none absolute inset-0 bg-grid-subtle landing-grid-drift opacity-60" />
       <div className="pointer-events-none absolute -left-16 top-10 h-56 w-56 rounded-full glow-coral blur-3xl landing-glow-a" />
       <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full glow-lilac blur-3xl landing-glow-b" />
