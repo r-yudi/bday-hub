@@ -63,21 +63,21 @@ export function LandingPremiumPageClient() {
                   </div>
                 )}
                 <h1 className="max-w-3xl text-4xl font-semibold leading-[0.95] tracking-tight text-text sm:text-6xl lg:text-7xl">
-                  Nunca mais esqueça <span className="landing-gradient-word">aniversários</span>.
+                  Celebre todas as pessoas que <span className="landing-gradient-word">importam</span>.
                 </h1>
               </div>
             </Reveal>
 
             <Reveal delay={100}>
               <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-                Um app acolhedor para organizar aniversários sem atrito. Comece no seu dispositivo e, quando quiser,
-                entre com Google para continuar a mesma lista em outros lugares.
+                O Lembra. organiza aniversários de um jeito simples e acolhedor. Comece no seu dispositivo e, quando
+                quiser, entre com Google para continuar sua lista em outros lugares.
               </p>
             </Reveal>
 
             <Reveal delay={150}>
               <div className="flex flex-wrap gap-2">
-                <Chip as="span" variant="accent">Lembretes rápidos</Chip>
+                <Chip as="span" variant="accent">Lembretes no tempo certo</Chip>
                 <Chip as="span" variant="subtle">Importação CSV</Chip>
                 <Chip as="span" variant="subtle">Comece sem login</Chip>
                 <Chip as="span" variant="subtle">Sincronize depois</Chip>
@@ -102,7 +102,7 @@ export function LandingPremiumPageClient() {
             <Reveal delay={240}>
               <div className="grid gap-2 text-sm text-muted sm:grid-cols-2">
                 <p className="rounded-xl border border-border/70 bg-surface/70 px-3 py-2">• Veja quem faz aniversário hoje e nos próximos dias.</p>
-                <p className="rounded-xl border border-border/70 bg-surface/70 px-3 py-2">• Copie mensagens prontas e compartilhe links simples.</p>
+                <p className="rounded-xl border border-border/70 bg-surface/70 px-3 py-2">• Compartilhe carinho com mensagens prontas e links simples.</p>
               </div>
             </Reveal>
           </div>
