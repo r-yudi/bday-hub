@@ -194,7 +194,7 @@ function PwaInstallBanner() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLanding = pathname === "/";
+  const isLanding = pathname === "/" || pathname === "/landing";
   const isLegalPage = pathname === "/privacy" || pathname === "/terms";
   const isDebugRoute = Boolean(pathname?.startsWith("/debug"));
   const showGlobalFooter = !isLanding && !isLegalPage && !isDebugRoute;

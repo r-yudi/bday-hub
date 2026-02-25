@@ -16,6 +16,11 @@ import { listBirthdays } from "@/lib/birthdaysRepo";
 import { isValidDayMonth } from "@/lib/dates";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
+import { Card } from "@/components/ui/Card";
+import { FieldGroup, FieldLabel, SelectField, TextArea, TextInput } from "@/components/ui/Field";
 
 type PersonFormProps = {
   initialPerson?: BirthdayPerson | null;
@@ -166,155 +171,139 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-black/10 bg-white/90 p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
-      <div>
-        <label className="mb-1 block text-sm font-medium">Nome</label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-xl border border-black/15 px-3 py-2 outline-none focus:border-accent dark:border-white/15 dark:bg-white/5"
-          placeholder="Ex.: Ana Silva"
-        />
-      </div>
+    <Card variant="elevated" className="p-5 sm:p-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <FieldGroup>
+          <FieldLabel htmlFor="person-name">Nome</FieldLabel>
+          <TextInput id="person-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Ana Silva" />
+        </FieldGroup>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1 block text-sm font-medium">Dia</label>
-          <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="w-full rounded-xl border border-black/15 px-3 py-2 dark:border-white/15 dark:bg-white/5">
-            {days.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium">Mês</label>
-          <select value={month} onChange={(e) => setMonth(Number(e.target.value))} className="w-full rounded-xl border border-black/15 px-3 py-2 dark:border-white/15 dark:bg-white/5">
-            {months.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium">Categorias</label>
-        <div className="space-y-2 rounded-xl border border-black/15 px-3 py-2 dark:border-white/15">
-          {categories.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => removeCategory(value)}
-                  className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-900 hover:bg-amber-100"
-                  title="Remover categoria"
-                >
-                  {value} ×
-                </button>
+        <div className="grid grid-cols-2 gap-3">
+          <FieldGroup>
+            <FieldLabel htmlFor="person-day">Dia</FieldLabel>
+            <SelectField id="person-day" value={day} onChange={(e) => setDay(Number(e.target.value))}>
+              {days.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
-            </div>
-          )}
+            </SelectField>
+          </FieldGroup>
 
-          <div className="flex items-center gap-2">
-            <input
-              value={categoryInput}
-              onChange={(e) => setCategoryInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  void addCategory(categoryInput);
-                }
-              }}
-              list="category-options"
-              placeholder="Digite e pressione Enter"
-              className="w-full bg-transparent outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => void addCategory(categoryInput)}
-              className="rounded-lg border border-black/10 bg-white px-2.5 py-1.5 text-xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:hover:bg-white/15"
-            >
-              Adicionar
-            </button>
+          <FieldGroup>
+            <FieldLabel htmlFor="person-month">Mês</FieldLabel>
+            <SelectField id="person-month" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+              {months.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </SelectField>
+          </FieldGroup>
+        </div>
+
+        <FieldGroup>
+          <FieldLabel htmlFor="person-category-input">Categorias</FieldLabel>
+          <div className="space-y-2 rounded-lg border border-border bg-surface2/70 p-3">
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {categories.map((value) => (
+                  <Chip
+                    key={value}
+                    variant="warning"
+                    interactive
+                    onClick={() => removeCategory(value)}
+                    title="Remover categoria"
+                  >
+                    {value} ×
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <TextInput
+                id="person-category-input"
+                value={categoryInput}
+                onChange={(e) => setCategoryInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void addCategory(categoryInput);
+                  }
+                }}
+                list="category-options"
+                placeholder="Digite e pressione Enter"
+                className="shadow-none"
+              />
+              <Button type="button" variant="secondary" size="sm" onClick={() => void addCategory(categoryInput)}>
+                Adicionar
+              </Button>
+            </div>
+
+            {typoSuggestion && (
+              <Alert variant="warning" className="text-xs">
+                <span>Você quis dizer </span>
+                <span className="font-semibold">{typoSuggestion}</span>
+                <span>?</span>{" "}
+                <Button type="button" variant="ghost" size="sm" className="ml-1 h-auto px-1.5 py-0.5 text-xs" onClick={() => void addCategory(typoSuggestion)}>
+                  Usar {typoSuggestion}
+                </Button>
+              </Alert>
+            )}
+
+            <datalist id="category-options">
+              {availableOptions.map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
+
+            {availableOptions.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {availableOptions.slice(0, 8).map((option) => (
+                  <Chip key={option} interactive variant="subtle" onClick={() => void addCategory(option)}>
+                    + {option}
+                  </Chip>
+                ))}
+              </div>
+            )}
           </div>
+        </FieldGroup>
 
-          {typoSuggestion && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              Você quis dizer <span className="font-semibold">{typoSuggestion}</span>?{" "}
-              <button
-                type="button"
-                onClick={() => void addCategory(typoSuggestion)}
-                className="underline decoration-amber-700/40 underline-offset-2 hover:text-amber-950"
-              >
-                Usar {typoSuggestion}
-              </button>
-            </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <FieldGroup>
+            <FieldLabel htmlFor="person-whatsapp">WhatsApp (link)</FieldLabel>
+            <TextInput id="person-whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="https://wa.me/..." />
+          </FieldGroup>
+          <FieldGroup>
+            <FieldLabel htmlFor="person-instagram">Instagram (link)</FieldLabel>
+            <TextInput id="person-instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/..." />
+          </FieldGroup>
+        </div>
+
+        <FieldGroup>
+          <FieldLabel htmlFor="person-other">Outro link (opcional)</FieldLabel>
+          <TextInput id="person-other" value={otherLink} onChange={(e) => setOtherLink(e.target.value)} placeholder="https://..." />
+        </FieldGroup>
+
+        <FieldGroup>
+          <FieldLabel htmlFor="person-notes">Observações</FieldLabel>
+          <TextArea id="person-notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observações" />
+        </FieldGroup>
+
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="submit" loading={saving}>
+            {saving ? "Salvando..." : "Salvar"}
+          </Button>
+          {isEdit && onDelete && initialPerson && (
+            <Button type="button" variant="destructive" onClick={() => void onDelete(initialPerson.id)}>
+              Excluir
+            </Button>
           )}
-
-          <datalist id="category-options">
-            {availableOptions.map((option) => (
-              <option key={option} value={option} />
-            ))}
-          </datalist>
-
-          {availableOptions.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {availableOptions.slice(0, 8).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => void addCategory(option)}
-                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs text-black/75 hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15"
-                >
-                  + {option}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium">WhatsApp (link)</label>
-          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="w-full rounded-xl border border-black/15 px-3 py-2 dark:border-white/15 dark:bg-white/5" placeholder="https://wa.me/..." />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium">Instagram (link)</label>
-          <input value={instagram} onChange={(e) => setInstagram(e.target.value)} className="w-full rounded-xl border border-black/15 px-3 py-2 dark:border-white/15 dark:bg-white/5" placeholder="https://instagram.com/..." />
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium">Outro link (opcional)</label>
-        <input value={otherLink} onChange={(e) => setOtherLink(e.target.value)} className="w-full rounded-xl border border-black/15 px-3 py-2 dark:border-white/15 dark:bg-white/5" placeholder="https://..." />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium">Observações</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-24 w-full rounded-xl border border-black/15 px-3 py-2 dark:border-white/15 dark:bg-white/5" placeholder="Observações" />
-      </div>
-
-      {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
-
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="submit"
-          disabled={saving}
-          className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover disabled:opacity-50"
-        >
-          {saving ? "Salvando..." : "Salvar"}
-        </button>
-        {isEdit && onDelete && initialPerson && (
-          <button type="button" onClick={() => void onDelete(initialPerson.id)} className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-700">
-            Excluir
-          </button>
-        )}
-      </div>
-    </form>
+      </form>
+    </Card>
   );
 }

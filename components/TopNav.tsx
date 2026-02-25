@@ -15,7 +15,7 @@ export function TopNav() {
   const { configured, initialized, user, signOut, syncStatus, syncMessage } = useAuth();
   const { themeMode, setThemeMode } = useThemeMode();
   const displayName = user?.user_metadata?.full_name || user?.email || "Conta";
-  const isLanding = pathname === "/";
+  const isLanding = pathname === "/" || pathname === "/landing";
 
   const themeSelectClass =
     "rounded-full border border-black/10 bg-white/85 px-3 py-1.5 text-black/75 hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15";
