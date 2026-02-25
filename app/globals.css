@@ -91,4 +91,66 @@
   .glow-lilac {
     background: radial-gradient(circle, hsl(var(--lilac) / 0.18), transparent 70%);
   }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(10px);
+    transition-property: opacity, transform;
+    transition-duration: var(--dur-2);
+    transition-timing-function: var(--ease);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .landing-glow-a {
+    animation: landingGlowA 18s ease-in-out infinite;
+  }
+
+  .landing-glow-b {
+    animation: landingGlowB 22s ease-in-out infinite;
+  }
+
+  .landing-grid-drift {
+    animation: gridDrift 24s linear infinite;
+  }
+
+  .shine-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-sweep::after {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    background: linear-gradient(110deg, transparent 35%, hsl(var(--surface) / 0.28) 50%, transparent 65%);
+    transform: translateX(-120%) rotate(8deg);
+    transition: transform 700ms var(--ease);
+    pointer-events: none;
+  }
+
+  .shine-sweep:hover::after {
+    transform: translateX(120%) rotate(8deg);
+  }
+}
+
+@keyframes landingGlowA {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(10px, -14px, 0) scale(1.06); }
+}
+
+@keyframes landingGlowB {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-12px, 10px, 0) scale(1.08); }
+}
+
+@keyframes gridDrift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(4px, 3px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
