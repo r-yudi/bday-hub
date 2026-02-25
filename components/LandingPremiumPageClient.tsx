@@ -23,6 +23,14 @@ export function LandingPremiumPageClient() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  function handleFeaturePointerMove(event: React.PointerEvent<HTMLElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    event.currentTarget.style.setProperty("--mx", `${x}%`);
+    event.currentTarget.style.setProperty("--my", `${y}%`);
+  }
+
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-background bg-celebration-light px-4 py-6 dark:bg-celebration-dark sm:px-6 sm:py-10">
       <div className="pointer-events-none absolute inset-0 bg-grid-subtle landing-grid-drift opacity-60" />
@@ -79,7 +87,7 @@ export function LandingPremiumPageClient() {
             <Reveal delay={200}>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link href="/today">
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button size="lg" className="landing-cta-premium w-full sm:w-auto">
                     {isLoggedIn ? "Continuar no app" : "Começar agora"}
                   </Button>
                 </Link>
@@ -100,7 +108,11 @@ export function LandingPremiumPageClient() {
           </div>
 
           <Reveal delay={170}>
-            <Card variant="elevated" className="shine-sweep relative overflow-hidden p-5 sm:p-6 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+            <Card
+              variant="elevated"
+              className="feature-spotlight shine-sweep relative overflow-hidden p-5 sm:p-6 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg"
+              onPointerMove={handleFeaturePointerMove}
+            >
               <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/15 blur-2xl landing-glow-a" />
               <div className="absolute -left-6 bottom-8 h-24 w-24 rounded-full bg-lilac/15 blur-2xl landing-glow-b" />
               <div className="relative space-y-4">
@@ -111,7 +123,7 @@ export function LandingPremiumPageClient() {
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-lg border border-border bg-surface p-4 shadow-sm transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-md">
+                  <div className="feature-spotlight rounded-lg border border-border bg-surface p-4 shadow-sm transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-md" onPointerMove={handleFeaturePointerMove}>
                     <p className="text-sm font-medium text-text">Categorias</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       <Chip as="span" variant="warning">Família</Chip>
@@ -119,7 +131,7 @@ export function LandingPremiumPageClient() {
                       <Chip as="span" variant="subtle">Trabalho</Chip>
                     </div>
                   </div>
-                  <div className="rounded-lg border border-border bg-surface p-4 shadow-sm transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-md">
+                  <div className="feature-spotlight rounded-lg border border-border bg-surface p-4 shadow-sm transition-all duration-250 ease-brand hover:-translate-y-0.5 hover:shadow-md" onPointerMove={handleFeaturePointerMove}>
                     <p className="text-sm font-medium text-text">Mensagem pronta</p>
                     <p className="mt-2 text-xs leading-relaxed text-muted">
                       “Parabéns! Que seu dia seja leve, feliz e cheio de boas surpresas 🎂”
@@ -133,7 +145,7 @@ export function LandingPremiumPageClient() {
 
         <section className="grid gap-4 lg:grid-cols-12">
           <Reveal delay={70} className="lg:col-span-4">
-            <Card variant="bento" className="shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+            <Card variant="bento" className="feature-spotlight shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg" onPointerMove={handleFeaturePointerMove}>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted">Como funciona</p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">1. Cadastre rápido</h2>
               <p className="mt-2 text-sm text-muted">
@@ -143,7 +155,7 @@ export function LandingPremiumPageClient() {
           </Reveal>
 
           <Reveal delay={130} className="lg:col-span-4">
-            <Card variant="bento" className="shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+            <Card variant="bento" className="feature-spotlight shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg" onPointerMove={handleFeaturePointerMove}>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted">Sem atrito</p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">2. Use sem login</h2>
               <p className="mt-2 text-sm text-muted">
@@ -153,7 +165,7 @@ export function LandingPremiumPageClient() {
           </Reveal>
 
           <Reveal delay={190} className="lg:col-span-4">
-            <Card variant="bento" className="shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg">
+            <Card variant="bento" className="feature-spotlight shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg" onPointerMove={handleFeaturePointerMove}>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted">Em qualquer lugar</p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">3. Sincronize sua lista</h2>
               <p className="mt-2 text-sm text-muted">

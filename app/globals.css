@@ -149,14 +149,72 @@
     content: "";
     position: absolute;
     inset: -20%;
-    background: linear-gradient(110deg, transparent 35%, hsl(var(--surface) / 0.28) 50%, transparent 65%);
+    background: linear-gradient(110deg, transparent 35%, hsl(var(--surface) / 0.20) 50%, transparent 65%);
     transform: translateX(-120%) rotate(8deg);
     transition: transform 700ms var(--ease);
     pointer-events: none;
   }
 
+  .dark .shine-sweep::after {
+    background: linear-gradient(112deg, transparent 33%, hsl(var(--lilac) / 0.12) 47%, hsl(var(--primary) / 0.14) 54%, transparent 68%);
+  }
+
   .shine-sweep:hover::after {
     transform: translateX(120%) rotate(8deg);
+  }
+
+  .feature-spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .feature-spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(140px 90px at var(--mx, 50%) var(--my, 50%), hsl(var(--primary) / 0.10), transparent 72%);
+    transition: opacity 220ms var(--ease);
+    z-index: 0;
+  }
+
+  .dark .feature-spotlight::before {
+    background:
+      radial-gradient(150px 92px at var(--mx, 50%) var(--my, 50%), hsl(var(--lilac) / 0.14), transparent 72%),
+      radial-gradient(130px 84px at calc(var(--mx, 50%) + 8%) calc(var(--my, 50%) + 4%), hsl(var(--primary) / 0.12), transparent 72%);
+  }
+
+  .feature-spotlight:hover::before {
+    opacity: 1;
+  }
+
+  .landing-cta-premium {
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .landing-cta-premium:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .landing-cta-premium:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  .dark .landing-cta-premium {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.14),
+      0 10px 28px hsl(var(--primary) / 0.14);
+  }
+
+  .dark .landing-cta-premium:hover {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.24),
+      0 0 22px hsl(var(--primary) / 0.16),
+      0 18px 36px hsl(var(--bg) / 0.55);
   }
 
   .landing-gradient-word {
