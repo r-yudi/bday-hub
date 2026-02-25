@@ -59,17 +59,17 @@ export default function ShareTokenPage() {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
     } catch {
-      window.alert("NÃ£o foi possÃ­vel copiar o link automaticamente.");
+      window.alert("Não foi possível copiar o link automaticamente.");
     }
   }
 
   if (!validPayload) {
     return (
       <div className="grid min-h-[65vh] place-items-center">
-        <div className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-800">
-          <h1 className="text-lg font-semibold">Link invÃ¡lido</h1>
-          <p className="mt-2 text-sm">Este token nÃ£o pÃ´de ser lido ou estÃ¡ malformado.</p>
-          <Link href="/today" className="mt-4 inline-block rounded-lg bg-white px-3 py-2 text-sm text-ink">
+        <div className="ui-surface-elevated ui-border-subtle mx-auto w-full max-w-xl rounded-2xl border p-6 text-text shadow-md">
+          <h1 className="text-lg font-semibold tracking-tight">Link inválido</h1>
+          <p className="mt-2 text-sm text-muted">Este token não pôde ser lido ou está malformado.</p>
+          <Link href="/today" className="ui-cta-secondary mt-4 inline-flex items-center rounded-lg border px-3 py-2 text-sm focus-visible:outline-none">
             Ir para o app
           </Link>
         </div>
@@ -80,22 +80,24 @@ export default function ShareTokenPage() {
   return (
     <div className="grid min-h-[65vh] place-items-center py-4">
       <div className="mx-auto w-full max-w-xl space-y-4">
-        <div className="rounded-3xl border border-black/10 bg-white/95 p-7 text-center shadow-sm sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-wide text-black/60">Lembra â€¢ Link compartilhado</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-black/90 sm:text-[2.1rem]">{validPayload.name}</h1>
-          <p className="mt-2 text-sm text-black/70">
-            AniversÃ¡rio: <span className="font-medium text-black/85">{formatDayMonth(validPayload.day, validPayload.month)}</span>
+        <div className="ui-surface-elevated ui-border-subtle rounded-3xl border p-6 text-center shadow-md sm:p-8">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra • Link compartilhado</p>
+          <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-text sm:text-[2.1rem]">{validPayload.name}</h1>
+          <p className="mt-2 text-sm text-muted">
+            Aniversário: <span className="font-medium text-text">{formatDayMonth(validPayload.day, validPayload.month)}</span>
           </p>
 
-          <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Este link compartilha apenas nome e dia/mÃªs. NÃ£o inclui ano.
-          </p>
+          <div className="ui-surface ui-border-subtle mt-5 rounded-2xl border px-4 py-3 text-left text-sm text-muted dark:bg-surface2/55">
+            <p>
+              <span className="font-medium text-text">Importante:</span> Este link compartilha apenas nome e dia/mês. Não inclui ano.
+            </p>
+          </div>
 
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             <button
               type="button"
               onClick={() => void handleCopyLink()}
-              className="btn-primary-brand rounded-xl bg-accent px-4 py-2.5 text-sm text-white hover:bg-accentHover"
+              className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-4 py-2.5 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
             >
               Copiar link
             </button>
@@ -104,13 +106,13 @@ export default function ShareTokenPage() {
               onClick={() => void handleAddToList()}
               disabled={saving || saved}
               aria-label={saved ? "Adicionado à minha lista" : "Adicionar à minha lista"}
-              className="btn-primary-brand rounded-xl bg-accent px-4 py-2.5 text-sm text-white hover:bg-accentHover disabled:opacity-50"
+              className="ui-cta-secondary rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none disabled:opacity-70"
             >
-              {saved ? "Adicionado Ã  minha lista" : saving ? "Adicionando..." : "Adicionar Ã  minha lista"}
+              {saved ? "Adicionado à minha lista" : saving ? "Adicionando..." : "Adicionar à minha lista"}
             </button>
           </div>
 
-          <p aria-live="polite" className="mt-3 min-h-5 text-xs font-medium text-emerald-700">
+          <p aria-live="polite" className="mt-3 min-h-5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
             {copied ? "Link copiado ✓" : ""}
           </p>
 
@@ -118,19 +120,17 @@ export default function ShareTokenPage() {
             <button
               type="button"
               onClick={() => router.push("/today")}
-              className="mt-2 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm"
+              className="ui-focus-surface mt-2 rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
             >
               Ver minha lista
             </button>
           )}
         </div>
 
-        <p className="text-center text-xs text-black/60">
-          v1 sem backend: o token expÃµe apenas nome + dia/mÃªs e nÃ£o possui revogaÃ§Ã£o individual.
+        <p className="text-center text-xs text-muted">
+          v1 sem backend: o token expõe apenas nome + dia/mês e não possui revogação individual.
         </p>
       </div>
     </div>
   );
 }
-
-
