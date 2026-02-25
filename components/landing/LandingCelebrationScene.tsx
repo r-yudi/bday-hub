@@ -19,42 +19,17 @@ const ORBS: Orb[] = [
   { id: 8, className: "glow-orb hidden lg:block", style: { left: "86%", top: "58%", width: 24, height: 24, background: "hsl(var(--warning) / 0.07)", animationDelay: "-20s", animationDuration: "28s" } }
 ];
 
-function HugIllustration() {
+function OutdoorPartyIllustration() {
   return (
-    <svg viewBox="0 0 280 240" className="hug-illustration h-full w-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="hugBodyA" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="hsl(var(--primary) / 0.72)" />
-          <stop offset="100%" stopColor="hsl(var(--primary) / 0.48)" />
-        </linearGradient>
-        <linearGradient id="hugBodyB" x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(var(--accent) / 0.72)" />
-          <stop offset="100%" stopColor="hsl(var(--lilac) / 0.5)" />
-        </linearGradient>
-      </defs>
-
-      <ellipse cx="144" cy="208" rx="82" ry="16" fill="hsl(var(--text) / 0.08)" />
-
-      <g opacity="0.9">
-        <path d="M76 164c0-34 18-58 48-58s52 24 52 58v22H76v-22Z" fill="url(#hugBodyA)" />
-        <circle cx="118" cy="92" r="26" fill="hsl(var(--warning) / 0.75)" />
-        <path d="M94 142c14-22 34-14 52 8" stroke="hsl(var(--surface) / 0.8)" strokeWidth="12" strokeLinecap="round" />
-        <path d="M88 154c14-10 30-8 42 8" stroke="hsl(var(--primary) / 0.8)" strokeWidth="10" strokeLinecap="round" />
-      </g>
-
-      <g opacity="0.95">
-        <path d="M124 170c0-38 24-64 60-64 30 0 54 24 54 60v20h-114v-16Z" fill="url(#hugBodyB)" />
-        <circle cx="184" cy="88" r="28" fill="hsl(var(--surface) / 0.95)" />
-        <path d="M152 148c18-20 40-10 56 12" stroke="hsl(var(--surface) / 0.85)" strokeWidth="14" strokeLinecap="round" />
-        <path d="M136 152c18-14 34-14 52 8" stroke="hsl(var(--lilac) / 0.7)" strokeWidth="10" strokeLinecap="round" />
-      </g>
-
-      <path d="M122 144c8 12 18 20 30 24" stroke="hsl(var(--surface) / 0.8)" strokeWidth="8" strokeLinecap="round" />
-      <path d="M158 144c-6 14-18 24-34 28" stroke="hsl(var(--surface) / 0.78)" strokeWidth="8" strokeLinecap="round" />
-
-      <circle cx="98" cy="66" r="14" fill="hsl(var(--lilac) / 0.18)" />
-      <circle cx="214" cy="62" r="12" fill="hsl(var(--primary) / 0.14)" />
-    </svg>
+    <img
+      src="/illustrations/outdoor-party.svg"
+      alt=""
+      width={680}
+      height={520}
+      className="outdoor-party-illustration h-full w-full object-contain"
+      loading="lazy"
+      decoding="async"
+    />
   );
 }
 
@@ -104,21 +79,23 @@ export function LandingCelebrationScene() {
   }, []);
 
   return (
-    <div className="celebration-scene absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden>
+    <div className="celebration-scene pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden>
       {ORBS.map((orb) => (
         <div key={orb.id} className={orb.className} style={orb.style} />
       ))}
 
-      <div className="absolute right-[-2%] top-[10%] h-[280px] w-[280px] opacity-70 sm:right-[4%] sm:top-[8%] sm:h-[320px] sm:w-[320px] lg:right-[10%] lg:top-[6%] lg:h-[360px] lg:w-[360px]">
-        <div className="absolute inset-0 rounded-full bg-primary/10 blur-3xl dark:bg-primary/16" />
-        <div className="absolute -left-10 top-16 h-24 w-24 rounded-full bg-lilac/10 blur-2xl dark:bg-lilac/16" />
-        <HugIllustration />
+      <div className="outdoor-party-wrap absolute right-[-6%] top-[6%] hidden h-[420px] w-[420px] md:block lg:right-[-2%] lg:top-[-2%] lg:h-[560px] lg:w-[560px] xl:right-[2%] xl:h-[640px] xl:w-[640px]">
+        <div className="absolute inset-[8%] rounded-full bg-primary/8 blur-3xl dark:bg-primary/14" />
+        <div className="absolute left-[8%] top-[22%] h-28 w-28 rounded-full bg-lilac/8 blur-2xl dark:bg-lilac/14" />
+        <div className="absolute inset-0 outdoor-party-fade">
+          <OutdoorPartyIllustration />
+        </div>
       </div>
 
-      <Balloon className="absolute right-[7%] top-[6%] h-20 w-10 sm:h-24 sm:w-12 lg:right-[14%]" color="hsl(var(--primary) / 0.78)" delay="-2s" duration="13s" />
-      <Balloon className="absolute right-[18%] top-[3%] hidden h-24 w-12 sm:block lg:right-[26%] lg:h-28 lg:w-14" color="hsl(var(--lilac) / 0.72)" delay="-7s" duration="16s" />
-      <Balloon className="absolute right-[2%] top-[20%] hidden h-16 w-9 md:block lg:right-[8%]" color="hsl(var(--accent) / 0.72)" delay="-11s" duration="12s" />
-      <Balloon className="absolute right-[28%] top-[14%] hidden h-16 w-9 lg:block" color="hsl(var(--warning) / 0.66)" delay="-4s" duration="18s" />
+      <Balloon className="absolute right-[4%] top-[4%] h-16 w-8 sm:h-20 sm:w-10 lg:right-[10%] lg:top-[2%]" color="hsl(var(--primary) / 0.74)" delay="-2s" duration="13s" />
+      <Balloon className="absolute right-[20%] top-[2%] hidden h-20 w-10 sm:block lg:right-[24%] lg:h-24 lg:w-12" color="hsl(var(--lilac) / 0.68)" delay="-7s" duration="16s" />
+      <Balloon className="absolute right-[2%] top-[24%] hidden h-14 w-8 md:block lg:right-[6%]" color="hsl(var(--accent) / 0.66)" delay="-11s" duration="12s" />
+      <Balloon className="absolute right-[30%] top-[18%] hidden h-14 w-8 lg:block" color="hsl(var(--warning) / 0.58)" delay="-4s" duration="18s" />
 
       {showBursts && (
         <>
