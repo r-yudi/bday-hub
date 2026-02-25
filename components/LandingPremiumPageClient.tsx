@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { LandingCelebrationScene } from "@/components/landing/LandingCelebrationScene";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -24,14 +23,6 @@ export function LandingPremiumPageClient() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  function handleFeaturePointerMove(event: React.PointerEvent<HTMLElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-    event.currentTarget.style.setProperty("--mx", `${x}%`);
-    event.currentTarget.style.setProperty("--my", `${y}%`);
-  }
-
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-background bg-celebration-light px-4 py-6 dark:bg-celebration-dark sm:px-6 sm:py-10">
       <div className="pointer-events-none absolute inset-0 bg-grid-subtle landing-grid-drift opacity-60" />
@@ -41,7 +32,7 @@ export function LandingPremiumPageClient() {
       <div className="relative mx-auto max-w-6xl space-y-10">
         <section className="relative grid items-center gap-6 lg:grid-cols-2 lg:gap-10">
           <Reveal delay={40} className="relative z-[40]">
-            <div className="hero-text-card">
+            <div className="hero-copy-backdrop">
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/85 px-3 py-1 text-xs font-medium text-muted shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Lembra. • Seu app de aniversários
@@ -66,9 +57,15 @@ export function LandingPremiumPageClient() {
 
               <Reveal delay={100}>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Chip as="span" variant="accent">Lembretes no tempo certo</Chip>
-                  <Chip as="span" variant="subtle">Importação CSV</Chip>
-                  <Chip as="span" variant="subtle">Comece sem login</Chip>
+                  <Chip as="span" variant="accent" className="border-primary/20 bg-primary/10 text-primary dark:bg-primary/14">
+                    Lembretes no tempo certo
+                  </Chip>
+                  <Chip as="span" variant="subtle" className="border-border/55 bg-surface/50 dark:bg-surface/40">
+                    Importação CSV
+                  </Chip>
+                  <Chip as="span" variant="subtle" className="border-border/55 bg-surface/50 dark:bg-surface/40">
+                    Comece sem login
+                  </Chip>
                 </div>
               </Reveal>
 
@@ -88,8 +85,8 @@ export function LandingPremiumPageClient() {
               </Reveal>
 
               <Reveal delay={190}>
-                <div className="mt-5 inline-flex max-w-full items-center gap-2 rounded-xl border border-border/80 bg-surface/70 px-3 py-2 text-sm text-muted shadow-sm">
-                  <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+                <div className="mt-5 inline-flex max-w-full items-center gap-2 text-sm text-muted">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent/12 text-accent">•</span>
                   Hoje: 3 aniversários na sua lista • mensagens prontas e links rápidos.
                 </div>
               </Reveal>
@@ -101,35 +98,46 @@ export function LandingPremiumPageClient() {
           </Reveal>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-12">
-          <Reveal delay={70} className="lg:col-span-4">
-            <Card variant="bento" className="feature-spotlight shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg" onPointerMove={handleFeaturePointerMove}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Como funciona</p>
-              <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">1. Cadastre rápido</h2>
-              <p className="mt-2 text-sm text-muted">
-                Adicione manualmente ou importe CSV. O app organiza por hoje e próximos dias automaticamente.
-              </p>
-            </Card>
-          </Reveal>
+        <section>
+          <Reveal delay={90}>
+            <div className="feature-row">
+              <div className="feature-row-item">
+                <div className="feature-row-icon" aria-hidden>1</div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">Como funciona</p>
+                  <h2 className="mt-1 text-lg font-semibold tracking-tight text-text">Cadastre rápido</h2>
+                  <p className="mt-1 text-sm text-muted">
+                    Adicione manualmente ou importe CSV. O app organiza por hoje e próximos dias automaticamente.
+                  </p>
+                </div>
+              </div>
 
-          <Reveal delay={130} className="lg:col-span-4">
-            <Card variant="bento" className="feature-spotlight shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg" onPointerMove={handleFeaturePointerMove}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Sem atrito</p>
-              <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">2. Use sem login</h2>
-              <p className="mt-2 text-sm text-muted">
-                Tudo funciona no seu dispositivo desde o primeiro uso. Se quiser, você pode entrar depois.
-              </p>
-            </Card>
-          </Reveal>
+              <div className="feature-row-divider" aria-hidden />
 
-          <Reveal delay={190} className="lg:col-span-4">
-            <Card variant="bento" className="feature-spotlight shine-sweep p-5 transition-all duration-250 ease-brand hover:-translate-y-1 hover:shadow-lg" onPointerMove={handleFeaturePointerMove}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Em qualquer lugar</p>
-              <h2 className="mt-2 text-xl font-semibold tracking-tight text-text">3. Sincronize sua lista</h2>
-              <p className="mt-2 text-sm text-muted">
-                Com login, sua lista acompanha você em outros dispositivos com segurança e privacidade.
-              </p>
-            </Card>
+              <div className="feature-row-item">
+                <div className="feature-row-icon" aria-hidden>2</div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">Sem atrito</p>
+                  <h2 className="mt-1 text-lg font-semibold tracking-tight text-text">Use sem login</h2>
+                  <p className="mt-1 text-sm text-muted">
+                    Tudo funciona no seu dispositivo desde o primeiro uso. Se quiser, você pode entrar depois.
+                  </p>
+                </div>
+              </div>
+
+              <div className="feature-row-divider" aria-hidden />
+
+              <div className="feature-row-item">
+                <div className="feature-row-icon" aria-hidden>3</div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">Em qualquer lugar</p>
+                  <h2 className="mt-1 text-lg font-semibold tracking-tight text-text">Sincronize sua lista</h2>
+                  <p className="mt-1 text-sm text-muted">
+                    Com login, sua lista acompanha você em outros dispositivos com segurança e privacidade.
+                  </p>
+                </div>
+              </div>
+            </div>
           </Reveal>
         </section>
 
