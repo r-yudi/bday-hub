@@ -90,6 +90,34 @@
   - usar `ui-callout` / `ui-disclosure` para blocos explicativos e detalhes técnicos
   - usar `ui-overlay-backdrop` / `ui-modal-surface` em modais/overlays
 
+## Skills (playbooks internos do repo)
+Use os playbooks em `playbooks/` para acelerar entregas com consistência, sem mudar o baseline por acidente.
+
+### Playbooks disponíveis
+- Produto: `playbooks/product-skill.md`
+  - decidir escopo, fora de escopo, hipótese, critérios de aceite e atualização de `PRD.md`/`SPEC.md`
+- Design: `playbooks/design-skill.md`
+  - evoluir UI com contrato visual (`ui-*`, tokens, dark mode, acessibilidade)
+- Desenvolvimento: `playbooks/dev-skill.md`
+  - implementar rápido com segurança (`scaffold -> wired -> polish -> harden`)
+
+### Fonte única do design system
+- `DESIGN_SYSTEM.md`
+- `app/styles/tokens.css`
+- `app/globals.css`
+
+### Ritual de execução (padrão)
+1. Ler `PRD.md`, `SPEC.md` e `AGENTS.md`.
+2. Escolher a skill principal (`product`, `design` ou `dev`).
+3. Executar o checklist do playbook escolhido.
+4. Produzir saída objetiva: `diff + validação/testes aplicáveis`.
+5. Atualizar `CHANGELOG.md` e `PRD.md`/`SPEC.md` quando houver mudança de baseline.
+
+### Padrão de uso no dia a dia (prompting interno)
+- "Use `playbooks/product-skill.md` para decidir escopo da feature X"
+- "Faça um UI polish pass seguindo `playbooks/design-skill.md`"
+- "Implemente Y com o fluxo de `playbooks/dev-skill.md`"
+
 ## Próximos focos sugeridos (vNext)
 - Gestão avançada (`/manage`) com busca/filtros/multi-select.
 - Share avançado com múltiplos aniversários + fluxo remoto seguro.

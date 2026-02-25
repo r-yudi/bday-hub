@@ -1,69 +1,62 @@
 ﻿# Changelog
 
-Todos os releases acompanham o padrao SemVer.
+Formato adotado:
+- `## [Unreleased]` para mudanças ainda não tagueadas
+- `## [0.x.y] - YYYY-MM-DD` para releases publicados
+
+## Regras de release/tag
+- Atualize `Unreleased` durante o desenvolvimento.
+- Ao publicar, mova os itens para a versão fechada e então crie a tag Git (`v0.x.y`).
+- Use patch (`v0.1.x`) para correções/estabilização/docs/testes sem mudança grande de escopo.
+- Use minor (`v0.x.0`) para incremento de capability/escopo perceptível.
 
 ## [Unreleased]
 
+### Changed
+- UI stabilization (rodada atual): consolidação do contrato visual `ui-*`, refinamentos de landing/fluxos e ajustes de consistência visual sem mudar o baseline de produto.
+
 ### Added
-- Endpoint `/healthz` para smoke test de producao/deploy
-- Multi-device sync de aniversarios com Supabase quando logado (fallback local mantido quando nao logado)
-- Ferramentas de debug de auth Supabase em `/debug/supabase` (health, session/getUser, teste de DB e limpar sessao local)
-- Fluxo de login Google com redirect robusto via `/auth/callback` (retry curto para consolidar sessao)
-- Google login com Supabase (OAuth Google), sessao persistente e logout no app
-- Pagina `/login` com CTA "Entrar com Google" e redirecionamento com `returnTo`
-- Protecao de rotas principais (`/today`, `/upcoming`, `/share`) exigindo login quando Supabase estiver configurado
-- Tela de debug `/debug/auth` (somente dev) para validar sessao e query real em `birthdays` (`Auth OK` / `DB OK`)
-- Rename de branding do produto/app de BdayHub para Lembra (UI, metadata, manifest e docs)
-- Banner contextual de instalacao PWA (sem popup automatico) com CTA `Instalar`
-- Instrucoes de instalacao para iOS ("Adicionar a Tela de Inicio") e Desktop Chrome
-- CTA destacado `Copiar link` em `/share/[token]` com feedback visual "Link copiado"
-- Rota `/share` (sem token) com pagina amigavel explicando como gerar o link de compartilhamento
-- `/share` com lista de aniversarios para gerar/copiar links rapidamente
-- Cadastro rapido em modal na rota `/share` quando nao ha aniversarios cadastrados
-- Micro onboarding com progresso 0-5 aniversarios em `/today` e `/upcoming`
-- Toast discreto de onboarding ao adicionar aniversario (incluindo estado especial ao completar setup)
+- Endpoint `/healthz` para smoke test de produção/deploy.
+- Multi-device sync de aniversários com Supabase quando logado (fallback local mantido quando não logado).
+- Ferramentas de debug Supabase (`/debug/auth`, `/debug/supabase`) para validação de Auth/DB/RLS em desenvolvimento.
+- Login Google com Supabase (`/login`, `/auth/callback`) com sessão persistente.
+- `/share` como hub para gerar/copiar links e `/share/[token]` para import de aniversário compartilhado.
+- Banner PWA contextual, onboarding leve e toasts de feedback.
+- Categorias predefinidas + custom (guest/local-first + `user_categories` no Supabase).
+- Páginas legais (`/privacy`, `/terms`) e branding Lembra.
 
 ### Fixed
-- `/` (entrypoint) agora renderiza a landing de marketing/premium como página inicial do produto (sem redirect automático para `/today`)
-- Bug visual no dark em `PersonCard` ("Mais mensagens") com superfícies brancas; sugestões de mensagem agora respeitam o contrato `ui-*`
-- `/login` e `/share/[token]` com superfícies e copy UTF-8 alinhadas ao design system (dark premium)
-- Disclosure de "Detalhes técnicos" em `/today` convertido para padrão de DS com melhor legibilidade
-- Hardening de producao: rotas `/debug/*` agora ficam indisponiveis (404) em `NODE_ENV=production`
-- `/debug/supabase` exibe aviso amigavel quando env vars publicas do Supabase estao ausentes
-- Debug de DB em `/debug/supabase` agora usa `user_settings.user_id` (sem depender de coluna `id`) e valida RLS com upsert/select do proprio usuario
-- `/debug/supabase` ganhou teste de `birthdays` (count + upsert/delete dummy) para validar acesso com RLS
-- UX da pagina `/share/[token]` com layout centralizado, mais espacamento e contexto claro sobre privacidade (sem ano)
-- Empty state de `/today` com icone/ilustracao simples e CTAs para adicionar aniversario e ver proximos 7 dias
-- Badge "Lembrete enviado hoje" quando o lembrete do dia ja foi disparado
-- Copy das notificacoes best-effort refinada para singular/plural
-- Hydration mismatch em `/today` ao adiar leituras de `window` e `Notification` para apos mount
-- Card de notificacoes simplificado com resumo amigavel e detalhes tecnicos opcionais
-- Copy mais humana no empty state de `/today` e no banner de instalacao PWA
-- Banner PWA refinado para versao compacta com accordion "Como instalar" e opcao de dispensar por 30 dias
-- Acao "Limpar todos os dados" com modal de confirmacao e digitacao de `LIMPAR`
-- Cartoes de aniversarios com hierarquia visual de acoes, feedback de copia e atalho compacto para Instagram
-- Onboarding com copy mais motivadora, estado de conclusao (5/5) e ocultacao automatica
-- Persistencia em localStorage para nao reexibir onboarding apos setup completo
+- `/` permanece como landing/entrypoint de marketing (sem redirect automático para `/today`).
+- Hardening de produção para `/debug/*` (404 em produção).
+- Ajustes de dark mode/superfícies e contraste em fluxos do app (`/today`, `/person`, `/share`, `/login`).
+- Ajustes de UX em notificações best-effort, onboarding e copy de estados vazios.
+- Validações de RLS/debug em `user_settings` e `birthdays` no fluxo de debug Supabase.
 
 ### Chore
-- Adicionado `docs/sql/verify_schema.sql` para verificar/preparar PK/FK/RLS de `user_settings` e `birthdays` no Supabase
-- Consolidado contrato visual em utilitários `ui-*` para links tertiary, callouts/disclosures, page shell e overlays/modais
+- Consolidação do design system em utilitários `ui-*` (links terciários, callouts/disclosures, shells e overlays).
+- `docs/sql/verify_schema.sql` para verificação/preparo de PK/FK/RLS no Supabase.
+- Playbooks internos (`product/design/dev`) e documentação do design system para padronizar execução.
 
----
+## [0.1.2] - 2026-02-24
 
-## [v0.1.0] - Initial MVP Release
 ### Added
-- Pagina /today com lista de aniversariantes
-- Pagina /upcoming com proximos 7 dias
-- Adicao/edicao/exclusao de aniversarios
-- Import CSV basico (formato: name,day,month,tags,...)
-- Notificacoes best-effort (quando o app e aberto)
-- Share v1 com link de aniversario (nome + data)
-- PWA basico com manifest e service worker
+- Playwright smoke E2E para fluxos principais do MVP.
+
+## [0.1.1] - 2026-02-23
 
 ### Changed
-- -
+- Melhorias de UX em notificações (patch de estabilização).
 
-### Fixed
-- -
+### Chore
+- Adição de `.gitattributes`.
 
+## [0.1.0] - 2026-02-23
+
+### Added
+- Página `/today` com lista de aniversariantes.
+- Página `/upcoming` com próximos 7 dias.
+- Adição/edição/exclusão de aniversários.
+- Import CSV básico (formato `name,day,month,tags,...`).
+- Notificações best-effort (ao abrir o app).
+- Share v1 com link de aniversário (nome + data).
+- PWA básico com manifest e service worker.
