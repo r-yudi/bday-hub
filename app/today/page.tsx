@@ -272,7 +272,7 @@ export default function TodayPage() {
                   onClick={() => setShowImport(true)}
                   className="mt-3 text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text"
                 >
-                  Importar CSV
+                  Abrir importação CSV
                 </button>
               </div>
             ) : (

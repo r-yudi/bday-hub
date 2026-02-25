@@ -275,7 +275,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
                   }
                 }}
                 list="category-options"
-                placeholder="Digite uma categoria"
+                placeholder="Digite e pressione Enter"
                 className="shadow-none"
               />
               <Button type="button" variant="secondary" size="sm" className="ui-cta-secondary" onClick={() => void addCategory(categoryInput)}>
