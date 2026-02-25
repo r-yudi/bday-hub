@@ -1,6 +1,6 @@
 ﻿# Lembra. — SPEC (baseline atual)
 
-## Status de implementação (atualizado em 2026-02-24)
+## Status de implementação (atualizado em 2026-02-25)
 
 ### Estado geral
 - App em produção com branding **Lembra.**
@@ -19,6 +19,7 @@
   - `/today`
   - `/upcoming`
   - `/person`
+  - `/manage`
   - `/share`
   - `/share/[token]`
 - Auth:
@@ -61,6 +62,7 @@
   - `/today`
   - `/upcoming`
   - `/person`
+  - `/manage`
   - `/share`
   - `/share/[token]`
   - `/login`
@@ -139,6 +141,21 @@
 - Form de cadastro/edição
 - categorias (multi-select leve + criação rápida)
 
+### `/manage`
+- Página de gestão com abas:
+  - aniversários
+  - categorias
+- Aniversários:
+  - lista completa
+  - busca + filtros (texto/categoria/origem/mês)
+  - editar (atalho para `/person?id=...`) e excluir
+- Categorias:
+  - lista completa (predefinidas + custom)
+  - busca + filtros (tipo/uso)
+  - editar/excluir categorias custom
+  - ao editar/excluir categoria custom, propaga alteração para aniversários associados
+  - categorias predefinidas ficam somente leitura no MVP
+
 ### `/share`
 - Hub para gerar/copiar links de compartilhamento
 
@@ -176,6 +193,7 @@
   - import CSV
   - persistência após reload
   - `/share/[token]` -> adicionar à lista
+  - (expansão futura) `/manage` busca/filtros/edição de categorias
 - Comandos obrigatórios em mudanças relevantes:
   - `npm run build`
   - `npm test`
@@ -194,7 +212,7 @@
 - Revogação completa de links compartilhados com UX de gestão
 - Dedupe/merge avançado de CSV
 - Notificações mais confiáveis (push/email/cron)
-- Fluxos avançados de gestão (ex.: `/manage`)
+- Fluxos avançados de gestão em `/manage` (bulk actions, multi-select, filtros salvos)
 
 ## 11) Nota de compatibilidade
 O app mantém compatibilidade de leitura com dados legados (`tags` / formatos anteriores), mas o schema atual de `birthdays` no Supabase deve usar `categories` e **não depender** da coluna legada `category`.

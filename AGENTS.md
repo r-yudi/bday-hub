@@ -11,7 +11,7 @@
 - Produto público com landing (`/`) + páginas legais (`/privacy`, `/terms`).
 - `/` deve permanecer como landing/entrypoint de marketing (sem redirect automático para `/today`).
 - App principal funcionando em guest/local-first:
-  - `/today`, `/upcoming`, `/person`, `/share`, `/share/[token]`
+  - `/today`, `/upcoming`, `/person`, `/manage`, `/share`, `/share/[token]`
 - Supabase já integrado para:
   - Auth Google (`/login`, `/auth/callback`)
   - Sessão persistente
@@ -49,6 +49,7 @@
 - Landing pública em `/`
 - `/today` e `/upcoming`
 - CRUD de aniversários (`/person`)
+- Gestão MVP de aniversários/categorias (`/manage`) com abas, busca/filtros e editar/excluir
 - Importação CSV com preview + validação + fallback de encoding (UTF-8/Latin1)
 - Templates de mensagem + copiar
 - Links rápidos (WhatsApp/Instagram/outro)
@@ -119,7 +120,7 @@ Use os playbooks em `playbooks/` para acelerar entregas com consistência, sem m
 - "Implemente Y com o fluxo de `playbooks/dev-skill.md`"
 
 ## Próximos focos sugeridos (vNext)
-- Gestão avançada (`/manage`) com busca/filtros/multi-select.
+- Gestão avançada em `/manage` (bulk actions, multi-select, filtros salvos).
 - Share avançado com múltiplos aniversários + fluxo remoto seguro.
 - Dedupe/merge mais inteligente na importação CSV.
 - Notificações mais confiáveis além do best-effort ao abrir.

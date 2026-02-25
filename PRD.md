@@ -1,6 +1,6 @@
 ﻿# Lembra. — PRD (baseline + status atual)
 
-## Status do projeto (atualizado em 2026-02-24)
+## Status do projeto (atualizado em 2026-02-25)
 
 ### Resumo executivo
 - Produto reposicionado como **Lembra.** (foco exclusivo em aniversários).
@@ -17,6 +17,7 @@
   - `/today`
   - `/upcoming`
   - `/person`
+  - `/manage`
   - `/share`
   - `/share/[token]`
 - Auth Google via Supabase (`/login`, `/auth/callback`) com sessão persistente.
@@ -69,14 +70,16 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 ## 4) Casos de uso principais (estado atual)
 1. Usuário adiciona aniversários manualmente (com categorias) ou importa CSV.
 2. Usuário abre o app e vê quem faz aniversário hoje / próximos 7 dias.
-3. Usuário copia mensagem pronta ou abre link para parabenizar.
-4. Usuário compartilha o próprio aniversário por link (`/share/[token]`).
-5. Usuário entra com Google para sincronizar aniversários entre dispositivos.
+3. Usuário gerencia aniversários e categorias em `/manage` (busca/filtros, edição/exclusão).
+4. Usuário copia mensagem pronta ou abre link para parabenizar.
+5. Usuário compartilha o próprio aniversário por link (`/share/[token]`).
+6. Usuário entra com Google para sincronizar aniversários entre dispositivos.
 
 ## 5) Escopo (baseline atual)
 ### 5.1 Incluído e entregue
 - Listas “Hoje” e “Próximos 7 dias”
 - CRUD de aniversários
+- Gestão MVP em `/manage` com abas de aniversários/categorias, busca/filtros e ações de editar/excluir
 - Importação CSV com preview e validação
 - Templates de mensagem + copiar
 - Links rápidos (WhatsApp / Instagram / outro)
@@ -115,10 +118,11 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 - Ao abrir `/`, usuário vê a landing (marketing) como página inicial do produto.
 - Usuário consegue (sem login):
   1. adicionar/editar/excluir aniversários
-  2. importar CSV
-  3. ver Hoje e Próximos 7 dias
-  4. copiar mensagem com 1 clique
-  5. usar `/share/[token]` e adicionar à lista
+  2. gerenciar aniversários/categorias em `/manage` (busca/filtros + edição/exclusão)
+  3. importar CSV
+  4. ver Hoje e Próximos 7 dias
+  5. copiar mensagem com 1 clique
+  6. usar `/share/[token]` e adicionar à lista
 - Usuário consegue (com login):
   1. entrar com Google
   2. manter sessão após refresh

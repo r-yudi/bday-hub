@@ -16,6 +16,7 @@ Formato adotado:
 - UI stabilization (rodada atual): consolidação do contrato visual `ui-*`, refinamentos de landing/fluxos e ajustes de consistência visual sem mudar o baseline de produto.
 
 ### Added
+- `/manage` com gestão MVP em abas (aniversários/categorias), busca/filtros e ações de editar/excluir.
 - Endpoint `/healthz` para smoke test de produção/deploy.
 - Multi-device sync de aniversários com Supabase quando logado (fallback local mantido quando não logado).
 - Ferramentas de debug Supabase (`/debug/auth`, `/debug/supabase`) para validação de Auth/DB/RLS em desenvolvimento.
