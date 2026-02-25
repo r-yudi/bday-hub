@@ -17,6 +17,7 @@ type BeforeInstallPromptEvent = Event & {
 type InstallPlatform = "ios" | "desktop-chrome" | "other";
 
 const PWA_BANNER_DISMISSED_UNTIL_KEY = "bdayhub_pwa_banner_dismissed_until";
+const PWA_BANNER_DISMISSED_SESSION_KEY = "lembra_pwa_banner_dismissed_session";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 function SessionGuardNotice() {
@@ -61,6 +62,7 @@ function detectInstallPlatform(): InstallPlatform {
 function shouldHidePwaBannerByDismiss() {
   if (typeof window === "undefined") return false;
   try {
+    if (window.sessionStorage.getItem(PWA_BANNER_DISMISSED_SESSION_KEY) === "1") return true;
     const raw = window.localStorage.getItem(PWA_BANNER_DISMISSED_UNTIL_KEY);
     if (!raw) return false;
     const until = Number(raw);
@@ -73,6 +75,7 @@ function shouldHidePwaBannerByDismiss() {
 function dismissPwaBannerFor30Days() {
   if (typeof window === "undefined") return;
   try {
+    window.sessionStorage.setItem(PWA_BANNER_DISMISSED_SESSION_KEY, "1");
     window.localStorage.setItem(PWA_BANNER_DISMISSED_UNTIL_KEY, String(Date.now() + THIRTY_DAYS_MS));
   } catch {
     // ignore
@@ -141,17 +144,17 @@ function PwaInstallBanner() {
   const showDesktopInstructions = platform === "desktop-chrome" || installEvent !== null;
 
   return (
-    <section className="mb-4 rounded-2xl border border-black/10 bg-white/90 p-3 shadow-sm dark:border-white/10 dark:bg-white/5">
-      <div className="flex items-start gap-3">
+    <section className="mb-4 rounded-xl border border-border/70 bg-surface/75 px-3 py-2 shadow-sm dark:bg-surface/20 sm:px-4 sm:py-2.5">
+      <div className="flex items-start gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-black/90 dark:text-white/90">Instale o Lembra. e deixe seus lembretes por perto</p>
+          <p className="text-sm font-medium leading-5 text-text">Instale o Lembra. para acessar seus aniversários mais rápido.</p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => void handleInstallClick()}
-            className="btn-primary-brand rounded-xl bg-accent px-3 py-1.5 text-sm text-white hover:bg-accentHover"
+            className="btn-primary-brand ui-cta-primary h-9 rounded-xl bg-accent px-3 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
           >
             Instalar
           </button>
@@ -159,26 +162,26 @@ function PwaInstallBanner() {
             type="button"
             onClick={handleDismiss}
             aria-label="Dispensar sugestão de instalação"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-black/60 hover:bg-black/5 dark:border-white/15 dark:text-white/65 dark:hover:bg-white/10"
+            className="ui-focus-surface inline-flex h-8 w-8 items-center justify-center rounded-lg border p-0 text-sm focus-visible:outline-none"
           >
             ×
           </button>
         </div>
       </div>
 
-      <div className="mt-2">
+      <div className="mt-1.5">
         <button
           type="button"
           onClick={() => setShowInstructions((value) => !value)}
-          className="text-xs text-black/65 underline decoration-black/20 underline-offset-2 hover:text-black/85 dark:text-white/65 dark:decoration-white/20 dark:hover:text-white/85"
+          className="text-xs text-muted underline decoration-border underline-offset-2 hover:text-text"
           aria-expanded={showInstructions}
         >
-          {showInstructions ? "Ocultar" : "Como instalar"}
+          {showInstructions ? "Ocultar" : "Saiba mais"}
         </button>
       </div>
 
       {showInstructions && (
-        <div className="mt-2 rounded-xl border border-black/5 bg-black/[0.03] px-3 py-2 text-xs text-black/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70">
+        <div className="mt-2 rounded-xl border border-border/60 bg-surface2/55 px-3 py-2 text-xs text-muted dark:bg-surface/20">
           {showIosInstructions && <p>No iPhone/iPad (Safari): toque em "Compartilhar" e depois em "Adicionar à Tela de Início".</p>}
           {showDesktopInstructions && (
             <p>No Chrome (desktop): clique em "Instalar" ou use o ícone de instalação na barra de endereço.</p>

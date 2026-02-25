@@ -221,12 +221,12 @@ export default function TodayPage() {
   return (
     <>
       <div className="space-y-8 lg:space-y-10">
-        <section className="flex flex-wrap items-center justify-between gap-3">
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">Hoje</h1>
             <p className="ui-subtitle-editorial mt-2 max-w-[60ch] text-sm sm:text-[15px]">Veja quem faz aniversário hoje e registre pessoas com categorias quando precisar.</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
             <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
               Adicionar
             </Link>
@@ -244,17 +244,17 @@ export default function TodayPage() {
 
         {banner && <div className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">{banner}</div>}
 
-        <section className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <section className="grid gap-4 lg:grid-cols-[2fr_1fr] lg:gap-5">
           <div className="space-y-4">
             {showImport && <ImportCsv onImport={handleImport} />}
 
             {loading ? (
               <p className="text-sm text-black/60">Carregando...</p>
             ) : todayPeople.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border/70 bg-surface/65 p-8 text-center shadow-sm dark:bg-surface/20">
+              <div className="rounded-2xl border border-border/60 bg-surface/65 p-6 text-center shadow-sm dark:bg-surface/20 sm:p-7">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper text-2xl shadow-sm">🎂</div>
-                <p className="mt-4 text-lg font-semibold tracking-tight text-text">Hoje está tranquilo por aqui 🎉</p>
-                <p className="mt-2 text-sm text-muted">Nenhum aniversário hoje. Que tal revisar os próximos dias?</p>
+                <p className="mt-4 text-lg font-semibold tracking-tight text-text">Nenhum aniversário hoje 🎈</p>
+                <p className="mt-2 text-sm text-muted">Aproveite para revisar os próximos dias ou adicionar alguém agora.</p>
                 <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
                   <Link
                     href="/person"
@@ -267,6 +267,13 @@ export default function TodayPage() {
                     Ver próximos 7 dias
                   </Link>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowImport(true)}
+                  className="mt-3 text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text"
+                >
+                  Importar CSV
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -288,7 +295,7 @@ export default function TodayPage() {
                 )}
               </div>
 
-              <p className="mt-2 text-sm text-black/75">{notificationSummary}</p>
+              <p className="mt-2 text-sm leading-5 text-black/75">{notificationSummary}</p>
 
               <button
                 type="button"
@@ -322,11 +329,11 @@ export default function TodayPage() {
 
             <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-black/70">Dados</h2>
-              <p className="mt-2 text-sm text-black/70">Seus aniversários ficam salvos localmente neste dispositivo.</p>
+              <p className="mt-2 text-sm leading-5 text-black/70">Seus aniversários ficam salvos neste dispositivo e você pode exportar em CSV quando quiser.</p>
               <button
                 type="button"
                 onClick={openClearModal}
-                className="ui-focus-surface mt-3 rounded-lg border px-3 py-2 text-sm font-medium focus-visible:outline-none"
+                className="ui-cta-secondary mt-3 rounded-lg border px-3 py-2 text-sm font-medium focus-visible:outline-none"
               >
                 Limpar todos os dados
               </button>
