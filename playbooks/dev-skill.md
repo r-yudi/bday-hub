@@ -1,4 +1,4 @@
-﻿# Dev Skill Playbook (Lembra.)
+# Dev Skill Playbook (Lembra.)
 
 ## Objetivo
 Desenvolver com simplicidade, velocidade e criatividade, sem inflar a arquitetura e sem quebrar os contratos do produto.
@@ -9,6 +9,13 @@ Desenvolver com simplicidade, velocidade e criatividade, sem inflar a arquitetur
 3. `AGENTS.md`
 4. `CHANGELOG.md` (se houver entrega relevante)
 5. `playbooks/product-skill.md` ou `playbooks/design-skill.md` (quando aplicável)
+
+## Regras estratégicas (nível co-founder)
+
+- **Regra de Simplicidade:** Preferir a solução mais simples que atenda ao objetivo; não adicionar camadas “por garantia”.
+- **Regra de MVP emocional primeiro:** Entregar primeiro o que gera impacto emocional ou confiança para o usuário; refinamentos técnicos depois.
+- **Regra de evitar abstração prematura:** Não criar helpers, camadas ou tipos genéricos antes de ter pelo menos dois usos concretos.
+- **Regra de sempre listar riscos antes de executar:** Antes de implementar, listar regressões possíveis (guest, sync, share, landing, rotas) e mitigação; não executar “no escuro”.
 
 ## Regras de execução
 - Fazer mudanças pequenas e incrementais.

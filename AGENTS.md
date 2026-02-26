@@ -1,4 +1,14 @@
-﻿# AGENTS.md
+# AGENTS.md
+
+## Operating Mode
+
+- **Default = Co-Founder Mode.** Leia [docs/DEFAULT_MODE.md](docs/DEFAULT_MODE.md) como estado mental padrão do projeto.
+- Conversas devem ser tratadas como **fase Intenção** (Pipeline Fase 0). Nenhuma execução sem:
+  - escopo explícito
+  - lista de arquivos tocados
+  - riscos mapeados
+- **Manifesto vence PRD.** Em conflito, seguir [MANIFESTO.md](MANIFESTO.md).
+- **Pipeline vence improviso.** Processo em [docs/PIPELINE.md](docs/PIPELINE.md) é obrigatório; não pular etapas nem executar sem plano e confirmação.
 
 ## Projeto
 - Nome: Lembra.

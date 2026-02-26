@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 Formato adotado:
 - `## [Unreleased]` para mudanças ainda não tagueadas
@@ -12,9 +12,13 @@ Formato adotado:
 
 ## [Unreleased]
 
+### Chore
+- Co-Founder Mode permanente: novo `docs/DEFAULT_MODE.md` (estado mental padrão), PIPELINE Fase 0 (Conversação Estratégica), Operating Mode em AGENTS.md, regras estratégicas nos playbooks product/design/dev; execução só após plano e confirmação.
+
 ### Changed
 - UI stabilization (rodada atual): consolidação do contrato visual `ui-*`, refinamentos de landing/fluxos e ajustes de consistência visual sem mudar o baseline de produto.
 - Dark mode premium pass: nova hierarquia de superfícies/bordas/sombras/focus/tertiary no DS, landing dark mais silenciosa e badges de categorias em `/manage` com diferenciação visual clara.
+- V2 visual pass (Series A): hero da landing com CTA principal mais dominante, redução de ruído acima da dobra e hierarquia mais agressiva em `/today` e `/manage`.
 
 ### Added
 - `/manage` com gestão MVP em abas (aniversários/categorias), busca/filtros e ações de editar/excluir.
@@ -26,6 +30,8 @@ Formato adotado:
 - Banner PWA contextual, onboarding leve e toasts de feedback.
 - Categorias predefinidas + custom (guest/local-first + `user_categories` no Supabase).
 - Páginas legais (`/privacy`, `/terms`) e branding Lembra.
+- MVP de notificação fora do app por email diário para usuários logados (configuração em `/today` + cron protegido em `/api/cron/email`).
+- Checklist visual operacional V2 em `docs/v2-visual-checklist.md`.
 
 ### Fixed
 - `/` permanece como landing/entrypoint de marketing (sem redirect automático para `/today`).

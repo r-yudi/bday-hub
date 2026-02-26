@@ -1,4 +1,4 @@
-﻿# Product Skill Playbook (Lembra.)
+# Product Skill Playbook (Lembra.)
 
 ## Objetivo
 Tomar decisões de produto com assertividade para o Lembra., preservando simplicidade e evitando escopo inflado.
@@ -9,6 +9,12 @@ Tomar decisões de produto com assertividade para o Lembra., preservando simplic
 3. `AGENTS.md` (regras operacionais)
 4. `CHANGELOG.md` (histórico e padrão de release)
 5. `DESIGN_SYSTEM.md` + `app/styles/tokens.css` + `app/globals.css` (se houver impacto visual)
+
+## Regras estratégicas (nível co-founder)
+
+- **Regra de Presença:** Decisões de produto devem considerar o que o usuário sente ao usar o app (presença emocional), não só a lista de features.
+- **Regra de Ação > Lembrança:** Priorizar o que o usuário pode fazer agora (ação) sobre o que o sistema “lembra” por ele; lembretes são apoio, não o centro.
+- **Regra de Priorizar impacto emocional:** Escolher escopo e copy que gerem energia, celebração ou confiança; evitar mudanças que deixem a experiência morna ou genérica.
 
 ## Regras de decisão (não negociáveis)
 - Preservar `guest/local-first`.

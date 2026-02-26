@@ -1,7 +1,14 @@
-﻿# Design Skill Playbook (Lembra.)
+# Design Skill Playbook (Lembra.)
 
 ## Objetivo
 Evoluir a UI com consistência e intenção de produto, usando o design system existente como fonte única e evitando regressões visuais/UX.
+
+## Regras estratégicas (nível co-founder)
+
+- **Regra de Energia:** A UI deve transmitir energia e celebração onde fizer sentido (hero, empty states, feedback); evitar telas “apagadas” ou neutras demais.
+- **Regra de Composição forte > efeito decorativo:** Priorizar hierarquia clara, CTA dominante e respiro; efeitos (sombras, animações, glows) servem à composição, não ao contrário.
+- **Regra de Hero memorável:** O hero/landing deve ser o elemento mais marcante da primeira impressão; uma mensagem, um CTA principal, fundo com profundidade elegante.
+- **Proibição de incrementalismo visual excessivo:** Evitar dezenas de ajustes pequenos sem direção; preferir um conjunto coerente de mudanças alinhado ao contrato visual e ao MANIFESTO.
 
 ## Fonte única do design system (obrigatório)
 - Tokens: `app/styles/tokens.css`
