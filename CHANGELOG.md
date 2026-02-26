@@ -16,6 +16,7 @@ Formato adotado:
 - Co-Founder Mode permanente: novo `docs/DEFAULT_MODE.md` (estado mental padrão), PIPELINE Fase 0 (Conversação Estratégica), Operating Mode em AGENTS.md, regras estratégicas nos playbooks product/design/dev; execução só após plano e confirmação.
 
 ### Changed
+- **V2 rodada governada (tese "Estar presente é celebrar"):** doc north-star `docs/MANIFESTO_UI_COPY.md` (mapa Manifesto→UI/copy, headline/CTA/apoio congelados, mini dicionário); hero da landing em ruptura (headline "Estar presente é celebrar.", CTA "Quero aparecer no dia" / "Continuar no app", chip "Lembra." apenas); confetes e fios dos balões visíveis em light e dark (`globals.css`); `/manage` consistência visual (tablist com `shadow-md`, badges predefinido/custom já alinhados ao contrato).
 - UI stabilization (rodada atual): consolidação do contrato visual `ui-*`, refinamentos de landing/fluxos e ajustes de consistência visual sem mudar o baseline de produto.
 - Dark mode premium pass: nova hierarquia de superfícies/bordas/sombras/focus/tertiary no DS, landing dark mais silenciosa e badges de categorias em `/manage` com diferenciação visual clara.
 - V2 visual pass (Series A): hero da landing com CTA principal mais dominante, redução de ruído acima da dobra e hierarquia mais agressiva em `/today` e `/manage`.
