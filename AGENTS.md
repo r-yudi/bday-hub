@@ -104,6 +104,7 @@ Use os playbooks em `playbooks/` para acelerar entregas com consistência, sem m
 
 ### Fonte única do design system
 - `DESIGN_SYSTEM.md`
+- `docs/visual-contract.md`
 - `app/styles/tokens.css`
 - `app/globals.css`
 

@@ -36,7 +36,7 @@ function Balloon({ className, color, delay, duration }: { className?: string; co
       <svg viewBox="0 0 44 86" className="h-full w-full" aria-hidden>
         <path d="M22 64c1.2 0 2.3-.5 3.2-1.3 7-6 11.3-15 11.3-25.1C36.5 20 30 8 22 8S7.5 20 7.5 37.6c0 10.2 4.2 19.1 11.3 25.1.9.8 2 1.3 3.2 1.3Z" fill={color} opacity="0.94" />
         <path d="M17 62h10l-5 7-5-7Z" fill={color} opacity="0.78" />
-        <path d="M22 69c1 6-4 7-1 13" stroke="hsl(var(--surface) / 0.7)" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+        <path d="M22 69c1 6-4 7-1 13" stroke="hsl(var(--ui-text) / 0.3)" strokeWidth="1.4" strokeLinecap="round" fill="none" />
       </svg>
     </div>
   );

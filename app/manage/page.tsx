@@ -584,7 +584,15 @@ export default function ManagePage() {
                 const renameBusy = busyKey === `category-rename:${row.key}`;
                 const deleteBusy = busyKey === `category-delete:${row.key}`;
                 return (
-                  <Card key={row.key} className="ui-surface-elevated p-4">
+                  <Card
+                    key={row.key}
+                    className={[
+                      "ui-surface-elevated p-4 transition-opacity",
+                      row.isPredefined ? "border-l-2 border-l-border/70" : "border-l-2 border-l-primary/45",
+                      isEditing ? "ring-1 ring-primary/25" : "",
+                      deleteBusy ? "opacity-70" : "opacity-100"
+                    ].join(" ")}
+                  >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="min-w-0 flex-1">
                         {isEditing ? (
@@ -616,10 +624,14 @@ export default function ManagePage() {
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                               <h2 className="text-base font-semibold tracking-tight text-text">{row.name}</h2>
-                              <Chip as="span" variant={row.isPredefined ? "subtle" : "accent"} className="ui-chip">
+                              <Chip
+                                as="span"
+                                variant={row.isPredefined ? "subtle" : "accent"}
+                                className={row.isPredefined ? "ui-chip ui-badge-predefined" : "ui-chip ui-badge-custom"}
+                              >
                                 {row.isPredefined ? "Predefinida" : "Custom"}
                               </Chip>
-                              <Chip as="span" variant="warning" className="ui-chip">
+                              <Chip as="span" variant="warning" className="ui-chip ui-badge-usage">
                                 {row.usageCount} uso(s)
                               </Chip>
                             </div>

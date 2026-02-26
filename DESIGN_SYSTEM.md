@@ -20,6 +20,7 @@ Definir a fonte única do contrato visual do Lembra. para manter consistência e
 - `ui-surface`
 - `ui-surface-elevated`
 - `ui-border-subtle`
+- `ui-border-strong`
 - `ui-backdrop`
 
 ### Ações e foco
@@ -35,6 +36,11 @@ Definir a fonte única do contrato visual do Lembra. para manter consistência e
 - `ui-callout`
 - `ui-disclosure`
 - `ui-disclosure-summary`
+
+### Badges (tipos/estado)
+- `ui-badge-predefined`
+- `ui-badge-custom`
+- `ui-badge-usage`
 
 ### Overlays e modais
 - `ui-overlay-backdrop`

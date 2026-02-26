@@ -14,6 +14,7 @@ Formato adotado:
 
 ### Changed
 - UI stabilization (rodada atual): consolidação do contrato visual `ui-*`, refinamentos de landing/fluxos e ajustes de consistência visual sem mudar o baseline de produto.
+- Dark mode premium pass: nova hierarquia de superfícies/bordas/sombras/focus/tertiary no DS, landing dark mais silenciosa e badges de categorias em `/manage` com diferenciação visual clara.
 
 ### Added
 - `/manage` com gestão MVP em abas (aniversários/categorias), busca/filtros e ações de editar/excluir.

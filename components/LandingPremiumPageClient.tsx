@@ -24,8 +24,8 @@ export function LandingPremiumPageClient() {
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-background bg-celebration-light px-4 py-6 dark:bg-celebration-dark sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-      <div className="pointer-events-none absolute inset-0 bg-grid-subtle landing-grid-drift opacity-60" />
+    <div className="relative overflow-hidden rounded-xl border border-border bg-background bg-celebration-light px-4 py-6 dark:border-border/60 dark:bg-celebration-dark sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-grid-subtle landing-grid-drift opacity-60 dark:opacity-30" />
       <div className="pointer-events-none absolute -left-16 top-10 h-56 w-56 rounded-full glow-coral blur-3xl landing-glow-a" />
       <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full glow-lilac blur-3xl landing-glow-b" />
 
@@ -33,7 +33,7 @@ export function LandingPremiumPageClient() {
         <section className="relative grid items-start gap-8 lg:grid-cols-2 lg:gap-10 xl:gap-12">
           <Reveal delay={40} className="relative z-[40]">
             <div className="hero-copy-backdrop">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/70 px-3 py-1 text-[11px] font-semibold tracking-[0.02em] text-muted shadow-sm dark:bg-surface/35">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/70 px-3 py-1 text-[11px] font-semibold tracking-[0.02em] text-muted shadow-sm dark:border-border/60 dark:bg-surface/45 dark:text-text/85">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 Lembra. • Seu app de aniversários
               </div>
@@ -46,7 +46,7 @@ export function LandingPremiumPageClient() {
                     <span className="landing-sparkle landing-sparkle-5" />
                   </div>
                 )}
-                <h1 className="text-balance text-[2.5rem] font-semibold leading-[0.96] tracking-[-0.025em] text-text sm:text-[3.2rem] sm:leading-[0.93] lg:text-[4.05rem] lg:leading-[0.9] xl:text-[4.45rem]">
+                <h1 className="text-balance text-[2.5rem] font-semibold leading-[0.96] tracking-[-0.025em] text-text sm:text-[3.2rem] sm:leading-[0.93] lg:text-[4.05rem] lg:leading-[0.9] xl:text-[4.45rem] dark:text-text dark:[text-shadow:0_2px_22px_hsl(var(--bg)/0.55)]">
                   Celebre todas as pessoas que <span className="landing-gradient-word">importam</span>.
                 </h1>
               </div>
@@ -85,7 +85,7 @@ export function LandingPremiumPageClient() {
               </Reveal>
 
               <Reveal delay={190}>
-                <div className="mt-6 inline-flex max-w-full items-center gap-2.5 text-[13px] leading-5 text-muted sm:text-sm">
+                <div className="mt-6 inline-flex max-w-full items-center gap-2.5 text-[13px] leading-5 text-muted sm:text-sm dark:text-muted">
                   <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent/18 bg-accent/10 text-[12px] text-accent">✓</span>
                   <span className="text-balance">
                     <span className="font-medium text-text/90">Hoje:</span> 3 aniversários na sua lista • mensagens prontas e links rápidos.
@@ -144,12 +144,12 @@ export function LandingPremiumPageClient() {
         </section>
 
         <Reveal delay={220}>
-          <footer className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border/75 bg-surface/70 px-4 py-3 text-sm text-muted shadow-sm sm:flex-row sm:items-center dark:bg-surface/35">
+          <footer className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border/75 bg-surface/70 px-4 py-3 text-sm text-muted shadow-sm sm:flex-row sm:items-center dark:border-border/60 dark:bg-surface/45">
             <p>Lembra. • Nunca mais esqueça um aniversário 🎉</p>
             <div className="flex items-center gap-3">
-              <Link href="/privacy" className="hover:text-text">Privacidade</Link>
-              <Link href="/terms" className="hover:text-text">Termos</Link>
-              <Link href="/styleguide" className="hover:text-text">Styleguide</Link>
+              <Link href="/privacy" className="ui-link-tertiary">Privacidade</Link>
+              <Link href="/terms" className="ui-link-tertiary">Termos</Link>
+              <Link href="/styleguide" className="ui-link-tertiary">Styleguide</Link>
             </div>
           </footer>
         </Reveal>

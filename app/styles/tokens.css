@@ -23,12 +23,21 @@
   --ui-bg: var(--bg);
   --ui-surface: var(--surface);
   --ui-surface-2: var(--surface-2);
+  --ui-surface-elevated: 0 0% 100%;
+  --ui-surface-overlay: 0 0% 100%;
   --ui-border: var(--border);
+  --ui-border-subtle: 220 14% 86%;
+  --ui-border-strong: 220 14% 78%;
   --ui-text: var(--text);
   --ui-muted: var(--muted);
   --ui-accent: var(--accent);
   --ui-accent-contrast: var(--accent-foreground);
   --ui-ring: var(--ring);
+  --ui-focus-ring: var(--primary);
+  --ui-link-tertiary: 220 20% 24%;
+  --ui-link-tertiary-hover: 220 22% 14%;
+  --ui-link-tertiary-muted: 220 10% 40%;
+  --ui-link-tertiary-underline: 220 14% 78%;
 
   --radius-sm: 10px;
   --radius-md: 14px;
@@ -67,16 +76,25 @@
   --ring: var(--primary);
 
   --ui-bg: 228 18% 9%;
-  --ui-surface: 228 16% 14%;
-  --ui-surface-2: 228 14% 18%;
+  --ui-surface: 228 15% 13%;
+  --ui-surface-2: 228 14% 17%;
+  --ui-surface-elevated: 228 14% 20%;
+  --ui-surface-overlay: 228 15% 23%;
   --ui-border: 228 12% 30%;
+  --ui-border-subtle: 228 12% 28%;
+  --ui-border-strong: 228 10% 40%;
   --ui-text: 34 24% 96%;
-  --ui-muted: 220 14% 78%;
+  --ui-muted: 220 12% 80%;
   --ui-accent: var(--accent);
   --ui-accent-contrast: var(--accent-foreground);
   --ui-ring: var(--primary);
+  --ui-focus-ring: 12 92% 68%;
+  --ui-link-tertiary: 34 18% 86%;
+  --ui-link-tertiary-hover: 34 22% 95%;
+  --ui-link-tertiary-muted: 220 12% 82%;
+  --ui-link-tertiary-underline: 228 10% 44%;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.22);
-  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.34);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255, 255, 255, 0.015);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.34), 0 1px 0 rgba(255, 255, 255, 0.02);
+  --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.42), 0 1px 0 rgba(255, 255, 255, 0.025);
 }

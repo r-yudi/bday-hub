@@ -207,6 +207,7 @@
   - callouts/disclosures: `ui-callout`, `ui-disclosure`, `ui-disclosure-summary`
   - shells centrados/overlays: `ui-page-shell`, `ui-page-shell-centered`, `ui-overlay-backdrop`, `ui-modal-surface`
 - Em dark mode, o fundo deve recuar (grid/glows discretos); conteúdo deve viver em superfícies previsíveis.
+- Referência operacional do contrato visual (dark + elevação + badges + focus + tertiary): `docs/visual-contract.md`
 
 ## 10) Limitações / próximos focos (vNext)
 - Revogação completa de links compartilhados com UX de gestão

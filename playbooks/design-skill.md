@@ -114,4 +114,4 @@ Aplicar depois que a tela já funciona.
 4. Implementar usando `ui-*`/tokens primeiro.
 5. Fazer `UI polish pass` (seguro).
 6. Checar checklist de acessibilidade.
-7. Atualizar `DESIGN_SYSTEM.md` se criar novo utilitário `ui-*`.
+7. Atualizar `DESIGN_SYSTEM.md` (e `docs/visual-contract.md` em dark passes) se criar/alterar utilitário `ui-*` ou regra visual recorrente.
