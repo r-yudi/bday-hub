@@ -12,11 +12,25 @@ on:
 jobs:
   trigger-cron:
     runs-on: ubuntu-latest
+    environment: production
     steps:
+      - name: Debug secret presence
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is EMPTY"
+            exit 1
+          else
+            echo "CRON_SECRET length: ${#CRON_SECRET}"
+          fi
+
       - name: Call /api/cron/email
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           resp=$(curl -s -w "\n%{http_code}" -X GET \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
             "https://uselembra.com.br/api/cron/email")
           code=$(echo "$resp" | tail -n1)
           body=$(echo "$resp" | sed '$d')
