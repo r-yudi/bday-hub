@@ -39,3 +39,25 @@ Registro de decisões estruturais e de escopo. Fonte: processo PIPELINE e discus
 - **Copy congelada:** headline "Estar presente é celebrar."; CTA "Quero aparecer no dia" (logado: "Continuar no app"); apoio ≤12 palavras: "A gente te avisa no dia. Você celebra."
 - **Escopo:** doc `MANIFESTO_UI_COPY.md`, hero rupture UI-only, confetti/balloon visibility light+dark, `/manage` consistência (tablist + badges). Sem Web Push, sem alteração de arquitetura/auth/sync, sem novas libs.
 - **Aprendizados:** (1) Congelar headline/CTA/apoio num doc north-star evita deriva em revisões. (2) Confetti/balões em light exigem opacidade maior nos strokes (--text/0.38–0.42) que em dark. (3) Tablist em /manage com shadow-md alinha elevação ao restante dos cards sem mudar contrato.
+
+---
+
+## Hero Side Blast (abandono Orbit)
+- **Decisão:** Abandonar conceito Orbit (hero centralizado, ilustração abaixo da dobra). Adotar Hero Side Blast Dramático: composição assimétrica, ilustração >= 35% na dobra, radial spotlight atrás do copy, glow quente lateral, confetti atravessando e invadindo a headline; mobile não centralizado.
+- **Prova visual obrigatória:** 8 screenshots (desktop/mobile × light/dark × fullpage + hero fold) em `test-results/visual-regression/`; paths listados em `e2e/visual-regression.spec.ts` e em `docs/VISUAL_PROOF_PROTOCOL.md`.
+
+---
+
+## Hero Radial Cut Explosion (abandono hero ilustrativo)
+- **Decisão:** Abandonar qualquer hero ilustrativo (personagens, outdoor-party). Adotar hero “Radial Cut Explosion”: abstração pura; forma principal >= 60vw nascendo fora da viewport (canto superior direito); orbs com blur profundo; pelo menos uma ribbon diagonal cruzando a tela; confete mínimo porém maior (partículas 12–24px); spotlight radial atrás da headline; headline com sobreposição leve à massa; mobile como corte de pôster (não SaaS minimal).
+- **Playbook:** Regra “Anti-hero minimalista” em `playbooks/design-skill.md`: exigir elemento de escala/composição ousada e validar com proof visual.
+
+---
+
+## Hero Experimental Lab (/campaign)
+- **Decisão:** Rota isolada `/campaign` para testar ruptura visual Series A sem alterar a landing atual. Full-bleed 100vh; AppShell em `/campaign` renderiza apenas `children` (sem TopNav/main wrapper).
+- **Copy fixa:** Headline "Quem se importa, aparece."; sub "O Lembra te encontra no dia. Você só celebra."; CTA "Me avisar no dia"; link "Já tenho conta".
+- **Visual Light:** Amarelo energético dominante (zona B + massa), 1 cor dominante + 1 corte (ribbon sólida). Proporções em `docs/LANDING_EXPERIMENTAL_CALIBRATION.md`.
+- **Visual Dark:** Cinematográfico, quase preto + pool of light (spotlight atrás da copy), 1 luz principal + 1 glow secundário (massa/borda).
+- **Prova visual:** 8 screenshots em `test-results/visual-regression/exp-*` (desktop/mobile × light/dark × fullpage + hero). Paths em `e2e/visual-regression.spec.ts` e `docs/VISUAL_PROOF_PROTOCOL.md`.
+- **Critério de promoção:** Se aprovado, considerar substituir hero da landing ou manter como variante A/B; decisão posterior.

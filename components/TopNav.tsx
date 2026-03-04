@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,16 +17,18 @@ export function TopNav() {
   const displayName = user?.user_metadata?.full_name || user?.email || "Conta";
   const isLanding = pathname === "/" || pathname === "/landing";
 
-  const themeSelectClass =
-    "ui-focus-surface rounded-full border px-3 py-1.5 text-black/80 focus-visible:outline-none dark:text-text";
+  const themeSelectClass = "topnav-theme-select ui-focus-surface rounded-full border focus-visible:outline-none";
 
   if (isLanding) {
     return (
-      <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/40 dark:bg-background/80">
+      <header className="topnav-shell sticky top-0 z-10 border-b backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <Link href="/" className="group inline-flex flex-col font-semibold tracking-tight">
-            <span>Lembra.</span>
-            <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
+          <Link href="/" className="topnav-brand group inline-flex items-center gap-2 font-semibold tracking-tight">
+            <span className="topnav-brand-mark" aria-hidden>🎉</span>
+            <span className="inline-flex flex-col">
+              <span>Lembra.</span>
+              <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
+            </span>
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -37,23 +39,18 @@ export function TopNav() {
               id="theme-mode-home"
               value={themeMode}
               onChange={(e) => setThemeMode(e.target.value as "light" | "dark" | "system")}
-              className={`${themeSelectClass} text-sm`}
+              className={`${themeSelectClass} px-3 py-1.5 text-sm`}
             >
               <option value="system">Sistema</option>
               <option value="light">Claro</option>
               <option value="dark">Escuro</option>
             </select>
-            <Link href="/today" className="ui-focus-surface inline-flex items-center rounded-full border px-3 py-1.5 text-sm text-black/85 focus-visible:outline-none dark:text-text">
-              Hoje
-            </Link>
-            <Link href="/upcoming" className="ui-focus-surface inline-flex items-center rounded-full border px-3 py-1.5 text-sm text-black/85 focus-visible:outline-none dark:text-text">
-              Próximos 7 dias
-            </Link>
             <Link
               href={user ? "/today" : "/login?returnTo=%2Ftoday"}
-              className="btn-primary-brand ui-cta-primary rounded-full bg-primary px-3 py-1.5 text-sm text-primaryForeground hover:bg-accentHover focus-visible:outline-none"
+              aria-label={configured && initialized && user ? "Continuar no app" : "Entrar com Google"}
+              className="topnav-pill-cta btn-primary-brand ui-cta-primary rounded-full px-3 py-1.5 text-sm text-primaryForeground focus-visible:outline-none"
             >
-              {configured && initialized && user ? "Continuar" : "Entrar"}
+              {configured && initialized && user ? "Continuar" : "Entrar com Google"}
             </Link>
           </div>
         </div>
@@ -62,11 +59,14 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-black/5 bg-paper/90 backdrop-blur dark:border-border/40 dark:bg-background/80">
+    <header className="topnav-shell sticky top-0 z-10 border-b backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <Link href="/today" className="group inline-flex flex-col font-semibold tracking-tight">
-          <span>Lembra.</span>
-          <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
+        <Link href="/today" className="topnav-brand group inline-flex items-center gap-2 font-semibold tracking-tight">
+          <span className="topnav-brand-mark" aria-hidden>🎉</span>
+          <span className="inline-flex flex-col">
+            <span>Lembra.</span>
+            <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
+          </span>
         </Link>
 
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -77,7 +77,7 @@ export function TopNav() {
             id="theme-mode-app"
             value={themeMode}
             onChange={(e) => setThemeMode(e.target.value as "light" | "dark" | "system")}
-            className={`${themeSelectClass} text-xs`}
+            className={`${themeSelectClass} px-3 py-1.5 text-xs`}
             title="Tema"
           >
             <option value="system">Sistema</option>
@@ -95,8 +95,8 @@ export function TopNav() {
                   className={[
                     "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-brand",
                     active
-                      ? "scale-[1.02] bg-primary text-primaryForeground shadow-sm"
-                      : "ui-focus-surface border text-black/85 focus-visible:outline-none dark:text-text"
+                      ? "topnav-pill-active scale-[1.02] text-primaryForeground shadow-sm"
+                      : "topnav-pill ui-focus-surface border focus-visible:outline-none"
                   ].join(" ")}
                 >
                   {item.label}
@@ -106,7 +106,7 @@ export function TopNav() {
           </nav>
 
           {configured && (
-            <div className="ui-surface-elevated flex items-center gap-2 rounded-full border px-2 py-1">
+            <div className="topnav-account-pill ui-surface-elevated flex items-center gap-2 rounded-full border px-2 py-1">
               {user && syncMessage && (
                 <span
                   className={[

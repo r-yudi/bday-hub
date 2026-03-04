@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lembra — Nunca esqueça um aniversário</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FAF8F3;
+    --ink: #1A1410;
+    --ink-mid: #4A3F35;
+    --ink-soft: #8C7B6E;
+    --warm-white: #FFFFFF;
+    --accent: #E85D26;
+    --accent-soft: #F4845A;
+    --dark: #0F0D0A;
+    --dark-card: #1C1A16;
+    --border: rgba(26,20,16,0.10);
+    --border-dark: rgba(255,255,255,0.10);
+    --gold: #C9973A;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(250,248,243,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s ease;
+  }
+
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .nav-logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .nav-links {
+    display: flex; align-items: center; gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px; font-weight: 500;
+    color: var(--ink-mid);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-cta {
+    background: var(--ink);
+    color: var(--cream) !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: background 0.15s ease, transform 0.15s ease !important;
+  }
+
+  .nav-cta:hover {
+    background: var(--accent) !important;
+    transform: translateY(-1px);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 48px 96px;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 64px;
+  }
+
+  .hero-left {
+    flex: 1;
+    max-width: 540px;
+  }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(232,93,38,0.08);
+    border: 1px solid rgba(232,93,38,0.20);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-tag-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(40px, 5vw, 60px);
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    color: var(--ink);
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-pills {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.25s ease both;
+  }
+
+  .pill {
+    font-size: 12px; font-weight: 500;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 5px 12px;
+    background: var(--warm-white);
+  }
+
+  .hero-actions {
+    display: flex; align-items: center; gap: 16px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px; font-weight: 500;
+    border: none; cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    color: var(--ink-mid);
+    font-size: 15px; font-weight: 500;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color 0.15s ease;
+  }
+
+  .btn-secondary:hover { color: var(--ink); }
+
+  .btn-secondary svg { transition: transform 0.15s ease; }
+  .btn-secondary:hover svg { transform: translateX(3px); }
+
+  /* ── HERO RIGHT: PHONE MOCKUP ── */
+  .hero-right {
+    flex: 1;
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .phone-wrap {
+    position: relative;
+    filter: drop-shadow(0 40px 80px rgba(26,20,16,0.18));
+  }
+
+  .phone-frame {
+    width: 300px;
+    background: var(--ink);
+    border-radius: 44px;
+    padding: 14px;
+    position: relative;
+  }
+
+  .phone-screen {
+    background: #F7F5EF;
+    border-radius: 32px;
+    overflow: hidden;
+    min-height: 560px;
+    padding: 28px 20px 20px;
+  }
+
+  .phone-notch {
+    width: 80px; height: 28px;
+    background: var(--ink);
+    border-radius: 100px;
+    margin: 0 auto 24px;
+  }
+
+  .phone-header {
+    margin-bottom: 24px;
+  }
+
+  .phone-date {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-soft);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .phone-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+  }
+
+  .today-section { margin-bottom: 20px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .birthday-card {
+    background: var(--warm-white);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: transform 0.15s ease;
+  }
+
+  .birthday-card:hover { transform: translateY(-1px); }
+
+  .birthday-card.today {
+    background: linear-gradient(135deg, #FFF4EC, #FFF9F5);
+    border-color: rgba(232,93,38,0.20);
+  }
+
+  .bday-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .bday-info { flex: 1; }
+
+  .bday-name {
+    font-size: 14px; font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+
+  .bday-meta {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .bday-action {
+    background: var(--ink);
+    color: white;
+    border: none; border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px; font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .phone-upcoming { }
+
+  .upcoming-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .upcoming-item:last-child { border-bottom: none; }
+
+  .upcoming-days {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-mid);
+    flex-shrink: 0;
+  }
+
+  .upcoming-name {
+    font-size: 13px; font-weight: 500;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .upcoming-date {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  /* Floating confetti elements */
+  .confetti-wrap {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .confetti-wrap.top-right {
+    top: -20px; right: -30px;
+  }
+
+  .confetti-wrap.bottom-left {
+    bottom: 20px; left: -40px;
+  }
+
+  .confetti-dot {
+    position: absolute;
+    border-radius: 50%;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+  }
+
+  /* ── SECTION SHARED ── */
+  section {
+    padding: 96px 48px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 4vw, 48px);
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  h2 em { font-style: italic; color: var(--accent); }
+
+  .section-sub {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    max-width: 520px;
+    margin-bottom: 64px;
+  }
+
+  /* ── WHY SECTION ── */
+  .why { background: var(--warm-white); }
+
+  .why-header { text-align: center; margin-bottom: 64px; }
+
+  .why-header .section-sub { margin: 0 auto; }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .feature-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: default;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(26,20,16,0.08);
+  }
+
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+
+  h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .feature-card p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+
+  /* ── REMINDER EXPERIENCE ── */
+  .reminder {
+    background: var(--dark);
+  }
+
+  .reminder .section-eyebrow { color: var(--gold); }
+  .reminder h2 { color: var(--cream); }
+
+  .reminder-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .reminder-left h2 { margin-bottom: 16px; }
+
+  .reminder-left p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(250,248,243,0.6);
+    margin-bottom: 36px;
+  }
+
+  .reminder-actions {
+    display: flex; gap: 12px;
+  }
+
+  .btn-dark-outline {
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--cream);
+    background: transparent;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .btn-dark-outline:hover {
+    border-color: var(--gold);
+    background: rgba(201,151,58,0.08);
+  }
+
+  /* Dark mode dashboard */
+  .dashboard {
+    background: var(--dark-card);
+    border: 1px solid var(--border-dark);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .dash-topbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-dark);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .dash-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .dash-title {
+    font-size: 13px; font-weight: 600;
+    color: rgba(250,248,243,0.8);
+    margin-left: 8px;
+  }
+
+  .dash-body { padding: 20px; }
+
+  .dash-today {
+    background: rgba(232,93,38,0.12);
+    border: 1px solid rgba(232,93,38,0.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .dash-today-label {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-soft);
+    margin-bottom: 10px;
+  }
+
+  .dash-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .dash-row:last-child { margin-bottom: 0; }
+
+  .dash-avatar-sm {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .dash-name {
+    font-size: 14px; font-weight: 500;
+    color: var(--cream);
+    flex: 1;
+  }
+
+  .dash-btn {
+    background: var(--accent);
+    color: white;
+    border: none; border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px; font-weight: 500;
+    cursor: pointer;
+  }
+
+  .dash-list { margin-bottom: 16px; }
+
+  .dash-list-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-dark);
+  }
+
+  .dash-list-item:last-child { border-bottom: none; }
+
+  .dash-list-name {
+    font-size: 13px; font-weight: 500;
+    color: rgba(250,248,243,0.7);
+    flex: 1;
+  }
+
+  .dash-list-date {
+    font-size: 11px;
+    color: rgba(250,248,243,0.35);
+  }
+
+  .dash-days-badge {
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px; font-weight: 600;
+    color: rgba(250,248,243,0.5);
+  }
+
+  .email-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-dark);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .email-icon-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .email-title { font-size: 12px; font-weight: 600; color: rgba(250,248,243,0.6); }
+  .email-body { font-size: 11px; color: rgba(250,248,243,0.35); line-height: 1.5; }
+
+  /* ── TRUST ── */
+  .trust {
+    background: #F4F1E8;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .trust-checks {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .check-item {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .check-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(26,20,16,0.06);
+  }
+
+  .check-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(232,93,38,0.10);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .check-text { font-size: 15px; font-weight: 500; color: var(--ink); }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: var(--dark);
+    text-align: center;
+  }
+
+  .cta-section h2 { color: var(--cream); margin-bottom: 32px; }
+
+  .cta-list {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 48px;
+  }
+
+  .cta-list li {
+    font-size: 16px;
+    color: rgba(250,248,243,0.65);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+
+  .cta-list li::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .btn-cta-big {
+    background: var(--accent);
+    color: white;
+    padding: 18px 40px;
+    border-radius: 12px;
+    font-size: 17px; font-weight: 600;
+    border: none; cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 10px;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .btn-cta-big:hover {
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 40px 48px;
+  }
+
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--cream);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .footer-links {
+    display: flex; gap: 28px; list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 13px;
+    color: rgba(250,248,243,0.45);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-links a:hover { color: var(--cream); }
+
+  .footer-copy {
+    font-size: 13px;
+    color: rgba(250,248,243,0.25);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .observe-fade {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .observe-fade.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { flex-direction: column; padding: 100px 24px 64px; gap: 48px; }
+    section { padding: 64px 24px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .reminder-grid { grid-template-columns: 1fr; }
+    .trust-grid { grid-template-columns: 1fr; gap: 40px; }
+    footer .footer-inner { flex-direction: column; gap: 20px; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    Lembra
+  </div>
+  <ul class="nav-links">
+    <li><a href="#why">Por que usar</a></li>
+    <li><a href="#reminder">Como funciona</a></li>
+    <li><a href="#trust">Privacidade</a></li>
+    <li><a href="#cta" class="nav-cta">Começar grátis</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div style="max-width:1200px;margin:0 auto;">
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        Disponível agora — grátis
+      </div>
+      <h1>Nunca esqueça um <em>aniversário</em> importante novamente</h1>
+      <p class="hero-sub">Lembra é o jeito mais simples de acompanhar aniversários, lembrar na hora certa e enviar uma mensagem em segundos.</p>
+      <div class="hero-pills">
+        <span class="pill">Sem planilhas</span>
+        <span class="pill">Sem redes sociais</span>
+        <span class="pill">Sem esquecer quem importa</span>
+      </div>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">
+          Começar grátis
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#reminder" class="btn-secondary">
+          Ver como funciona
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <!-- Floating confetti dots -->
+      <div class="confetti-wrap top-right">
+        <div class="confetti-dot" style="width:12px;height:12px;background:#E85D26;top:0;right:0;animation-delay:0s;"></div>
+        <div class="confetti-dot" style="width:8px;height:8px;background:#C9973A;top:30px;right:20px;animation-delay:0.5s;border-radius:2px;"></div>
+        <div class="confetti-dot" style="width:6px;height:6px;background:#F4845A;top:10px;right:40px;animation-delay:1s;"></div>
+      </div>
+      <div class="confetti-wrap bottom-left">
+        <div class="confetti-dot" style="width:10px;height:10px;background:#C9973A;bottom:40px;left:10px;animation-delay:0.3s;border-radius:2px;"></div>
+        <div class="confetti-dot" style="width:7px;height:7px;background:#E85D26;bottom:10px;left:0;animation-delay:0.8s;"></div>
+      </div>
+
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-header">
+              <div class="phone-date">Terça, 4 Mar</div>
+              <div class="phone-title">Aniversários 🎂</div>
+            </div>
+
+            <div class="today-section">
+              <div class="section-label">Hoje</div>
+              <div class="birthday-card today">
+                <div class="bday-avatar" style="background:#FFF0E8;">🎉</div>
+                <div class="bday-info">
+                  <div class="bday-name">Ana Souza</div>
+                  <div class="bday-meta">Faz 28 anos hoje</div>
+                </div>
+                <button class="bday-action">Copiar</button>
+              </div>
+              <div class="birthday-card today">
+                <div class="bday-avatar" style="background:#FFF8E8;">🥳</div>
+                <div class="bday-info">
+                  <div class="bday-name">Lucas Melo</div>
+                  <div class="bday-meta">Faz 32 anos hoje</div>
+                </div>
+                <button class="bday-action" style="background:#F0F0F0;color:#1A1410;">Zap</button>
+              </div>
+            </div>
+
+            <div class="phone-upcoming">
+              <div class="section-label">Em breve</div>
+              <div class="upcoming-item">
+                <div class="upcoming-days">3d</div>
+                <div class="upcoming-name">Marina Castro</div>
+                <div class="upcoming-date">7 mar</div>
+              </div>
+              <div class="upcoming-item">
+                <div class="upcoming-days">9d</div>
+                <div class="upcoming-name">Pedro Lima</div>
+                <div class="upcoming-date">13 mar</div>
+              </div>
+              <div class="upcoming-item">
+                <div class="upcoming-days">14d</div>
+                <div class="upcoming-name">Carla Dias</div>
+                <div class="upcoming-date">18 mar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY LEMBRA -->
+<section class="why" id="why">
+  <div class="container">
+    <div class="why-header observe-fade">
+      <div class="section-eyebrow">Por que usar</div>
+      <h2>Simples como <em>deve ser</em></h2>
+      <p class="section-sub">Não existe motivo para esquecer quem você ama. O Lembra cuida disso por você.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="feature-card observe-fade" style="transition-delay:0.1s">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>Nunca esqueça</h3>
+        <p>Veja quem faz aniversário hoje e nos próximos dias em um único lugar. Sem distrações.</p>
+      </div>
+      <div class="feature-card observe-fade" style="transition-delay:0.2s">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Parabenize em segundos</h3>
+        <p>Copie uma mensagem pronta ou abra diretamente no WhatsApp ou Instagram com um toque.</p>
+      </div>
+      <div class="feature-card observe-fade" style="transition-delay:0.3s">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Sincronize quando quiser</h3>
+        <p>Funciona sem login. Mas se quiser, sincronize sua lista entre todos os seus dispositivos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REMINDER EXPERIENCE -->
+<section class="reminder" id="reminder">
+  <div class="container">
+    <div class="reminder-grid">
+      <div class="reminder-left observe-fade">
+        <div class="section-eyebrow">Lembretes</div>
+        <h2>O Lembra avisa você no <em>momento certo</em></h2>
+        <p>Receba uma notificação discreta toda manhã quando alguém que você se importa estiver comemorando. Nunca mais chegue atrasado.</p>
+        <div class="reminder-actions">
+          <a href="#cta" class="btn-primary">Começar agora</a>
+          <a href="#" class="btn-dark-outline">Ver demo</a>
+        </div>
+      </div>
+
+      <div class="observe-fade" style="transition-delay:0.15s">
+        <div class="dashboard">
+          <div class="dash-topbar">
+            <div class="dash-dot" style="background:#FF5F57;"></div>
+            <div class="dash-dot" style="background:#FEBC2E;"></div>
+            <div class="dash-dot" style="background:#28C840;"></div>
+            <div class="dash-title">Lembra — hoje</div>
+          </div>
+          <div class="dash-body">
+            <div class="dash-today">
+              <div class="dash-today-label">🎉 Hoje</div>
+              <div class="dash-row">
+                <div class="dash-avatar-sm" style="background:rgba(255,100,50,0.2);">🎂</div>
+                <div class="dash-name">Ana Souza</div>
+                <button class="dash-btn">Copiar msg</button>
+              </div>
+              <div class="dash-row">
+                <div class="dash-avatar-sm" style="background:rgba(100,150,255,0.2);">🎈</div>
+                <div class="dash-name">Lucas Melo</div>
+                <button class="dash-btn" style="background:#1C6E3A;">Abrir Zap</button>
+              </div>
+            </div>
+
+            <div class="dash-list">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(250,248,243,0.35);margin-bottom:8px;">Próximos</div>
+              <div class="dash-list-item">
+                <div class="dash-avatar-sm" style="background:rgba(255,255,255,0.06);font-size:12px;">🌸</div>
+                <div class="dash-list-name">Marina Castro</div>
+                <div class="dash-list-date">7 mar</div>
+                <div class="dash-days-badge">3d</div>
+              </div>
+              <div class="dash-list-item">
+                <div class="dash-avatar-sm" style="background:rgba(255,255,255,0.06);font-size:12px;">⭐</div>
+                <div class="dash-list-name">Pedro Lima</div>
+                <div class="dash-list-date">13 mar</div>
+                <div class="dash-days-badge">9d</div>
+              </div>
+            </div>
+
+            <div class="email-card">
+              <div class="email-icon-row">
+                <svg width="12" height="12" fill="none" stroke="rgba(250,248,243,0.4)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <div class="email-title">Lembrete por e-mail — 8h00</div>
+              </div>
+              <div class="email-body">Hoje é aniversário de Ana e Lucas. Toque para parabenizar.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust" id="trust">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="observe-fade">
+        <div class="section-eyebrow">Privacidade</div>
+        <h2>Simples, privado e <em>confiável</em></h2>
+        <p class="section-sub" style="margin-bottom:0;">Seus aniversários são seus. O Lembra foi construído para ser simples, privado e sem complexidade desnecessária.</p>
+      </div>
+
+      <div class="trust-checks observe-fade" style="transition-delay:0.15s">
+        <div class="check-item">
+          <div class="check-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="check-text">Funciona mesmo sem login</span>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="check-text">Seus dados ficam sob seu controle</span>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="check-text">Sincronização segura entre dispositivos</span>
+        </div>
+        <div class="check-item">
+          <div class="check-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="check-text">Projeto leve, rápido e sem anúncios</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="container">
+    <div class="observe-fade">
+      <div class="section-eyebrow" style="color:var(--gold);">Comece agora</div>
+      <h2>Nunca mais esqueça um <em>aniversário</em> importante</h2>
+      <ul class="cta-list">
+        <li>Comece em segundos</li>
+        <li>Organize aniversários em um só lugar</li>
+        <li>Receba lembretes na hora certa</li>
+      </ul>
+      <a href="#" class="btn-cta-big">
+        Começar grátis
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+      Lembra
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">Como funciona</a></li>
+      <li><a href="#">Privacidade</a></li>
+      <li><a href="#">Termos</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 Lembra</div>
+  </div>
+</footer>
+
+<script>
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.observe-fade').forEach(el => observer.observe(el));
+
+  // Stagger children cards
+  document.querySelectorAll('.cards-grid .feature-card').forEach((card, i) => {
+    card.style.transitionDelay = `${i * 0.08}s`;
+  });
+</script>
+</body>
+</html>

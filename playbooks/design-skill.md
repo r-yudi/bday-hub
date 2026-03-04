@@ -8,6 +8,7 @@ Evoluir a UI com consistência e intenção de produto, usando o design system e
 - **Regra de Energia:** A UI deve transmitir energia e celebração onde fizer sentido (hero, empty states, feedback); evitar telas “apagadas” ou neutras demais.
 - **Regra de Composição forte > efeito decorativo:** Priorizar hierarquia clara, CTA dominante e respiro; efeitos (sombras, animações, glows) servem à composição, não ao contrário.
 - **Regra de Hero memorável:** O hero/landing deve ser o elemento mais marcante da primeira impressão; uma mensagem (uma promessa), um CTA principal, fundo com profundidade elegante; validar contra a tese do MANIFESTO antes de alterar copy do hero.
+- **Anti-hero minimalista:** Evitar heróis que se resumam a título centralizado + CTA + fundo neutro; exigir pelo menos um elemento de escala ou composição ousada (forma grande, corte que ultrapassa a viewport, assimetria, abstração) e validar com proof visual para não cair em “SaaS minimal”.
 - **Proibição de incrementalismo visual excessivo:** Evitar dezenas de ajustes pequenos sem direção; preferir um conjunto coerente de mudanças alinhado ao contrato visual e ao MANIFESTO.
 
 ## Fonte única do design system (obrigatório)
@@ -70,6 +71,9 @@ Use esta hierarquia para reduzir ruído e dar direção:
 6. `Muted` (metadados/estado)
 - Texto de suporte, timestamps, explicações curtas.
 - Usar cor/mix do DS; evitar diminuir contraste além do legível.
+
+## Checklist de proof visual (hero/landing)
+- Alterações de UI no hero/landing exigem proof visual: rodar Playwright visual regression (`npx playwright test e2e/visual-regression.spec.ts --config=playwright.visual.config.ts`), salvar screenshots em `test-results/visual-regression/`, documentar paths no PR/commit. Não fazer merge sem proof. Ver `docs/VISUAL_PROOF_PROTOCOL.md`.
 
 ## Checklist de acessibilidade (mínimo)
 - [ ] Navegação por teclado funciona (tab order coerente).

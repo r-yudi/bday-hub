@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 function todayDayMonth() {
@@ -125,5 +127,31 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByText("Carregando...")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: /Share E2E/ })).toBeVisible();
     await expect(page.getByText("compartilhado")).toBeVisible();
+  });
+
+  test("Email diário section on /today (guest: CTA; no email sent)", async ({ page }) => {
+    await gotoTodayReady(page);
+    await expect(page.getByText("Email diário")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Entrar para ativar email" })).toBeVisible();
+  });
+
+  test("Push (complementar) section on /today: guest sees instruction and CTA", async ({ page }) => {
+    await gotoTodayReady(page);
+    await expect(page.getByRole("heading", { name: "Push (complementar)" })).toBeVisible();
+    await expect(page.getByText("Notificações push estão disponíveis para contas conectadas")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Entrar para ativar push" })).toBeVisible();
+  });
+});
+
+test.describe("Push (complementar) logado não-standalone", () => {
+  const authPath = join(process.cwd(), "test-results", ".auth", "user.json");
+  const hasAuth = existsSync(authPath);
+  if (hasAuth) test.use({ storageState: authPath });
+  test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json). Gerar: login em /login e salvar storageState.");
+
+  test("mostra instrução de instalar PWA e não mostra toggle", async ({ page }) => {
+    await page.goto("/today");
+    await expect(page.getByText("Para ativar notificações push, instale o Lembra (PWA) na tela inicial.")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Ativar push|Desativar push/ })).toHaveCount(0);
   });
 });

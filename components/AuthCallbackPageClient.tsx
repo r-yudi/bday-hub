@@ -99,7 +99,7 @@ export function AuthCallbackPageClient({ returnTo }: { returnTo: string }) {
 
   if (state.status === "done") {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-black/10 bg-white/90 p-5 text-sm text-black/70">
+      <div className="ui-panel-soft mx-auto max-w-md rounded-2xl border p-5 text-sm text-muted">
         Redirecionando...
       </div>
     );
@@ -107,19 +107,19 @@ export function AuthCallbackPageClient({ returnTo }: { returnTo: string }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <section className="rounded-3xl border border-black/10 bg-white/95 p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-black/60">OAuth Callback</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-black/90 sm:text-3xl">Finalizando login</h1>
-        <p className="mt-2 text-sm text-black/70">{state.message}</p>
-        {state.status === "loading" && <p className="mt-2 text-xs text-black/55">Tentativa atual: {state.attempt}/10</p>}
+      <section className="ui-page-hero p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">OAuth Callback</p>
+        <h1 className="ui-title-editorial mt-2 text-2xl sm:text-3xl">Finalizando login</h1>
+        <p className="ui-subtitle-editorial mt-2 text-sm">{state.message}</p>
+        {state.status === "loading" && <p className="mt-2 text-xs text-muted">Tentativa atual: {state.attempt}/10</p>}
       </section>
 
       {state.status === "error" && (
-        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-300/30 dark:bg-rose-500/10 dark:text-rose-200">
           <p className="font-medium">Não foi possível confirmar a sessão.</p>
           <p className="mt-1">{state.message}</p>
 
-          <div className="mt-4 space-y-2 rounded-xl border border-rose-200/80 bg-white/70 p-3 text-xs text-rose-900/90">
+          <div className="mt-4 space-y-2 rounded-xl border border-rose-200/80 bg-white/70 p-3 text-xs text-rose-900/90 dark:border-rose-300/20 dark:bg-white/5 dark:text-rose-100/90">
             <p>
               <span className="font-semibold">Querystring atual:</span> <code>{debugInfo.querystring || "(vazia)"}</code>
             </p>
@@ -128,8 +128,8 @@ export function AuthCallbackPageClient({ returnTo }: { returnTo: string }) {
             </p>
           </div>
 
-          <div className="mt-4 rounded-xl border border-black/10 bg-white/80 p-3 text-xs text-black/75">
-            <p className="font-semibold text-black/85">Checklist rápido de configuração</p>
+          <div className="ui-prose-panel mt-4 p-3 text-xs text-muted">
+            <p className="font-semibold text-text">Checklist rápido de configuração</p>
             <p className="mt-1">
               1. Supabase `Authentication &gt; URL Configuration &gt; Redirect URLs` deve incluir o domínio atual com
               `/**` (ex.: `http://localhost:3000/**`).
@@ -145,10 +145,13 @@ export function AuthCallbackPageClient({ returnTo }: { returnTo: string }) {
           </div>
 
           <div className="mt-4 flex gap-2">
-            <Link href={`/login?returnTo=${encodeURIComponent(returnTo || "/today")}`} className="btn-primary-brand rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover">
+            <Link
+              href={`/login?returnTo=${encodeURIComponent(returnTo || "/today")}`}
+              className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover"
+            >
               Voltar para login
             </Link>
-            <Link href="/debug/supabase" className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm hover:bg-black/5">
+            <Link href="/debug/supabase" className="ui-cta-secondary rounded-xl border px-4 py-2 text-sm">
               Abrir debug Supabase
             </Link>
           </div>

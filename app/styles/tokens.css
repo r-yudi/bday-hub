@@ -1,18 +1,18 @@
 ﻿:root {
   color-scheme: light;
 
-  --bg: 34 33% 98%;
+  --bg: 30 48% 97%;
   --surface: 0 0% 100%;
-  --surface-2: 30 25% 96%;
-  --text: 220 20% 12%;
-  --muted: 220 10% 40%;
-  --border: 220 14% 90%;
+  --surface-2: 28 42% 95%;
+  --text: 224 18% 12%;
+  --muted: 222 10% 40%;
+  --border: 28 26% 88%;
 
-  --primary: 8 88% 62%;
+  --primary: 12 91% 61%;
   --primary-foreground: 0 0% 100%;
-  --accent: 160 60% 45%;
+  --accent: 162 64% 43%;
   --accent-foreground: 0 0% 100%;
-  --lilac: 262 86% 70%;
+  --lilac: 266 90% 72%;
 
   --danger: 0 78% 56%;
   --warning: 35 92% 55%;
@@ -56,18 +56,18 @@
 .dark {
   color-scheme: dark;
 
-  --bg: 228 16% 10%;
-  --surface: 228 14% 14%;
-  --surface-2: 228 12% 22%;
-  --text: 34 25% 96%;
-  --muted: 220 10% 76%;
-  --border: 220 10% 34%;
+  --bg: 230 20% 9%;
+  --surface: 230 18% 13%;
+  --surface-2: 230 14% 20%;
+  --text: 34 28% 96%;
+  --muted: 222 12% 79%;
+  --border: 228 12% 32%;
 
-  --primary: 8 88% 64%;
+  --primary: 12 90% 65%;
   --primary-foreground: 0 0% 100%;
-  --accent: 160 58% 48%;
+  --accent: 162 64% 47%;
   --accent-foreground: 0 0% 100%;
-  --lilac: 262 86% 74%;
+  --lilac: 268 92% 76%;
 
   --danger: 0 78% 62%;
   --warning: 35 92% 60%;

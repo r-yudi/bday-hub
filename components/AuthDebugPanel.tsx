@@ -55,31 +55,33 @@ export function AuthDebugPanel() {
   }, [configured, initialized, session, user]);
 
   return (
-    <section className="rounded-2xl border border-black/10 bg-white/90 p-4 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-black/60">Debug Auth / Supabase</h2>
+    <section className="ui-prose-panel p-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Debug Auth / Supabase</h2>
       <div className="mt-3 space-y-2 text-sm">
         <p>
-          <span className="text-black/60">status:</span>{" "}
-          <span className="font-medium text-black/85">
+          <span className="text-muted">status:</span>{" "}
+          <span className="font-medium text-text">
             {!configured ? "Supabase não configurado" : !initialized ? "loading" : user ? "logged in" : "logged out"}
           </span>
         </p>
         <p>
-          <span className="text-black/60">user id:</span> <span className="font-mono text-xs">{user?.id ?? "-"}</span>
+          <span className="text-muted">user id:</span> <span className="font-mono text-xs text-text">{user?.id ?? "-"}</span>
         </p>
         <p>
-          <span className="text-black/60">provider:</span> <span className="font-medium text-black/85">{provider}</span>
+          <span className="text-muted">provider:</span> <span className="font-medium text-text">{provider}</span>
         </p>
         <p>
-          <span className="text-black/60">Auth:</span>{" "}
-          <span className={user ? "text-emerald-700" : "text-black/70"}>{user ? "Auth OK" : "Aguardando login"}</span>
+          <span className="text-muted">Auth:</span>{" "}
+          <span className={user ? "text-emerald-700 dark:text-emerald-300" : "text-muted"}>
+            {user ? "Auth OK" : "Aguardando login"}
+          </span>
         </p>
         <p>
-          <span className="text-black/60">DB:</span>{" "}
-          {dbCheck.status === "idle" && <span className="text-black/70">Aguardando sessão</span>}
-          {dbCheck.status === "loading" && <span className="text-black/70">Testando query...</span>}
-          {dbCheck.status === "ok" && <span className="text-emerald-700">DB OK (query executada)</span>}
-          {dbCheck.status === "error" && <span className="text-rose-700">Falha: {dbCheck.message}</span>}
+          <span className="text-muted">DB:</span>{" "}
+          {dbCheck.status === "idle" && <span className="text-muted">Aguardando sessão</span>}
+          {dbCheck.status === "loading" && <span className="text-muted">Testando query...</span>}
+          {dbCheck.status === "ok" && <span className="text-emerald-700 dark:text-emerald-300">DB OK (query executada)</span>}
+          {dbCheck.status === "error" && <span className="text-rose-700 dark:text-rose-300">Falha: {dbCheck.message}</span>}
         </p>
       </div>
     </section>

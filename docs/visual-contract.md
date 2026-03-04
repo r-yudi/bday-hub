@@ -54,6 +54,11 @@ Regra:
   - 1 CTA principal e opcionalmente 1 secundário
 - Em dark, usar superfície previsível; não soltar texto direto no fundo.
 
+## 8.1) Regra de ilustração festiva (landing)
+- Confetes e fios dos balões precisam permanecer aparentes em **light e dark**.
+- Se a arte base perder contraste no light, usar overlay leve (confete/ribbons) com contraste controlado.
+- Priorizar legibilidade da arte sem “lavar” o fundo da hero.
+
 ## 9) Regra de CTA primário vs secundário
 - Primário:
   - maior peso visual
@@ -71,5 +76,24 @@ Regra:
 - [ ] Tertiary links estão visíveis e elegantes.
 - [ ] Focus ring consistente em tabs, links, botões e filtros.
 - [ ] Landing dark mantém impacto de headline + ilustração legível.
+- [ ] Landing light mantém confetes e fios aparentes (sem sumir no fundo claro).
 - [ ] `/manage` diferencia visualmente categoria predefinida vs custom.
+- [ ] Screenshots de regressão (desktop/mobile, claro/escuro) gerados para telas tocadas.
 
+## 11) Regra de hero (Series A)
+- Hero precisa comunicar uma única promessa por viewport.
+- Headline dominante com contraste de escala claro vs subheadline.
+- CTA primário deve ser o elemento mais forte da dobra inicial.
+- CTA secundário precisa ser claro, mas visualmente subordinado ao primário.
+- Evitar excesso de elementos simultâneos (efeitos, chips, blocos concorrentes).
+
+## 12) Regra de autoridade visual
+- Priorizar alinhamento e ritmo vertical antes de adicionar efeitos.
+- Cada seção principal precisa de uma âncora (título, métrica ou CTA) com prioridade inequívoca.
+- Reduzir variação arbitrária de card: menos estilos, mais previsibilidade.
+- Se houver dúvida entre “mais efeito” e “mais clareza”, escolher clareza.
+
+## 13) Empty states em /today e /manage (Series A)
+- Formato: título forte (h2) + contexto curto + 1 CTA principal dominante + opcional CTA secundário.
+- Respiro: padding generoso (p-8 sm:p-10) e ícone/emoji como âncora visual.
+- CTA primário com peso visual claro (font-semibold, shadow, focus ring); evitar aparência de painel genérico.

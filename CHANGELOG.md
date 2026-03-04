@@ -16,12 +16,15 @@ Formato adotado:
 - Co-Founder Mode permanente: novo `docs/DEFAULT_MODE.md` (estado mental padrão), PIPELINE Fase 0 (Conversação Estratégica), Operating Mode em AGENTS.md, regras estratégicas nos playbooks product/design/dev; execução só após plano e confirmação.
 
 ### Changed
+- **Hero Radial Cut Explosion (abstração pura):** abandono de hero ilustrativo; forma principal >= 60vw nascendo fora da viewport (canto superior direito); orbs grandes com blur profundo; ribbon diagonal cruzando a tela; partículas grandes (4–8, não pulverizadas); spotlight radial atrás da headline; copy sobreposta à massa; mobile com corte de pôster (não SaaS minimal); regra no design-skill “Anti-hero minimalista”; 8 screenshots em `test-results/visual-regression/`.
 - **V2 rodada governada (tese "Estar presente é celebrar"):** doc north-star `docs/MANIFESTO_UI_COPY.md` (mapa Manifesto→UI/copy, headline/CTA/apoio congelados, mini dicionário); hero da landing em ruptura (headline "Estar presente é celebrar.", CTA "Quero aparecer no dia" / "Continuar no app", chip "Lembra." apenas); confetes e fios dos balões visíveis em light e dark (`globals.css`); `/manage` consistência visual (tablist com `shadow-md`, badges predefinido/custom já alinhados ao contrato).
 - UI stabilization (rodada atual): consolidação do contrato visual `ui-*`, refinamentos de landing/fluxos e ajustes de consistência visual sem mudar o baseline de produto.
 - Dark mode premium pass: nova hierarquia de superfícies/bordas/sombras/focus/tertiary no DS, landing dark mais silenciosa e badges de categorias em `/manage` com diferenciação visual clara.
 - V2 visual pass (Series A): hero da landing com CTA principal mais dominante, redução de ruído acima da dobra e hierarquia mais agressiva em `/today` e `/manage`.
 
 ### Added
+- **Fase 3 — Push complementar (opt-in):** notificações push apenas para PWA instalada (standalone); toggle em `/today` quando logado + standalone; rotas `POST /api/push/subscribe` e `/api/push/unsubscribe`; envio best-effort no cron de email (web-push); tabela `push_subscriptions` e coluna `push_enabled` em `user_settings`; Service Worker mínimo `sw-push.js`; revogação automática de subscriptions inválidas (410/Gone).
+- **Hero Experimental Lab:** rota `/campaign` full-bleed 100vh com hero alternativo (Light: amarelo dominante + ribbon; Dark: pool of light + glow). Copy fixa "Quem se importa, aparece."; CTA "Me avisar no dia". AppShell em `/campaign` sem TopNav; 8 screenshots exp-* em visual-regression.
 - `/manage` com gestão MVP em abas (aniversários/categorias), busca/filtros e ações de editar/excluir.
 - Endpoint `/healthz` para smoke test de produção/deploy.
 - Multi-device sync de aniversários com Supabase quando logado (fallback local mantido quando não logado).

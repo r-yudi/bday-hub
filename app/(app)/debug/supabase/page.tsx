@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -354,14 +354,14 @@ export default function DebugSupabasePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <section className="rounded-3xl border border-black/10 bg-white/95 p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-black/60">Debug • Supabase Auth</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-black/90 sm:text-[2rem]">Diagnóstico Supabase</h1>
-        <p className="mt-2 text-sm text-black/70">
+      <section className="ui-page-hero p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">Debug • Supabase Auth</p>
+        <h1 className="ui-title-editorial mt-2 text-3xl sm:text-[2rem]">Diagnóstico Supabase</h1>
+        <p className="ui-subtitle-editorial mt-2 text-sm">
           Use esta tela para validar health, sessão local, `getUser()` e validação real de RLS em `user_settings`.
         </p>
-        <p className="mt-3 text-xs text-black/60">
-          <span className="font-semibold text-black/75">Host Supabase:</span> {hostname ?? "(inválido/ausente)"}
+        <p className="mt-3 text-xs text-muted">
+          <span className="font-semibold text-text">Host Supabase:</span> {hostname ?? "(inválido/ausente)"}
         </p>
         {!configured && (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
@@ -373,12 +373,12 @@ export default function DebugSupabasePage() {
 
       <section className="grid gap-3 sm:grid-cols-2">
         {summary.map((item) => (
-          <div key={item.label} className="rounded-2xl border border-black/10 bg-white/90 p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-black/60">{item.label}</p>
+          <div key={item.label} className="ui-prose-panel p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">{item.label}</p>
             <p
               className={[
                 "mt-1 text-sm",
-                item.ok === true ? "text-emerald-700" : item.ok === false ? "text-rose-700" : "text-black/75"
+                item.ok === true ? "text-emerald-700 dark:text-emerald-300" : item.ok === false ? "text-rose-700 dark:text-rose-300" : "text-muted"
               ].join(" ")}
             >
               {item.text}
@@ -387,33 +387,33 @@ export default function DebugSupabasePage() {
         ))}
       </section>
 
-      <section className="rounded-2xl border border-black/10 bg-white/90 p-4 shadow-sm">
+      <section className="ui-prose-panel p-4">
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => void runHealthCheck()}
-            className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/5"
+            className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm"
           >
             Recarregar health
           </button>
           <button
             type="button"
             onClick={() => void runSessionChecks()}
-            className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/5"
+            className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm"
           >
             Recarregar sessão/user
           </button>
           <button
             type="button"
             onClick={() => void testDb()}
-            className="btn-primary-brand rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover"
+            className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover"
           >
             Testar DB
           </button>
           <button
             type="button"
             onClick={() => void testBirthdaysDb()}
-            className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm hover:bg-black/5"
+            className="ui-cta-secondary rounded-xl border px-3 py-2 text-sm"
           >
             Testar Birthdays
           </button>
@@ -428,9 +428,9 @@ export default function DebugSupabasePage() {
 
         {dbState.status !== "idle" && (
           <p className="mt-3 text-sm">
-            <span className="font-medium text-black/75">DB:</span>{" "}
+            <span className="font-medium text-text">DB:</span>{" "}
             {dbState.status === "loading" && (
-              <span className="text-black/70">Executando validação em `user_settings` (read probe + upsert/select do próprio usuário)...</span>
+              <span className="text-muted">Executando validação em `user_settings` (read probe + upsert/select do próprio usuário)...</span>
             )}
             {dbState.status === "done" && dbState.ok && (
               <span className="text-emerald-700">
@@ -448,35 +448,35 @@ export default function DebugSupabasePage() {
 
         {clearState.status !== "idle" && (
           <p className="mt-2 text-sm">
-            <span className="font-medium text-black/75">Sessão local:</span>{" "}
-            {clearState.status === "loading" && <span className="text-black/70">Limpando...</span>}
-            {clearState.status === "done" && <span className="text-emerald-700">{clearState.message}</span>}
-            {clearState.status === "error" && <span className="text-rose-700">{clearState.message}</span>}
+            <span className="font-medium text-text">Sessão local:</span>{" "}
+            {clearState.status === "loading" && <span className="text-muted">Limpando...</span>}
+            {clearState.status === "done" && <span className="text-emerald-700 dark:text-emerald-300">{clearState.message}</span>}
+            {clearState.status === "error" && <span className="text-rose-700 dark:text-rose-300">{clearState.message}</span>}
           </p>
         )}
 
         {birthdaysDbState.status !== "idle" && (
           <p className="mt-2 text-sm">
-            <span className="font-medium text-black/75">Birthdays:</span>{" "}
-            {birthdaysDbState.status === "loading" && <span className="text-black/70">Validando count + upsert/delete dummy...</span>}
+            <span className="font-medium text-text">Birthdays:</span>{" "}
+            {birthdaysDbState.status === "loading" && <span className="text-muted">Validando count + upsert/delete dummy...</span>}
             {birthdaysDbState.status === "done" && birthdaysDbState.ok && (
-              <span className="text-emerald-700">DB OK (birthdays) • count atual: {birthdaysDbState.count ?? 0}</span>
+              <span className="text-emerald-700 dark:text-emerald-300">DB OK (birthdays) • count atual: {birthdaysDbState.count ?? 0}</span>
             )}
             {birthdaysDbState.status === "done" && !birthdaysDbState.ok && (
-              <span className="text-rose-700">Erro: {birthdaysDbState.message}</span>
+              <span className="text-rose-700 dark:text-rose-300">Erro: {birthdaysDbState.message}</span>
             )}
-            {birthdaysDbState.status === "error" && <span className="text-rose-700">Erro: {birthdaysDbState.message}</span>}
+            {birthdaysDbState.status === "error" && <span className="text-rose-700 dark:text-rose-300">Erro: {birthdaysDbState.message}</span>}
           </p>
         )}
       </section>
 
-      <section className="rounded-2xl border border-black/10 bg-white/90 p-4 shadow-sm text-sm">
-        <h2 className="font-semibold tracking-tight text-black/85">Detalhes técnicos</h2>
+      <section className="ui-prose-panel p-4 text-sm">
+        <h2 className="font-semibold tracking-tight text-text">Detalhes técnicos</h2>
 
         <div className="mt-3 space-y-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-black/60">/auth/v1/health</p>
-            <pre className="mt-2 overflow-x-auto rounded-xl border border-black/10 bg-black/[0.03] p-3 text-xs text-black/75">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">/auth/v1/health</p>
+            <pre className="ui-code-block mt-2 overflow-x-auto p-3 text-xs">
               {health.status === "done"
                 ? `status: ${health.httpStatus}\nbody:\n${health.bodyText || "(vazio)"}`
                 : health.status === "error"
@@ -486,29 +486,29 @@ export default function DebugSupabasePage() {
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-black/60">supabase.auth.getSession()</p>
-            <pre className="mt-2 overflow-x-auto rounded-xl border border-black/10 bg-black/[0.03] p-3 text-xs text-black/75">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">supabase.auth.getSession()</p>
+            <pre className="ui-code-block mt-2 overflow-x-auto p-3 text-xs">
               {JSON.stringify(sessionState, null, 2)}
             </pre>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-black/60">supabase.auth.getUser()</p>
-            <pre className="mt-2 overflow-x-auto rounded-xl border border-black/10 bg-black/[0.03] p-3 text-xs text-black/75">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">supabase.auth.getUser()</p>
+            <pre className="ui-code-block mt-2 overflow-x-auto p-3 text-xs">
               {JSON.stringify(userState, null, 2)}
             </pre>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-black/60">DB debug</p>
-            <pre className="mt-2 overflow-x-auto rounded-xl border border-black/10 bg-black/[0.03] p-3 text-xs text-black/75">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">DB debug</p>
+            <pre className="ui-code-block mt-2 overflow-x-auto p-3 text-xs">
               {JSON.stringify(dbState, null, 2)}
             </pre>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-black/60">Birthdays DB debug</p>
-            <pre className="mt-2 overflow-x-auto rounded-xl border border-black/10 bg-black/[0.03] p-3 text-xs text-black/75">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Birthdays DB debug</p>
+            <pre className="ui-code-block mt-2 overflow-x-auto p-3 text-xs">
               {JSON.stringify(birthdaysDbState, null, 2)}
             </pre>
           </div>
@@ -517,3 +517,4 @@ export default function DebugSupabasePage() {
     </div>
   );
 }
+

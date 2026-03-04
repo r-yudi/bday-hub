@@ -1,4 +1,4 @@
-﻿# Lembra. — SPEC (baseline atual)
+# Lembra. — SPEC (baseline atual)
 
 ## Status de implementação (atualizado em 2026-02-25)
 
@@ -176,6 +176,21 @@
 ## 7) Notificações (baseline)
 - Estratégia MVP mantida: best-effort ao abrir o app
 - Sem agendamento confiável em background (limitação conhecida/documentada)
+
+## 7.1 Notificações V2 (fora do app)
+- Canal MVP principal: **email diário agendado** para usuários logados.
+- Configuração no app:
+  - `/today` exibe card de email diário (ativar/desativar + horário).
+  - timezone padrão: `America/Sao_Paulo`.
+- Fluxo guest vs logado:
+  - guest continua com lembrete in-app best-effort.
+  - logado pode ativar lembrete por email fora da interface.
+- Agendamento:
+  - cron a cada 15 minutos (`/api/cron/email`).
+  - proteção por `CRON_SECRET` (header `x-cron-secret` ou Bearer).
+- Dedupe/idempotência:
+  - controle por `user_settings.last_daily_email_sent_on`.
+  - claim condicional antes do envio para reduzir duplicidade em execuções concorrentes.
 
 ## 8) Segurança e privacidade
 - RLS em tabelas de usuário (`birthdays`, `user_settings`, `user_categories`)

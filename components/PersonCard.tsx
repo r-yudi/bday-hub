@@ -63,7 +63,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   }
 
   return (
-    <article className="rounded-2xl border border-border/70 bg-surface/75 p-4 shadow-sm dark:bg-surface/20">
+    <article className="ui-panel rounded-2xl border p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -124,7 +124,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
           <button
             type="button"
             onClick={() => void handleDelete()}
-            className="rounded-xl border border-rose-200/80 bg-white/90 px-3 py-2 text-sm text-rose-700 shadow-sm hover:-translate-y-px hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-200 dark:border-rose-300/30 dark:bg-white/10 dark:text-rose-200 dark:hover:bg-rose-500/10"
+            className="rounded-xl border border-rose-200/80 bg-white/90 px-3 py-2 text-sm text-rose-700 shadow-sm hover:-translate-y-px hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-200/80 dark:border-rose-300/30 dark:bg-white/10 dark:text-rose-200 dark:hover:bg-rose-500/10"
           >
             Excluir
           </button>

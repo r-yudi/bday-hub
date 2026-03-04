@@ -1,4 +1,4 @@
-﻿# DESIGN_SYSTEM.md
+# DESIGN_SYSTEM.md
 
 ## Objetivo
 Definir a fonte única do contrato visual do Lembra. para manter consistência entre landing, páginas do app e fluxos novos.
@@ -19,6 +19,8 @@ Definir a fonte única do contrato visual do Lembra. para manter consistência e
 ### Superfícies e níveis
 - `ui-surface`
 - `ui-surface-elevated`
+- `ui-panel`
+- `ui-panel-soft`
 - `ui-border-subtle`
 - `ui-border-strong`
 - `ui-backdrop`
@@ -49,6 +51,11 @@ Definir a fonte única do contrato visual do Lembra. para manter consistência e
 ### Layout/shell
 - `ui-page-shell`
 - `ui-page-shell-centered`
+- `ui-page-hero`
+- `ui-prose-panel`
+
+### Código/diagnóstico
+- `ui-code-block`
 
 ### Tipografia/estado
 - `ui-title-editorial`
@@ -68,3 +75,10 @@ Definir a fonte única do contrato visual do Lembra. para manter consistência e
 ## Observações
 - `ds_base.html` pode servir como referência visual histórica/exploratória, mas não substitui o contrato real em `tokens.css` + `globals.css`.
 - Para ajustes visuais, siga `playbooks/design-skill.md`.
+
+## Atualizações V2 (Series A)
+- Hero e header da landing priorizam clareza extrema: menos elementos competitivos acima da dobra.
+- CTA primário com dominância explícita (`landing-cta-dominant`) e secundário subordinado (`landing-cta-support`).
+- Novo tratamento de profundidade da landing com `bg-landing-depth-light` e `bg-landing-depth-dark`.
+- Reforço de superfícies elevadas em dark para separação real de camadas (`.dark .ui-surface-elevated`).
+- Empty states devem seguir formato: título forte + contexto curto + CTA principal + opcional secundário.

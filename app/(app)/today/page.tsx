@@ -111,6 +111,7 @@ export default function TodayPage() {
   const [toast, setToast] = useState<OnboardingToast | null>(null);
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const [lastDispatch, setLastDispatch] = useState<LastEmailDispatch | null>(null);
   const [timezoneDraft, setTimezoneDraft] = useState<string>("");
   const [pushSettings, setPushSettings] = useState<{ pushEnabled: boolean } | null>(null);
@@ -252,11 +253,17 @@ export default function TodayPage() {
     if (!user) return;
     setEmailSaving(true);
     setEmailError(null);
+    setEmailSuccess(null);
     try {
       const next = await saveEmailReminderSettings({
         emailEnabled: !(emailSettings?.emailEnabled ?? false)
       });
-      if (next) setEmailSettings(next);
+      if (next) {
+        setEmailSettings(next);
+        setEmailError(null);
+        setEmailSuccess("Configurações salvas.");
+        setTimeout(() => setEmailSuccess(null), 3000);
+      }
     } catch (error) {
       setEmailError(error instanceof Error ? error.message : "Não foi possível atualizar lembretes por email.");
     } finally {
@@ -268,9 +275,14 @@ export default function TodayPage() {
     if (!user) return;
     setEmailSaving(true);
     setEmailError(null);
+    setEmailSuccess(null);
     try {
       const next = await saveEmailReminderSettings({ emailTime: value });
-      if (next) setEmailSettings(next);
+      if (next) {
+        setEmailSettings(next);
+        setEmailSuccess("Horário salvo.");
+        setTimeout(() => setEmailSuccess(null), 3000);
+      }
     } catch (error) {
       setEmailError(error instanceof Error ? error.message : "Não foi possível salvar o horário de email.");
     } finally {
@@ -289,9 +301,14 @@ export default function TodayPage() {
     }
     setEmailSaving(true);
     setEmailError(null);
+    setEmailSuccess(null);
     try {
       const next = await saveEmailReminderSettings({ timezone: value });
-      if (next) setEmailSettings(next);
+      if (next) {
+        setEmailSettings(next);
+        setEmailSuccess("Fuso salvo.");
+        setTimeout(() => setEmailSuccess(null), 3000);
+      }
     } catch (error) {
       setEmailError(error instanceof Error ? error.message : "Não foi possível salvar o fuso horário.");
     } finally {
@@ -629,6 +646,7 @@ export default function TodayPage() {
                     </div>
                   )}
                   {emailError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{emailError}</p>}
+                  {emailSuccess && <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-300">{emailSuccess}</p>}
                 </>
               )}
             </section>

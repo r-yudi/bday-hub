@@ -18,33 +18,37 @@ export function LandingPremiumPageClient() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-landing-depth-light dark:bg-landing-depth-dark" />
 
       <div className="relative mx-auto max-w-6xl space-y-10 lg:space-y-12">
-        <section className="relative grid items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
-          <Reveal delay={30} className="relative z-[40]">
-            <div className="hero-copy-backdrop landing-hero-copy">
+        {/* Radial Cut Explosion: abstraction only — shape >= 60vw from corner, ribbon, orbs, large particles; copy over mass */}
+        <section className="hero-radialcut-section relative py-10 sm:py-12 lg:py-14">
+          <LandingCelebrationScene variant="radialcut" />
+          <div className="hero-radialcut-spotlight" aria-hidden />
+          <Reveal delay={30} className="hero-radialcut-copy flex flex-col items-start">
+            <div className="hero-copy-backdrop landing-hero-copy max-w-[42rem]">
               <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/80 px-2.5 py-1 text-[10px] font-semibold tracking-[0.02em] text-muted shadow-sm dark:border-border/60 dark:bg-surface/55 dark:text-text/80" aria-hidden>
                 <span className="h-1 w-1 rounded-full bg-primary" />
                 Lembra.
               </div>
 
-              <h1 className="mt-5 text-balance text-[2.85rem] font-semibold leading-[0.92] tracking-[-0.04em] text-text sm:text-[3.6rem] sm:leading-[0.90] lg:text-[4.4rem] lg:leading-[0.88] xl:text-[4.8rem] dark:text-text dark:[text-shadow:0_2px_22px_hsl(var(--bg)/0.5)]">
+              <h1 className="mt-5 text-balance text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.04em] text-text sm:text-[3.25rem] lg:text-[3.75rem] xl:text-[4.25rem] dark:text-text dark:[text-shadow:0_2px_22px_hsl(var(--bg)/0.5)]">
                 Estar presente é <span className="landing-gradient-word">celebrar</span>.
               </h1>
 
-              <p className="mt-5 max-w-[40ch] text-[15px] leading-[1.55] text-muted/95 sm:text-[16px] dark:text-muted">
+              <p className="mt-5 max-w-[38ch] text-[15px] leading-[1.55] text-muted/95 sm:text-[16px] dark:text-muted">
                 A gente te avisa no dia. Você celebra.
               </p>
 
               <Reveal delay={90}>
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <Link href="/today">
-                    <Button size="lg" className="landing-cta-premium landing-cta-dominant w-full sm:w-auto">
+                  <Link href="/today" className="w-full sm:w-auto">
+                    <Button size="lg" className="landing-cta-premium landing-cta-dominant w-full sm:min-w-[14rem]">
                       {primaryLabel}
                     </Button>
                   </Link>
-                  <Link href="/login?returnTo=%2Ftoday">
-                    <Button variant="secondary" size="lg" className="landing-cta-secondary landing-cta-support w-full sm:w-auto">
-                      {configured ? (initialized && isLoggedIn ? "Trocar conta" : "Entrar com Google") : "Entrar com Google"}
-                    </Button>
+                  <Link
+                    href="/login?returnTo=%2Ftoday"
+                    className="landing-cta-support ui-focus-surface rounded-md px-2 py-1 text-sm font-medium text-muted hover:text-text dark:text-muted dark:hover:text-text"
+                  >
+                    {configured ? (initialized && isLoggedIn ? "Trocar conta" : "Entrar com Google") : "Entrar com Google"}
                   </Link>
                 </div>
               </Reveal>
@@ -55,10 +59,6 @@ export function LandingPremiumPageClient() {
                 </p>
               </Reveal>
             </div>
-          </Reveal>
-
-          <Reveal delay={60} className="relative z-[20] lg:pt-1 xl:pt-0">
-            <LandingCelebrationScene />
           </Reveal>
         </section>
 

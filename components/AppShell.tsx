@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -209,6 +209,7 @@ function PwaInstallBanner() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isCampaign = pathname === "/campaign";
   const isLanding = pathname === "/" || pathname === "/landing";
   const isLegalPage = pathname === "/privacy" || pathname === "/terms";
   const isDebugRoute = Boolean(pathname?.startsWith("/debug"));
@@ -217,12 +218,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void maybeNotifyTodayBirthdays();
+    const interval = setInterval(() => void maybeNotifyTodayBirthdays(), 60_000);
+    return () => clearInterval(interval);
   }, []);
 
+  if (isCampaign) {
+    return <>{children}</>;
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="app-shell-wrap min-h-screen">
       <TopNav />
-      <main className={["mx-auto w-full max-w-5xl px-4 pb-12 sm:px-6", isLoginPage ? "pt-4 sm:pt-5" : "pt-6"].join(" ")}>
+      <main className={["app-shell-main mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6", isLoginPage ? "pt-4 sm:pt-5" : "pt-6"].join(" ")}>
         {!isDebugRoute && <SessionGuardNotice />}
         {!isLanding && (
           <div className={isLoginPage ? "mx-auto w-full max-w-md" : undefined}>
@@ -232,12 +239,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
 
         {showGlobalFooter && (
-          <footer className="mt-10 border-t border-black/10 pt-5 text-center text-xs text-black/55 sm:text-right dark:border-border/50 dark:text-muted">
+          <footer className="ui-surface mt-10 rounded-2xl border px-4 py-4 text-center text-xs text-black/65 shadow-sm sm:text-right dark:text-muted">
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-end sm:gap-4">
-              <Link href="/privacy" className="hover:text-black/75 dark:hover:text-text">
+              <Link href="/privacy" className="ui-link-tertiary">
                 Política de Privacidade
               </Link>
-              <Link href="/terms" className="hover:text-black/75 dark:hover:text-text">
+              <Link href="/terms" className="ui-link-tertiary">
                 Termos
               </Link>
             </div>

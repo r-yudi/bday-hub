@@ -1,0 +1,24 @@
+# Visual Proof Protocol
+
+- Any UI change to hero/landing (or other high-impact UI) must include **generated screenshots**.
+- Run: `npx playwright test e2e/visual-regression.spec.ts --config=playwright.visual.config.ts` (or `npm run test:e2e`).
+- Screenshots: `test-results/visual-regression/`. Hero proof (8 paths, e.g. Radial Cut Explosion):
+  - `test-results/visual-regression/desktop-light-landing-fullpage.png`
+  - `test-results/visual-regression/desktop-light-landing-hero.png`
+  - `test-results/visual-regression/desktop-dark-landing-fullpage.png`
+  - `test-results/visual-regression/desktop-dark-landing-hero.png`
+  - `test-results/visual-regression/mobile-light-landing-fullpage.png`
+  - `test-results/visual-regression/mobile-light-landing-hero.png`
+  - `test-results/visual-regression/mobile-dark-landing-fullpage.png`
+  - `test-results/visual-regression/mobile-dark-landing-hero.png`
+- Hero Lab `/campaign` (exp-*, 8 paths):
+  - `test-results/visual-regression/exp-desktop-light-fullpage.png`
+  - `test-results/visual-regression/exp-desktop-light-hero.png`
+  - `test-results/visual-regression/exp-desktop-dark-fullpage.png`
+  - `test-results/visual-regression/exp-desktop-dark-hero.png`
+  - `test-results/visual-regression/exp-mobile-light-fullpage.png`
+  - `test-results/visual-regression/exp-mobile-light-hero.png`
+  - `test-results/visual-regression/exp-mobile-dark-fullpage.png`
+  - `test-results/visual-regression/exp-mobile-dark-hero.png`
+- Before/after: copy baseline screenshots before change; after change, run again and attach or link paths in PR/commit.
+- No merge of hero/landing UI changes without visual proof (screenshots paths or artifacts).

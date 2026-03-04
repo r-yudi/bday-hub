@@ -8,9 +8,12 @@ type CardProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 const variants: Record<CardVariant, string> = {
-  default: "rounded-xl border border-border bg-surface shadow-sm",
-  elevated: "rounded-xl border border-border bg-surface shadow-md transition-all duration-150 ease-brand hover:-translate-y-px hover:shadow-lg",
-  bento: "rounded-xl border border-border bg-gradient-to-b from-surface to-surface2 shadow-md"
+  default:
+    "ui-panel-soft rounded-2xl border shadow-sm",
+  elevated:
+    "ui-panel rounded-2xl border shadow-md transition-all duration-150 ease-brand hover:-translate-y-px hover:shadow-lg",
+  bento:
+    "ui-panel rounded-2xl border shadow-md"
 };
 
 export function Card({ className, variant = "default", ...props }: CardProps) {

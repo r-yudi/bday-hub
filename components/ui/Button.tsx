@@ -14,9 +14,9 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-primaryForeground shadow-sm hover:-translate-y-px hover:shadow-md hover:brightness-[0.98] active:translate-y-0 active:brightness-95 disabled:bg-primary/65 disabled:text-primaryForeground/95 disabled:shadow-none disabled:hover:translate-y-0",
+    "ui-cta-primary bg-primary text-primaryForeground shadow-sm hover:-translate-y-px hover:shadow-md hover:brightness-[0.98] active:translate-y-0 active:brightness-95 disabled:bg-primary/65 disabled:text-primaryForeground/95 disabled:shadow-none disabled:hover:translate-y-0",
   secondary:
-    "border border-border/80 bg-surface2/70 text-text shadow-sm hover:-translate-y-px hover:border-border hover:bg-surface2 hover:shadow-sm active:bg-surface2/90 dark:border-border/90 dark:bg-surface2/80 dark:hover:bg-surface2 dark:hover:border-border disabled:border-border/80 disabled:bg-surface2/70 disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0",
+    "ui-cta-secondary border text-text shadow-sm hover:-translate-y-px hover:shadow-sm disabled:border-border/80 disabled:bg-surface2/70 disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0",
   ghost:
     "border border-transparent bg-transparent text-text hover:border-border/70 hover:bg-surface2/45 active:bg-surface2/65 dark:text-text dark:hover:border-border/90 dark:hover:bg-surface2/60 dark:active:bg-surface2/80 disabled:border-border/40 disabled:bg-surface2/30 disabled:text-muted disabled:hover:bg-surface2/30",
   destructive:
@@ -37,7 +37,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-150 ease-brand disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/25 focus-visible:ring-2 focus-visible:ring-primary/45",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-150 ease-brand disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45",
         variantClasses[variant],
         sizeClasses[size],
         className

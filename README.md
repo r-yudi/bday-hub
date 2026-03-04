@@ -1,4 +1,4 @@
-﻿# Lembra (MVP)
+# Lembra (MVP)
 
 Nunca mais esqueça um aniversário 🎉
 
@@ -26,12 +26,17 @@ MVP client-only para lembrar aniversários, conforme `SPEC.md`.
 - Página pública ` /privacy ` (e ` /terms ` básica)
 - Botão para limpar todos os dados locais
 
-## Limitação conhecida (MVP)
+## Notificações (estado atual)
 
-Notificação agendada confiável em background varia por navegador/OS. Implementado fallback aceito na SPEC:
+Canal disponível:
 
-- O app tenta notificar **ao abrir**
-- Se a permissão não estiver disponível/concedida, o app mostra aviso em tela na rota ` /today `
+- In-app best-effort (ao abrir o app), com permissão do navegador.
+- Email diário agendado para usuário logado (configurado em `/today`).
+
+Limitações conhecidas:
+
+- Guest mantém apenas lembretes in-app.
+- Email depende de cron + provider configurados no ambiente.
 
 ## Como rodar localmente
 
@@ -66,6 +71,20 @@ Checklist de configuração (Supabase + Google):
 - Google Cloud OAuth inclui:
   - Authorized JavaScript origins: `http://localhost:3000` e dominio de producao
   - Redirect URI: callback do Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`)
+
+Env vars adicionais para email diário (server):
+
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `CRON_SECRET`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL` (ou `REMINDER_FROM_EMAIL`)
+
+Env vars para Web Push (server; PWA instalada, opt-in):
+
+- `VAPID_PUBLIC_KEY` — chave pública VAPID (gerar com `npx web-push generate-vapid-keys`)
+- `VAPID_PRIVATE_KEY` — chave privada VAPID (não commitar)
+- `VAPID_SUBJECT` — mailto ou URL do site (ex.: `mailto:suporte@uselembra.com.br` ou `https://uselembra.com.br`)
+- No client, defina `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (mesma chave pública) para o subscribe no navegador.
 
 Como testar localmente:
 

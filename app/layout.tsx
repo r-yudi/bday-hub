@@ -1,9 +1,8 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/app/globals.css";
-import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getThemeBootScript } from "@/lib/theme";
@@ -41,9 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <script dangerouslySetInnerHTML={{ __html: getThemeBootScript() }} />
         <AuthProvider>
-          <ThemeProvider>
-            <AppShell>{children}</AppShell>
-          </ThemeProvider>
+          <ThemeProvider>{children}</ThemeProvider>
         </AuthProvider>
         <Analytics />
         <SpeedInsights />

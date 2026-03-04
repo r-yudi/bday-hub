@@ -10,7 +10,7 @@ export function FieldLabel({ className, ...props }: React.LabelHTMLAttributes<HT
 }
 
 const controlBase =
-  "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text shadow-sm outline-none placeholder:text-muted/80 focus-visible:border-border focus-visible:ring-2 focus-visible:ring-primary/35 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border/90 dark:bg-surface2/70 dark:placeholder:text-muted/90 dark:focus-visible:ring-primary/45";
+  "w-full rounded-xl border border-border/80 bg-surface/90 px-3 py-2.5 text-sm text-text shadow-sm outline-none placeholder:text-muted/80 focus-visible:border-border focus-visible:ring-2 focus-visible:ring-primary/35 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border/90 dark:bg-surface2/75 dark:placeholder:text-muted/90 dark:focus-visible:ring-primary/45";
 
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean };
 export function TextInput({ className, hasError, ...props }: TextInputProps) {
