@@ -171,6 +171,11 @@ export type DailyEmailCronDeps = {
   sendReminderEmail: (input: { to: string; subject: string; html: string; text: string }) => Promise<{ ok: true } | { ok: false; reason?: string; detail?: string }>;
 };
 
+export type ProcessOneCandidateOptions = {
+  /** When set, store this in error_message when status is skipped (no birthdays). Used for forced debug runs. */
+  debugNoBirthdaysMessage?: string;
+};
+
 /**
  * Process one candidate: insert-first claim, then skip or send.
  * Injects all I/O via deps for testability.
@@ -178,7 +183,8 @@ export type DailyEmailCronDeps = {
 export async function processOneCandidate(
   deps: DailyEmailCronDeps,
   row: UserSettingsReminderRow,
-  now: Date
+  now: Date,
+  options?: ProcessOneCandidateOptions
 ): Promise<ProcessOutcome> {
   const timezone = row.timezone || "America/Sao_Paulo";
   const emailTime = row.email_time || "09:00";
@@ -217,7 +223,10 @@ export async function processOneCandidate(
 
   const birthdays = birthdaysResult;
   if (birthdays.length === 0) {
-    await deps.updateDispatch(dispatchId, { status: "skipped" });
+    await deps.updateDispatch(dispatchId, {
+      status: "skipped",
+      ...(options?.debugNoBirthdaysMessage && { error_message: options.debugNoBirthdaysMessage })
+    });
     return { outcome: "skipped", reason: "no_birthday", ...(recoveredStale && { recoveredStale: true }) };
   }
 

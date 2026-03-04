@@ -8,7 +8,7 @@ import {
   shouldSendForNow,
   getCandidateDebug,
   dateKeyToDayMonth,
-  STALE_PENDING_MS,
+  type ProcessOutcome,
   type UserSettingsReminderRow,
   type DailyEmailCronDeps,
   type BirthdayRow,
@@ -16,6 +16,83 @@ import {
 } from "@/lib/server/dailyEmailCronLogic";
 import { getDateKey } from "@/lib/timezone";
 import { getDatePartsInTimeZone } from "@/lib/server/dailyReminderDigest";
+
+const CRON_INTERVAL_MINUTES = 15;
+const MINUTES_PER_DAY = 24 * 60;
+
+function toMinutes(hhmm: string): number | null {
+  const [h, m] = (hhmm ?? "").trim().split(":");
+  const hour = Number(h);
+  const minute = Number(m ?? "0");
+  if (!Number.isInteger(hour) || !Number.isInteger(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+  return hour * 60 + minute;
+}
+
+function formatHHMM(minutes: number): string {
+  const h = Math.floor(minutes / 60) % 24;
+  const m = minutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+type DebugUser = {
+  userId: string;
+  emailEnabled: boolean;
+  emailTime: string;
+  timezone: string;
+  serverNowUtcIso: string;
+  userNowLocalIso: string;
+  windowStartLocalIso: string;
+  windowEndLocalIso: string;
+  isWithinWindow: boolean;
+  computedDateKey: string;
+  reason?: string;
+};
+
+function buildDebugUser(
+  row: UserSettingsReminderRow,
+  now: Date,
+  outcomeOrSkip?: ProcessOutcome | { skipReason: string }
+): DebugUser {
+  const tz = (row.timezone || "America/Sao_Paulo").trim();
+  const emailTime = (row.email_time || "09:00").trim();
+  const parts = getDatePartsInTimeZone(tz, now);
+  const dateKey = getDateKey(now, tz);
+  const targetMinutes = toMinutes(emailTime);
+  const windowEndMinutes = targetMinutes !== null ? targetMinutes + CRON_INTERVAL_MINUTES : null;
+  const crossesMidnight = windowEndMinutes !== null && windowEndMinutes >= MINUTES_PER_DAY;
+  const windowStartLocalIso =
+    targetMinutes !== null ? `${parts.isoDate}T${emailTime}:00` : `${parts.isoDate}T00:00:00`;
+  const windowEndLocalIso =
+    windowEndMinutes !== null
+      ? crossesMidnight
+        ? `${getDatePartsInTimeZone(tz, new Date(now.getTime() + 86400000)).isoDate}T${formatHHMM(windowEndMinutes)}:00`
+        : `${parts.isoDate}T${formatHHMM(windowEndMinutes)}:00`
+      : `${parts.isoDate}T00:00:00`;
+  const isWithinWindow = shouldSendForNow(emailTime, tz, now);
+  let reason: string | undefined;
+  if (outcomeOrSkip) {
+    if ("skipReason" in outcomeOrSkip) reason = outcomeOrSkip.skipReason === "outside_window" ? "outside_window" : outcomeOrSkip.skipReason;
+    else if (outcomeOrSkip.outcome === "skipped") {
+      const r = outcomeOrSkip.reason;
+      reason = r === "already_sent" || r === "already_processing" ? "already_dispatched" : r === "no_birthday" ? "no_birthdays_today" : r;
+    } else if (outcomeOrSkip.outcome === "failed") reason = outcomeOrSkip.reason;
+    else if (outcomeOrSkip.outcome === "sent") reason = undefined;
+  } else if (!row.email_enabled) reason = "email_disabled";
+  else if (!isWithinWindow) reason = "outside_window";
+  return {
+    userId: row.user_id,
+    emailEnabled: row.email_enabled,
+    emailTime,
+    timezone: tz,
+    serverNowUtcIso: now.toISOString(),
+    userNowLocalIso: `${parts.isoDate}T${parts.hhmm}:00`,
+    windowStartLocalIso,
+    windowEndLocalIso,
+    isWithinWindow,
+    computedDateKey: dateKey,
+    ...(reason && { reason })
+  };
+}
 
 function isAuthorized(request: Request): boolean {
   const expected = process.env.CRON_SECRET;
@@ -88,7 +165,7 @@ export async function GET(request: Request) {
   const xDebug = request.headers.get("x-debug") === "1";
   const debugUserId = request.headers.get("x-debug-user-id")?.trim() || null;
   const forceCandidate =
-    request.headers.get("x-debug-force") === "1" &&
+    (request.headers.get("x-force") === "1" || request.headers.get("x-debug-force") === "1") &&
     (process.env.NODE_ENV !== "production" || xDebug);
   const url = new URL(request.url);
   const userIdParam = url.searchParams.get("userId");
@@ -112,11 +189,17 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           ok: true,
+          scannedUsers: 0,
+          candidates: 0,
+          insertsAttempted: 0,
+          dispatchRowsWritten: 0,
+          skippedAlreadySent: 0,
+          lastError: undefined,
           debug: {
             serverNowIso,
             serverNowUtc,
-            userDebug: null,
-            reasonIfNot: "user not found in user_settings"
+            debugUser: null,
+            reason: "user_not_found"
           }
         },
         { status: 200 }
@@ -124,40 +207,39 @@ export async function GET(request: Request) {
     }
     const row = userRow as UserSettingsReminderRow;
     const userDebug = getCandidateDebug(row, now);
-    const tz = (row.timezone || "America/Sao_Paulo").trim();
-    const parts = getDatePartsInTimeZone(tz, now);
-    const dateKey = getDateKey(now, tz);
-    const { day, month } = dateKeyToDayMonth(dateKey);
+    const treatAsCandidate = userDebug.isCandidate || forceCandidate;
     const deps = buildCronDeps(supabase);
-    const birthdaysResult = await deps.getBirthdays(row.user_id, day, month);
-    const birthdaysFoundForToday = Array.isArray(birthdaysResult) ? birthdaysResult.length : 0;
-    const body: Record<string, unknown> = {
+    let outcome: ProcessOutcome | undefined;
+    let insertsAttempted = 0;
+    let dispatchRowsWritten = 0;
+    let lastError: string | undefined;
+    if (treatAsCandidate) {
+      insertsAttempted = 1;
+      outcome = await processOneCandidate(
+        deps,
+        row,
+        now,
+        forceCandidate ? { debugNoBirthdaysMessage: "forced_debug_no_birthdays" } : undefined
+      );
+      if (outcome.outcome === "sent") dispatchRowsWritten = 1;
+      else if (outcome.outcome === "skipped" && outcome.reason !== "already_sent" && outcome.reason !== "already_processing") dispatchRowsWritten = 1;
+      if (outcome.outcome === "failed") lastError = outcome.reason;
+    }
+    const debugUser = buildDebugUser(row, now, outcome);
+    return NextResponse.json({
       ok: true,
+      scannedUsers: 1,
+      candidates: treatAsCandidate ? 1 : 0,
+      insertsAttempted,
+      dispatchRowsWritten,
+      skippedAlreadySent: outcome?.outcome === "skipped" && outcome.reason !== "no_birthday" && outcome.reason !== "invalid_email" ? 1 : 0,
+      lastError,
       debug: {
         serverNowIso,
         serverNowUtc,
-        scannedUsers: 1,
-        candidates: userDebug.isCandidate ? 1 : 0,
-        insertsAttempted: 0,
-        dispatchRowsWritten: 0,
-        lastError: undefined as string | undefined,
-        todayInUserTz: parts.isoDate,
-        nowInUserTz: parts.hhmm,
-        birthdaysFoundForToday,
-        userDebug
+        debugUser
       }
-    };
-    if (userDebug.isCandidate) {
-      const outcome = await processOneCandidate(deps, row, now);
-      (body.debug as Record<string, unknown>).userOutcome = outcome;
-      (body.debug as Record<string, unknown>).insertsAttempted = 1;
-      if (outcome.outcome === "sent" || outcome.outcome === "skipped") {
-        (body.debug as Record<string, unknown>).dispatchRowsWritten = 1;
-      } else {
-        (body.debug as Record<string, unknown>).lastError = outcome.outcome === "failed" ? outcome.reason : undefined;
-      }
-    }
-    return NextResponse.json(body);
+    });
   }
 
   const deps = buildCronDeps(supabase);
@@ -198,6 +280,7 @@ export async function GET(request: Request) {
     rows = (settingsRows ?? []) as UserSettingsReminderRow[];
   }
   summary.scannedUsers = rows.length;
+  let singleUserOutcome: ProcessOutcome | { skipReason: string } | null = null;
 
   for (const row of rows) {
     const timezone = (row.timezone || "America/Sao_Paulo").trim();
@@ -208,12 +291,19 @@ export async function GET(request: Request) {
 
     if (!treatAsCandidate) {
       skipReasons.push({ userId: row.user_id, skipReason: "outside_window" });
+      if (rows.length === 1) singleUserOutcome = { skipReason: "outside_window" };
       continue;
     }
     summary.candidates += 1;
     summary.insertsAttempted += 1;
 
-    const outcome = await processOneCandidate(deps, row, now);
+    const outcome = await processOneCandidate(
+      deps,
+      row,
+      now,
+      forceCandidate ? { debugNoBirthdaysMessage: "forced_debug_no_birthdays" } : undefined
+    );
+    if (rows.length === 1) singleUserOutcome = outcome;
 
     if ("recoveredStale" in outcome && outcome.recoveredStale) summary.recoveredStale += 1;
     switch (outcome.outcome) {
@@ -222,7 +312,9 @@ export async function GET(request: Request) {
         summary.dispatchRowsWritten += 1;
         break;
       case "skipped":
-        summary.dispatchRowsWritten += 1;
+        if (outcome.reason !== "already_sent" && outcome.reason !== "already_processing") {
+          summary.dispatchRowsWritten += 1;
+        }
         if (outcome.reason === "no_birthday") summary.skippedNoBirthday += 1;
         else if (outcome.reason === "invalid_email") summary.skippedInvalidEmail += 1;
         else summary.skippedAlreadySent += 1;
@@ -253,12 +345,14 @@ export async function GET(request: Request) {
       candidates: summary.candidates,
       insertsAttempted: summary.insertsAttempted,
       dispatchRowsWritten: summary.dispatchRowsWritten,
+      skippedAlreadySent: summary.skippedAlreadySent,
       lastError: summary.lastError ?? undefined,
       forcedUserId: debugUserId ?? undefined,
       forced: forceCandidate,
       skipReasons: skipReasons.length ? skipReasons : undefined
     };
     if (rows.length === 1) {
+      debug.debugUser = buildDebugUser(rows[0], now, singleUserOutcome ?? undefined);
       const row = rows[0];
       const tz = (row.timezone || "America/Sao_Paulo").trim();
       const parts = getDatePartsInTimeZone(tz, now);
