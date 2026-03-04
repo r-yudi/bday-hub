@@ -65,9 +65,11 @@ export async function getEmailReminderSettings(): Promise<EmailReminderSettings 
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (error && process.env.NODE_ENV === "development") {
-    console.warn("[notifications] remote settings read skipped:", error.message);
-    return { ...DEFAULT_EMAIL_REMINDER_SETTINGS };
+  if (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[notifications] remote settings read failed:", error.message);
+    }
+    return null;
   }
 
   return normalizeSettings((data as UserSettingsRow | null) ?? null);
@@ -84,25 +86,46 @@ export async function saveEmailReminderSettings(partial: Partial<EmailReminderSe
   const next: EmailReminderSettings = {
     ...current,
     ...partial,
-    emailTime: normalizeEmailTime(partial.emailTime ?? current.emailTime)
+    emailTime:
+      partial.emailTime !== undefined ? normalizeEmailTime(partial.emailTime) : (current.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime),
+    timezone: partial.timezone !== undefined ? partial.timezone : (current.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone)
   };
 
-  const payload = {
-    user_id: userId,
-    email_enabled: next.emailEnabled,
-    email_time: next.emailTime,
-    timezone: next.timezone
-  };
+  const payload = buildEmailReminderPayload(partial, userId);
+  if (Object.keys(payload).length === 1) return next; // only user_id, nothing to persist
+  await upsertUserSettingsEmail(supabase as unknown as Parameters<typeof upsertUserSettingsEmail>[0], payload);
+  return next;
+}
 
-  const { error } = await supabase.from("user_settings").upsert(payload, { onConflict: "user_id" });
+/** Builds DB payload with only keys present in partial (patch). Exported for unit tests. */
+export function buildEmailReminderPayload(
+  partial: Partial<EmailReminderSettings>,
+  userId: string
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = { user_id: userId };
+  if (partial.emailEnabled !== undefined) payload.email_enabled = partial.emailEnabled;
+  if (partial.emailTime !== undefined) payload.email_time = normalizeEmailTime(partial.emailTime);
+  if (partial.timezone !== undefined) payload.timezone = partial.timezone;
+  return payload;
+}
+
+/** Used by saveEmailReminderSettings; exported for unit tests. Throws on DB error. */
+export async function upsertUserSettingsEmail(
+  supabase: {
+    from: (table: string) => {
+      upsert: (p: unknown, opts: { onConflict: string }) => Promise<{ error: { message: string } | null }>;
+    };
+  },
+  payload: Record<string, unknown>
+): Promise<void> {
+  const result = await supabase.from("user_settings").upsert(payload, { onConflict: "user_id" });
+  const error = (result as { error: { message: string } | null }).error;
   if (error) {
     if (process.env.NODE_ENV === "development") {
-      console.warn("[notifications] remote settings save skipped:", error.message);
+      console.warn("[notifications] remote settings save failed:", error.message);
     }
-    return current;
+    throw new Error(error.message || "Falha ao salvar configurações de email.");
   }
-
-  return next;
 }
 
 export async function getLastEmailDispatch(): Promise<LastEmailDispatch> {
