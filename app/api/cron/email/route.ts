@@ -83,6 +83,10 @@ export async function GET(request: Request) {
   const supabase = getSupabaseAdminClient();
   const now = new Date();
   const xDebug = request.headers.get("x-debug") === "1";
+  const debugUserId = request.headers.get("x-debug-user-id")?.trim() || null;
+  const forceCandidate =
+    request.headers.get("x-debug-force") === "1" &&
+    (process.env.NODE_ENV !== "production" || xDebug);
   const url = new URL(request.url);
   const userIdParam = url.searchParams.get("userId");
 
@@ -158,23 +162,42 @@ export async function GET(request: Request) {
     dispatchRowsWritten: 0,
     lastError: null as string | null
   };
+  const skipReasons: { userId: string; skipReason: string }[] = [];
 
-  const { data: settingsRows, error: settingsError } = await supabase
-    .from("user_settings")
-    .select("user_id,email_enabled,email_time,timezone,push_enabled")
-    .eq("email_enabled", true);
-
-  if (settingsError) {
-    return NextResponse.json({ ok: false, message: settingsError.message }, { status: 500 });
+  let rows: UserSettingsReminderRow[];
+  if (debugUserId) {
+    const { data: userRow, error: userError } = await supabase
+      .from("user_settings")
+      .select("user_id,email_enabled,email_time,timezone,push_enabled")
+      .eq("user_id", debugUserId)
+      .maybeSingle();
+    if (userError) {
+      return NextResponse.json({ ok: false, message: userError.message }, { status: 500 });
+    }
+    rows = userRow ? ([userRow] as UserSettingsReminderRow[]) : [];
+  } else {
+    const { data: settingsRows, error: settingsError } = await supabase
+      .from("user_settings")
+      .select("user_id,email_enabled,email_time,timezone,push_enabled")
+      .eq("email_enabled", true);
+    if (settingsError) {
+      return NextResponse.json({ ok: false, message: settingsError.message }, { status: 500 });
+    }
+    rows = (settingsRows ?? []) as UserSettingsReminderRow[];
   }
-
-  const rows = (settingsRows ?? []) as UserSettingsReminderRow[];
   summary.scannedUsers = rows.length;
 
   for (const row of rows) {
     const timezone = (row.timezone || "America/Sao_Paulo").trim();
     const emailTime = (row.email_time || "09:00").trim();
-    if (!shouldSendForNow(emailTime, timezone, now)) continue;
+    const isInWindow = shouldSendForNow(emailTime, timezone, now);
+    const treatAsCandidate =
+      isInWindow || (forceCandidate && debugUserId !== null && row.user_id === debugUserId);
+
+    if (!treatAsCandidate) {
+      skipReasons.push({ userId: row.user_id, skipReason: "outside_window" });
+      continue;
+    }
     summary.candidates += 1;
     summary.insertsAttempted += 1;
 
@@ -218,7 +241,10 @@ export async function GET(request: Request) {
       candidates: summary.candidates,
       insertsAttempted: summary.insertsAttempted,
       dispatchRowsWritten: summary.dispatchRowsWritten,
-      lastError: summary.lastError ?? undefined
+      lastError: summary.lastError ?? undefined,
+      forcedUserId: debugUserId ?? undefined,
+      forced: forceCandidate,
+      skipReasons: skipReasons.length ? skipReasons : undefined
     };
   }
   return NextResponse.json(body);
