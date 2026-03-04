@@ -7,13 +7,16 @@ name: Cron email (15 min)
 on:
   schedule:
     - cron: "*/15 * * * *"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   trigger-cron:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Log event
+        run: echo "event: $GITHUB_EVENT_NAME"
+
       - name: Debug secret presence
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
