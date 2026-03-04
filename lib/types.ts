@@ -27,6 +27,24 @@ export type AppSettings = {
   lastNotifiedDate?: string;
 };
 
+export type EmailReminderSettings = {
+  emailEnabled: boolean;
+  emailTime: string;
+  timezone: string;
+  lastDailyEmailSentOn?: string | null;
+};
+
+export type PushSettings = {
+  pushEnabled: boolean;
+};
+
+export type LastEmailDispatch = {
+  dateKey: string;
+  status: string;
+  sentAt: string | null;
+  errorMessage: string | null;
+} | null;
+
 export type SettingRecord<T = unknown> = {
   key: string;
   value: T;
@@ -35,4 +53,11 @@ export type SettingRecord<T = unknown> = {
 export const DEFAULT_SETTINGS: AppSettings = {
   notificationEnabled: false,
   notificationTime: "09:00"
+};
+
+export const DEFAULT_EMAIL_REMINDER_SETTINGS: EmailReminderSettings = {
+  emailEnabled: false,
+  emailTime: "09:00",
+  timezone: "America/Sao_Paulo",
+  lastDailyEmailSentOn: null
 };
