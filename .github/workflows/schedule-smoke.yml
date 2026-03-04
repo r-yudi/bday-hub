@@ -1,0 +1,13 @@
+name: Schedule smoke
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo schedule ok
+        run: echo "schedule ok: $(date)"
