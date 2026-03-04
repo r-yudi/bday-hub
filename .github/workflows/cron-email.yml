@@ -29,6 +29,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           echo "event: $GITHUB_EVENT_NAME"
+          date -u
           if [ -z "$CRON_SECRET" ]; then
             echo "CRON_SECRET is EMPTY"
             exit 1
@@ -44,7 +45,7 @@ jobs:
         run: |
           EXTRA_HEADERS=()
           [ -n "$DEBUG_USER_ID" ] && EXTRA_HEADERS+=(-H "X-Debug: 1" -H "X-Debug-UserId: $DEBUG_USER_ID")
-          [ "$DEBUG_FORCE" = "true" ] && EXTRA_HEADERS+=(-H "X-Debug-Force: 1")
+          [ "$DEBUG_FORCE" = "true" ] && EXTRA_HEADERS+=(-H "X-Force: 1" -H "X-Debug-Force: 1")
           resp=$(curl -s -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer $CRON_SECRET" \
             "${EXTRA_HEADERS[@]}" \

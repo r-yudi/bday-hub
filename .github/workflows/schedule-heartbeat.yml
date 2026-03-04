@@ -1,0 +1,25 @@
+# Prova que o schedule do GitHub está ativo: chama o cron sem auth e espera 401.
+name: Schedule heartbeat
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log event and date
+        run: |
+          echo "event: $GITHUB_EVENT_NAME"
+          date -u
+      - name: Curl cron endpoint (expect 401)
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" -I "https://uselembra.com.br/api/cron/email")
+          echo "http_code: $code"
+          if [ "$code" != "401" ]; then
+            echo "Expected 401 (unauthorized without auth), got $code"
+            exit 1
+          fi
+          echo "schedule heartbeat ok"
