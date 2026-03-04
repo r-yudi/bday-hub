@@ -7,12 +7,15 @@ import {
   processOneCandidate,
   shouldSendForNow,
   getCandidateDebug,
+  dateKeyToDayMonth,
   STALE_PENDING_MS,
   type UserSettingsReminderRow,
   type DailyEmailCronDeps,
   type BirthdayRow,
   type DispatchRow
 } from "@/lib/server/dailyEmailCronLogic";
+import { getDateKey } from "@/lib/timezone";
+import { getDatePartsInTimeZone } from "@/lib/server/dailyReminderDigest";
 
 function isAuthorized(request: Request): boolean {
   const expected = process.env.CRON_SECRET;
@@ -121,6 +124,13 @@ export async function GET(request: Request) {
     }
     const row = userRow as UserSettingsReminderRow;
     const userDebug = getCandidateDebug(row, now);
+    const tz = (row.timezone || "America/Sao_Paulo").trim();
+    const parts = getDatePartsInTimeZone(tz, now);
+    const dateKey = getDateKey(now, tz);
+    const { day, month } = dateKeyToDayMonth(dateKey);
+    const deps = buildCronDeps(supabase);
+    const birthdaysResult = await deps.getBirthdays(row.user_id, day, month);
+    const birthdaysFoundForToday = Array.isArray(birthdaysResult) ? birthdaysResult.length : 0;
     const body: Record<string, unknown> = {
       ok: true,
       debug: {
@@ -131,11 +141,13 @@ export async function GET(request: Request) {
         insertsAttempted: 0,
         dispatchRowsWritten: 0,
         lastError: undefined as string | undefined,
+        todayInUserTz: parts.isoDate,
+        nowInUserTz: parts.hhmm,
+        birthdaysFoundForToday,
         userDebug
       }
     };
     if (userDebug.isCandidate) {
-      const deps = buildCronDeps(supabase);
       const outcome = await processOneCandidate(deps, row, now);
       (body.debug as Record<string, unknown>).userOutcome = outcome;
       (body.debug as Record<string, unknown>).insertsAttempted = 1;
@@ -234,7 +246,7 @@ export async function GET(request: Request) {
   const showDebug = process.env.NODE_ENV !== "production" || xDebug;
   const body: Record<string, unknown> = { ok: true, ...summary };
   if (showDebug) {
-    body.debug = {
+    const debug: Record<string, unknown> = {
       serverNowIso,
       serverNowUtc,
       scannedUsers: summary.scannedUsers,
@@ -246,6 +258,18 @@ export async function GET(request: Request) {
       forced: forceCandidate,
       skipReasons: skipReasons.length ? skipReasons : undefined
     };
+    if (rows.length === 1) {
+      const row = rows[0];
+      const tz = (row.timezone || "America/Sao_Paulo").trim();
+      const parts = getDatePartsInTimeZone(tz, now);
+      const dateKey = getDateKey(now, tz);
+      const { day, month } = dateKeyToDayMonth(dateKey);
+      const birthdaysResult = await deps.getBirthdays(row.user_id, day, month);
+      debug.todayInUserTz = parts.isoDate;
+      debug.nowInUserTz = parts.hhmm;
+      debug.birthdaysFoundForToday = Array.isArray(birthdaysResult) ? birthdaysResult.length : 0;
+    }
+    body.debug = debug;
   }
   return NextResponse.json(body);
 }
