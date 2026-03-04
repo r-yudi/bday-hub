@@ -6,6 +6,7 @@ import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
 import {
   processOneCandidate,
   shouldSendForNow,
+  getCandidateDebug,
   STALE_PENDING_MS,
   type UserSettingsReminderRow,
   type DailyEmailCronDeps,
@@ -81,6 +82,68 @@ export async function GET(request: Request) {
 
   const supabase = getSupabaseAdminClient();
   const now = new Date();
+  const xDebug = request.headers.get("x-debug") === "1";
+  const url = new URL(request.url);
+  const userIdParam = url.searchParams.get("userId");
+
+  const serverNowIso = now.toISOString();
+  const serverNowUtc = now.toUTCString();
+
+  if (xDebug && userIdParam) {
+    const { data: userRow, error: userError } = await supabase
+      .from("user_settings")
+      .select("user_id,email_enabled,email_time,timezone,push_enabled")
+      .eq("user_id", userIdParam)
+      .maybeSingle();
+    if (userError) {
+      return NextResponse.json(
+        { ok: false, message: userError.message, debug: { serverNowIso, serverNowUtc } },
+        { status: 500 }
+      );
+    }
+    if (!userRow) {
+      return NextResponse.json(
+        {
+          ok: true,
+          debug: {
+            serverNowIso,
+            serverNowUtc,
+            userDebug: null,
+            reasonIfNot: "user not found in user_settings"
+          }
+        },
+        { status: 200 }
+      );
+    }
+    const row = userRow as UserSettingsReminderRow;
+    const userDebug = getCandidateDebug(row, now);
+    const body: Record<string, unknown> = {
+      ok: true,
+      debug: {
+        serverNowIso,
+        serverNowUtc,
+        scannedUsers: 1,
+        candidates: userDebug.isCandidate ? 1 : 0,
+        insertsAttempted: 0,
+        dispatchRowsWritten: 0,
+        lastError: undefined as string | undefined,
+        userDebug
+      }
+    };
+    if (userDebug.isCandidate) {
+      const deps = buildCronDeps(supabase);
+      const outcome = await processOneCandidate(deps, row, now);
+      (body.debug as Record<string, unknown>).userOutcome = outcome;
+      (body.debug as Record<string, unknown>).insertsAttempted = 1;
+      if (outcome.outcome === "sent" || outcome.outcome === "skipped") {
+        (body.debug as Record<string, unknown>).dispatchRowsWritten = 1;
+      } else {
+        (body.debug as Record<string, unknown>).lastError = outcome.outcome === "failed" ? outcome.reason : undefined;
+      }
+    }
+    return NextResponse.json(body);
+  }
+
   const deps = buildCronDeps(supabase);
   const summary = {
     scannedUsers: 0,
@@ -90,7 +153,10 @@ export async function GET(request: Request) {
     skippedAlreadySent: 0,
     skippedInvalidEmail: 0,
     failed: 0,
-    recoveredStale: 0
+    recoveredStale: 0,
+    insertsAttempted: 0,
+    dispatchRowsWritten: 0,
+    lastError: null as string | null
   };
 
   const { data: settingsRows, error: settingsError } = await supabase
@@ -106,10 +172,11 @@ export async function GET(request: Request) {
   summary.scannedUsers = rows.length;
 
   for (const row of rows) {
-    const timezone = row.timezone || "America/Sao_Paulo";
-    const emailTime = row.email_time || "09:00";
+    const timezone = (row.timezone || "America/Sao_Paulo").trim();
+    const emailTime = (row.email_time || "09:00").trim();
     if (!shouldSendForNow(emailTime, timezone, now)) continue;
     summary.candidates += 1;
+    summary.insertsAttempted += 1;
 
     const outcome = await processOneCandidate(deps, row, now);
 
@@ -117,14 +184,17 @@ export async function GET(request: Request) {
     switch (outcome.outcome) {
       case "sent":
         summary.sent += 1;
+        summary.dispatchRowsWritten += 1;
         break;
       case "skipped":
+        summary.dispatchRowsWritten += 1;
         if (outcome.reason === "no_birthday") summary.skippedNoBirthday += 1;
         else if (outcome.reason === "invalid_email") summary.skippedInvalidEmail += 1;
-        else summary.skippedAlreadySent += 1; // already_sent | already_processing
+        else summary.skippedAlreadySent += 1;
         break;
       default:
         summary.failed += 1;
+        summary.lastError = outcome.reason ?? "unknown";
     }
 
     if (row.push_enabled) {
@@ -138,5 +208,18 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, ...summary });
+  const showDebug = process.env.NODE_ENV !== "production" || xDebug;
+  const body: Record<string, unknown> = { ok: true, ...summary };
+  if (showDebug) {
+    body.debug = {
+      serverNowIso,
+      serverNowUtc,
+      scannedUsers: summary.scannedUsers,
+      candidates: summary.candidates,
+      insertsAttempted: summary.insertsAttempted,
+      dispatchRowsWritten: summary.dispatchRowsWritten,
+      lastError: summary.lastError ?? undefined
+    };
+  }
+  return NextResponse.json(body);
 }

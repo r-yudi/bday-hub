@@ -45,3 +45,44 @@
 - **GET** `/api/cron/email`
 - Sem header ou secret inválido → **401** (JSON `{ "ok": false, "message": "unauthorized" }`)
 - Com `x-cron-secret` ou `Authorization: Bearer <CRON_SECRET>` → **200** (JSON `{ "ok": true, ... }`)
+
+## Debug (X-Debug: 1)
+
+Com o header **`X-Debug: 1`** (e secret válido), a resposta inclui um objeto **`debug`** com:
+
+- **serverNowIso** — instante do servidor em ISO (UTC)
+- **serverNowUtc** — instante em UTC (string legível)
+- **scannedUsers** — quantos usuários têm `email_enabled = true`
+- **candidates** — quantos estão na janela de 15 min do `email_time` no timezone do usuário
+- **insertsAttempted** — tentativas de insert em `daily_email_dispatch`
+- **dispatchRowsWritten** — linhas efetivamente gravadas
+- **lastError** — último erro (sem dados sensíveis), se houver
+
+Exemplo de chamada (curl):
+
+```bash
+curl -s -H "Authorization: Bearer $CRON_SECRET" -H "X-Debug: 1" "https://uselembra.com.br/api/cron/email"
+```
+
+## Testar um usuário (userId)
+
+Com **X-Debug: 1** e query **`?userId=<uuid>`** (UUID do usuário em `auth.users` / `user_settings`), o endpoint:
+
+1. Busca esse usuário em `user_settings` (sem filtrar por `email_enabled`)
+2. Avalia se ele é candidato (janela de 15 min no timezone dele)
+3. Retorna em **`debug.userDebug`**:
+   - **email_enabled**, **email_time**, **timezone**
+   - **localNow**, **localNowHHMM** — data/hora local no fuso do usuário
+   - **emailTimeParsed** — minutos do dia do `email_time`
+   - **windowStart**, **windowEnd** — janela [start, end) em HH:MM
+   - **isCandidate** — se está na janela
+   - **reasonIfNot** — motivo se não for candidato
+4. Se **isCandidate** for true, roda o fluxo (insert + skip/send) e inclui **userOutcome** e contagens em **debug**.
+
+Exemplo:
+
+```bash
+curl -s -H "Authorization: Bearer $CRON_SECRET" -H "X-Debug: 1" "https://uselembra.com.br/api/cron/email?userId=SEU_USER_UUID"
+```
+
+Use para validar por que um usuário com `email_enabled=true` e `email_time` próximo do horário atual não está entrando como candidato (ex.: timezone errado, horário fora da janela de 15 min).

@@ -39,10 +39,14 @@ export function truncateError(msg: string): string {
   return msg.slice(0, MAX_ERROR_MESSAGE_LENGTH - 3) + "...";
 }
 
+const MINUTES_PER_DAY = 24 * 60;
+
 function toMinutes(hhmm: string): number | null {
-  const [hourText, minuteText] = hhmm.split(":");
+  const trimmed = (hhmm ?? "").trim();
+  if (!trimmed) return null;
+  const [hourText, minuteText] = trimmed.split(":");
   const hour = Number(hourText);
-  const minute = Number(minuteText);
+  const minute = Number(minuteText ?? "0");
   if (!Number.isInteger(hour) || !Number.isInteger(minute)) return null;
   if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
   return hour * 60 + minute;
@@ -50,7 +54,7 @@ function toMinutes(hhmm: string): number | null {
 
 /**
  * Janela de envio: [email_time, email_time + cronIntervalMinutes) no timezone do usuário.
- * Sem promessa de horário exato; o cron pode rodar a cada 15 min.
+ * Trata virada do dia (ex.: 23:50 -> janela até 00:05).
  */
 export function shouldSendNow(
   nowUtc: Date,
@@ -60,13 +64,87 @@ export function shouldSendNow(
 ): boolean {
   const parts = getDatePartsInTimeZone(timezone, nowUtc);
   const currentMinutes = toMinutes(parts.hhmm);
-  const targetMinutes = toMinutes(emailTime);
+  const targetMinutes = toMinutes(emailTime.trim());
   if (currentMinutes === null || targetMinutes === null) return false;
-  return currentMinutes >= targetMinutes && currentMinutes < targetMinutes + cronIntervalMinutes;
+  const windowEnd = targetMinutes + cronIntervalMinutes;
+  if (windowEnd <= MINUTES_PER_DAY) {
+    return currentMinutes >= targetMinutes && currentMinutes < windowEnd;
+  }
+  // Janela cruza meia-noite (ex.: 23:50 + 15 = 00:05)
+  return currentMinutes >= targetMinutes || currentMinutes < windowEnd % MINUTES_PER_DAY;
 }
 
 export function shouldSendForNow(emailTime: string, timezone: string, now = new Date()): boolean {
-  return shouldSendNow(now, timezone, emailTime, 15);
+  return shouldSendNow(now, timezone, (emailTime ?? "").trim(), 15);
+}
+
+export type CandidateDebug = {
+  email_enabled: boolean;
+  email_time: string;
+  timezone: string;
+  localNow: string;
+  localNowHHMM: string;
+  emailTimeParsed: number | null;
+  windowStart: string;
+  windowEnd: string;
+  isCandidate: boolean;
+  reasonIfNot?: string;
+};
+
+/**
+ * Avalia um usuário para o cron e retorna dados de debug (para X-Debug e ?userId=).
+ */
+export function getCandidateDebug(
+  row: UserSettingsReminderRow,
+  now: Date,
+  cronIntervalMinutes = 15
+): CandidateDebug {
+  const timezone = (row.timezone || "America/Sao_Paulo").trim();
+  const emailTime = (row.email_time || "09:00").trim();
+  const parts = getDatePartsInTimeZone(timezone, now);
+  const currentMinutes = toMinutes(parts.hhmm);
+  const targetMinutes = toMinutes(emailTime);
+  const formatM = (m: number) =>
+    `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+  const windowEndMinutes = targetMinutes !== null ? targetMinutes + cronIntervalMinutes : null;
+  const windowEndM =
+    windowEndMinutes !== null && windowEndMinutes >= MINUTES_PER_DAY ? windowEndMinutes % MINUTES_PER_DAY : windowEndMinutes;
+  const windowStart = targetMinutes !== null ? formatM(targetMinutes) : "invalid";
+  const windowEnd =
+    windowEndM !== null ? formatM(windowEndM) : "invalid";
+
+  let isCandidate = false;
+  let reasonIfNot: string | undefined;
+  if (!row.email_enabled) {
+    reasonIfNot = "email_enabled is false";
+  } else if (targetMinutes === null) {
+    reasonIfNot = `email_time "${emailTime}" could not be parsed (expected HH:MM)`;
+  } else if (currentMinutes === null) {
+    reasonIfNot = "could not parse local time";
+  } else {
+    isCandidate = shouldSendNow(now, timezone, emailTime, cronIntervalMinutes);
+    if (!isCandidate) {
+      const windowEndVal = targetMinutes + cronIntervalMinutes;
+      if (windowEndVal <= MINUTES_PER_DAY) {
+        reasonIfNot = `local time ${parts.hhmm} not in [${windowStart}, ${windowEnd})`;
+      } else {
+        reasonIfNot = `local time ${parts.hhmm} not in [${windowStart}, 24:00) or [00:00, ${windowEnd})`;
+      }
+    }
+  }
+
+  return {
+    email_enabled: row.email_enabled,
+    email_time: emailTime,
+    timezone,
+    localNow: `${parts.isoDate} ${parts.hhmm}`,
+    localNowHHMM: parts.hhmm,
+    emailTimeParsed: targetMinutes,
+    windowStart,
+    windowEnd,
+    isCandidate,
+    ...(reasonIfNot && { reasonIfNot })
+  };
 }
 
 function isValidEmail(value: string): boolean {
