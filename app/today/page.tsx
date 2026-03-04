@@ -1,11 +1,21 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { ImportCsv } from "@/components/ImportCsv";
 import { PersonCard } from "@/components/PersonCard";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { AppToast } from "@/components/AppToast";
+import {
+  getEmailReminderSettings,
+  getLastEmailDispatch,
+  saveEmailReminderSettings,
+  getPushSettings,
+  savePushEnabled,
+  isValidTimezone
+} from "@/lib/notificationSettingsRepo";
+import { getSafeBrowserSession } from "@/lib/supabase-browser";
 import {
   getNotificationSupport,
   requestNotificationPermission,
@@ -15,7 +25,13 @@ import { getTodayPeople, todayParts } from "@/lib/dates";
 import { clearAllData, getSettings, saveSettings } from "@/lib/storage";
 import { deleteBirthday, importCsvBirthdays, listBirthdays } from "@/lib/birthdaysRepo";
 import { buildAddBirthdayToast, consumeBirthdayAddedToast, type OnboardingToast } from "@/lib/onboarding-ui";
-import type { AppSettings, BirthdayPerson } from "@/lib/types";
+import {
+  DEFAULT_EMAIL_REMINDER_SETTINGS,
+  type AppSettings,
+  type BirthdayPerson,
+  type EmailReminderSettings,
+  type LastEmailDispatch
+} from "@/lib/types";
 
 const INITIAL_NOTIFICATION_SUPPORT: NotificationSupport = {
   supported: false,
@@ -80,9 +96,11 @@ function ClearDataModal({
 }
 
 export default function TodayPage() {
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [people, setPeople] = useState<BirthdayPerson[]>([]);
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [emailSettings, setEmailSettings] = useState<EmailReminderSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
@@ -91,23 +109,45 @@ export default function TodayPage() {
   const [clearConfirmText, setClearConfirmText] = useState("");
   const [clearingData, setClearingData] = useState(false);
   const [toast, setToast] = useState<OnboardingToast | null>(null);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [lastDispatch, setLastDispatch] = useState<LastEmailDispatch | null>(null);
+  const [timezoneDraft, setTimezoneDraft] = useState<string>("");
+  const [pushSettings, setPushSettings] = useState<{ pushEnabled: boolean } | null>(null);
+  const [pushSaving, setPushSaving] = useState(false);
+  const [pushError, setPushError] = useState<string | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [notificationSaving, setNotificationSaving] = useState(false);
 
   const notificationCtaLabel = !mounted
     ? "Carregando..."
     : !support.supported
       ? "Navegador sem suporte"
       : support.permission === "granted" && settings?.notificationEnabled
-        ? "Lembretes ativados"
+        ? "Desativar lembretes"
         : support.permission === "denied"
-          ? "PermissÃ£o bloqueada"
+          ? "Permissão bloqueada"
           : "Ativar lembretes";
 
   async function loadData() {
     setLoading(true);
     try {
-      const [storedPeople, storedSettings] = await Promise.all([listBirthdays(), getSettings()]);
+      const [storedPeople, storedSettings, remoteEmailSettings, remoteLastDispatch, remotePushSettings] =
+        await Promise.all([
+          listBirthdays(),
+          getSettings(),
+          user ? getEmailReminderSettings() : Promise.resolve(null),
+          user ? getLastEmailDispatch() : Promise.resolve(null),
+          user ? getPushSettings() : Promise.resolve(null)
+        ]);
       setPeople(storedPeople);
       setSettings(storedSettings);
+      const nextEmail = remoteEmailSettings ?? (user ? { ...DEFAULT_EMAIL_REMINDER_SETTINGS } : null);
+      setEmailSettings(nextEmail);
+      setTimezoneDraft(nextEmail?.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone);
+      setLastDispatch(remoteLastDispatch ?? null);
+      setPushSettings(remotePushSettings ?? { pushEnabled: false });
+      setEmailError(null);
     } finally {
       setLoading(false);
     }
@@ -115,13 +155,17 @@ export default function TodayPage() {
 
   useEffect(() => {
     setMounted(true);
+    setIsStandalone(
+      window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as { standalone?: boolean }).standalone === true
+    );
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
     setSupport(getNotificationSupport());
     void loadData();
-  }, [mounted]);
+  }, [mounted, user?.id]);
 
   useEffect(() => {
     if (!mounted || loading) return;
@@ -158,8 +202,20 @@ export default function TodayPage() {
     await loadData();
   }
 
-  async function handleEnableNotifications() {
+  async function handleNotificationToggle() {
     if (!mounted) return;
+
+    if (support.permission === "granted" && settings?.notificationEnabled) {
+      setNotificationSaving(true);
+      const next: AppSettings = {
+        ...(settings ?? { notificationEnabled: false, notificationTime: "09:00" }),
+        notificationEnabled: false
+      };
+      await saveSettings(next);
+      setSettings(next);
+      setNotificationSaving(false);
+      return;
+    }
 
     const permission = await requestNotificationPermission();
     if (permission === "unsupported") {
@@ -180,6 +236,150 @@ export default function TodayPage() {
 
     if (permission !== "granted") {
       window.alert("Permissão não concedida. Você ainda verá avisos dentro do app.");
+    }
+  }
+
+  async function handleNotificationTimeChange(value: string) {
+    if (!mounted || !settings) return;
+    setNotificationSaving(true);
+    const next: AppSettings = { ...settings, notificationTime: value };
+    await saveSettings(next);
+    setSettings(next);
+    setNotificationSaving(false);
+  }
+
+  async function handleEmailToggle() {
+    if (!user) return;
+    setEmailSaving(true);
+    setEmailError(null);
+    try {
+      const next = await saveEmailReminderSettings({
+        emailEnabled: !(emailSettings?.emailEnabled ?? false)
+      });
+      if (next) setEmailSettings(next);
+    } catch (error) {
+      setEmailError(error instanceof Error ? error.message : "Não foi possível atualizar lembretes por email.");
+    } finally {
+      setEmailSaving(false);
+    }
+  }
+
+  async function handleEmailTimeChange(value: string) {
+    if (!user) return;
+    setEmailSaving(true);
+    setEmailError(null);
+    try {
+      const next = await saveEmailReminderSettings({ emailTime: value });
+      if (next) setEmailSettings(next);
+    } catch (error) {
+      setEmailError(error instanceof Error ? error.message : "Não foi possível salvar o horário de email.");
+    } finally {
+      setEmailSaving(false);
+    }
+  }
+
+  async function handleTimezoneBlur() {
+    if (!user) return;
+    const value = timezoneDraft.trim() || "America/Sao_Paulo";
+    if (value === (emailSettings?.timezone ?? "")) return;
+    if (!isValidTimezone(value)) {
+      setTimezoneDraft(emailSettings?.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone);
+      setEmailError("Timezone inválido; não foi salvo. Será usado America/Sao_Paulo se não corrigir.");
+      return;
+    }
+    setEmailSaving(true);
+    setEmailError(null);
+    try {
+      const next = await saveEmailReminderSettings({ timezone: value });
+      if (next) setEmailSettings(next);
+    } catch (error) {
+      setEmailError(error instanceof Error ? error.message : "Não foi possível salvar o fuso horário.");
+    } finally {
+      setEmailSaving(false);
+    }
+  }
+
+  async function handlePushToggle() {
+    if (!user || !mounted) return;
+    setPushSaving(true);
+    setPushError(null);
+    const enabling = !(pushSettings?.pushEnabled ?? false);
+    try {
+      if (enabling) {
+        const reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
+        await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          setPushError("Permissão negada. Push permanece desativado.");
+          setPushSaving(false);
+          return;
+        }
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidKey) {
+          setPushError("Push não configurado no servidor.");
+          setPushSaving(false);
+          return;
+        }
+        const keyBytes = Uint8Array.from(atob(vapidKey.replace(/-/g, "+").replace(/_/g, "/")), (c) =>
+          c.charCodeAt(0)
+        );
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: keyBytes
+        });
+        const toBase64Url = (buf: ArrayBuffer) =>
+          btoa(String.fromCharCode(...new Uint8Array(buf)))
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/, "");
+        const { session } = await getSafeBrowserSession();
+        if (!session?.access_token) {
+          setPushError("Sessão expirada. Faça login novamente.");
+          setPushSaving(false);
+          return;
+        }
+        const res = await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: toBase64Url(sub.getKey("p256dh")!),
+              auth: toBase64Url(sub.getKey("auth")!)
+            }
+          })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setPushError(data.message === "endpoint-already-used" ? "Este dispositivo já está em uso em outra conta." : "Falha ao ativar push.");
+          setPushSaving(false);
+          return;
+        }
+        const next = await savePushEnabled(true);
+        if (next) setPushSettings(next);
+      } else {
+        const { session } = await getSafeBrowserSession();
+        if (session?.access_token) {
+          await fetch("/api/push/unsubscribe", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${session.access_token}` }
+          });
+        }
+        const reg = await navigator.serviceWorker.getRegistration("/");
+        if (reg?.pushManager) {
+          const sub = await reg.pushManager.getSubscription();
+          if (sub) await sub.unsubscribe().catch(() => {});
+        }
+        const next = await savePushEnabled(false);
+        if (next) setPushSettings(next);
+      }
+    } catch (e) {
+      setPushError(e instanceof Error ? e.message : "Erro ao alterar push.");
+    } finally {
+      setPushSaving(false);
     }
   }
 
@@ -214,28 +414,37 @@ export default function TodayPage() {
       : support.permission === "denied"
         ? "Permissão bloqueada. Reative no navegador se quiser receber lembretes."
         : support.permission === "granted" && settings?.notificationEnabled
-          ? "Lembretes ativos: ao abrir o app, vocÃª recebe um aviso dos aniversários de hoje."
-          : "Ative os lembretes para ser avisado ao abrir o app nos dias com aniversários.";
+          ? `Lembretes ativos: no dia do aniversário, você recebe um aviso no horário escolhido (ao abrir o app ou com o app aberto). Clique na notificação para abrir Hoje.`
+          : "Ative os lembretes e escolha o horário. No dia do aniversário você recebe uma notificação (ao abrir o app ou com o app aberto).";
+
+  const emailSummary = !user
+    ? "Lembretes por email estão disponíveis para contas conectadas."
+    : emailSettings?.emailEnabled
+      ? `Email diário ativo às ${emailSettings.emailTime} (${emailSettings.timezone}).`
+      : "Ative o email diário para receber lembretes fora do app.";
 
   return (
     <>
-      <div className="space-y-8 lg:space-y-10">
-        <section className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">Hoje</h1>
-            <p className="ui-subtitle-editorial mt-2 max-w-[60ch] text-sm sm:text-[15px]">Veja quem faz aniversário hoje e registre pessoas com categorias quando precisar.</p>
-          </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
-            <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
-              Adicionar
-            </Link>
-            <button
-              type="button"
-              onClick={() => setShowImport((v) => !v)}
-              className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
-            >
-              {showImport ? "Fechar CSV" : "Importar CSV"}
-            </button>
+      <div className="space-y-9 lg:space-y-12">
+        <section className="rounded-2xl border border-border/75 bg-surface/75 p-5 shadow-sm dark:border-border/65 dark:bg-surface/35 sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Painel principal</p>
+              <h1 className="ui-title-editorial mt-2 text-4xl sm:text-[2.45rem]">Hoje</h1>
+              <p className="ui-subtitle-editorial mt-3 max-w-[62ch] text-sm sm:text-[15px]">Veja quem faz aniversário hoje, mantenha seus lembretes ativos e registre pessoas sem perder ritmo.</p>
+            </div>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
+              <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
+                Adicionar
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowImport((v) => !v)}
+                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+              >
+                {showImport ? "Fechar CSV" : "Importar CSV"}
+              </button>
+            </div>
           </div>
         </section>
 
@@ -243,33 +452,33 @@ export default function TodayPage() {
 
         {banner && <div className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">{banner}</div>}
 
-        <section className="grid gap-4 lg:grid-cols-[2fr_1fr] lg:gap-5">
+        <section className="grid gap-5 lg:grid-cols-[1.95fr_1fr] lg:gap-6">
           <div className="space-y-4">
             {showImport && <ImportCsv onImport={handleImport} />}
 
             {loading ? (
               <p className="text-sm text-muted">Carregando...</p>
             ) : todayPeople.length === 0 ? (
-              <div className="rounded-2xl border border-border/60 bg-surface/65 p-6 text-center shadow-sm dark:bg-surface/20 sm:p-7">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-paper text-2xl shadow-sm">ðŸŽ‚</div>
-                <p className="mt-4 text-lg font-semibold tracking-tight text-text">Nenhum aniversário hoje ðŸŽˆ</p>
-                <p className="mt-2 text-sm text-muted">Aproveite para revisar os próximos dias ou adicionar alguém agora.</p>
-                <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+              <div className="ui-surface-elevated rounded-2xl border p-8 text-center shadow-md sm:p-10">
+                <div className="mx-auto grid h-20 w-20 place-items-center rounded-2xl bg-paper text-3xl shadow-sm dark:bg-surface/55" aria-hidden>🎂</div>
+                <h2 className="mt-5 text-2xl font-semibold tracking-tight text-text sm:text-[1.5rem]">Hoje sua lista está tranquila 🎈</h2>
+                <p className="mt-3 max-w-[42ch] mx-auto text-sm text-muted">Use esse momento para preparar os próximos dias e não deixar nenhum parabéns passar.</p>
+                <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
                   <Link
                     href="/person"
-                    aria-label="Criar novo aniversario"
-                    className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
+                    aria-label="Criar novo aniversário"
+                    className="btn-primary-brand ui-cta-primary order-first inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   >
-                    Adicionar aniversário
+                    Adicionar agora
                   </Link>
-                  <Link href="/upcoming" className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none">
+                  <Link href="/upcoming" className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2">
                     Ver próximos 7 dias
                   </Link>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowImport(true)}
-                  className="mt-3 text-xs font-medium text-muted underline decoration-border underline-offset-2 hover:text-text"
+                  className="ui-link-tertiary mt-4 text-xs font-medium"
                 >
                   Abrir importação CSV
                 </button>
@@ -284,7 +493,10 @@ export default function TodayPage() {
           </div>
 
           <aside className="space-y-4">
-            <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
+            <div className="rounded-xl border border-amber-300/80 bg-amber-50/80 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/60 dark:bg-amber-950/50 dark:text-amber-200" aria-hidden>
+              BUILD: Email diário section expected — {typeof process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA === "string" ? process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA : "local"}
+            </div>
+            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Lembretes</h2>
                 {reminderSentToday && (
@@ -298,28 +510,171 @@ export default function TodayPage() {
 
               <button
                 type="button"
-                onClick={() => void handleEnableNotifications()}
-                disabled={!mounted || !support.supported || (support.permission === "granted" && Boolean(settings?.notificationEnabled))}
+                onClick={() => void handleNotificationToggle()}
+                disabled={!mounted || !support.supported || support.permission === "denied" || notificationSaving}
                 className="btn-primary-brand ui-cta-primary mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white shadow-sm hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted disabled:shadow-none focus-visible:outline-none"
               >
-                {notificationCtaLabel}
+                {notificationSaving ? "Salvando..." : notificationCtaLabel}
               </button>
+
+              {support.supported && support.permission === "granted" && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <label className="text-xs text-muted" htmlFor="daily-notification-time">
+                    Horário do lembrete
+                  </label>
+                  <input
+                    id="daily-notification-time"
+                    type="time"
+                    value={settings?.notificationTime ?? "09:00"}
+                    disabled={notificationSaving}
+                    onChange={(e) => void handleNotificationTimeChange(e.target.value)}
+                    className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                  />
+                </div>
+              )}
 
               <details className="ui-disclosure mt-3 px-3 py-2">
                 <summary className="ui-disclosure-summary">Ver detalhes técnicos</summary>
                 <div className="ui-callout mt-2 px-3 py-2 text-xs leading-5">
-                  <p>Estratégia MVP: melhor esforço (notifica ao abrir o app, quando suportado).</p>
-                  <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não") : "..."}</p>
-                  <p>Permissão: {mounted ? String(support.permission) : "..."}</p>
+                  <p>Web Push MVP: notificação local no horário escolhido (ao abrir o app ou com o app aberto). Um aviso por dia; clique abre Hoje.</p>
+                  <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não suportado") : "..."}</p>
+                  <p>Permissão: {mounted ? (support.permission === "denied" ? "negada" : support.permission) : "..."}</p>
                   <p>Ativado no app: {mounted ? (settings?.notificationEnabled ? "sim" : "não") : "..."}</p>
                   {support.permission === "denied" && (
-                    <p className="mt-1 text-amber-700 dark:text-amber-300">Permissão negada no navegador. Reative nas configurações do site.</p>
+                    <p className="mt-1 text-amber-700 dark:text-amber-300">Permissão negada no navegador. Reative nas configurações do site para receber lembretes.</p>
+                  )}
+                  {!support.supported && mounted && (
+                    <p className="mt-1 text-muted">Em alguns navegadores (ex.: iOS/Safari) as notificações não estão disponíveis.</p>
                   )}
                 </div>
               </details>
             </section>
 
-            <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
+            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Email diário</h2>
+              <p className="mt-2 text-sm leading-5 text-muted">{emailSummary}</p>
+              {!user ? (
+                <Link
+                  href="/login?returnTo=%2Ftoday"
+                  className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+                >
+                  Entrar para ativar email
+                </Link>
+              ) : (
+                <>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleEmailToggle()}
+                      disabled={emailSaving}
+                      className={[
+                        "inline-flex h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium focus-visible:outline-none",
+                        emailSettings?.emailEnabled ? "ui-cta-secondary border" : "btn-primary-brand ui-cta-primary bg-accent text-white"
+                      ].join(" ")}
+                    >
+                      {emailSaving ? "Salvando..." : emailSettings?.emailEnabled ? "Desativar email diário" : "Ativar email diário"}
+                    </button>
+                    <label className="text-xs text-muted" htmlFor="daily-email-time">
+                      Horário
+                    </label>
+                    <input
+                      id="daily-email-time"
+                      type="time"
+                      value={emailSettings?.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime}
+                      disabled={emailSaving}
+                      onChange={(e) => void handleEmailTimeChange(e.target.value)}
+                      className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                    />
+                    <label className="text-xs text-muted" htmlFor="daily-email-timezone">
+                      Fuso
+                    </label>
+                    <input
+                      id="daily-email-timezone"
+                      type="text"
+                      placeholder="America/Sao_Paulo"
+                      value={timezoneDraft}
+                      disabled={emailSaving}
+                      onChange={(e) => setTimezoneDraft(e.target.value)}
+                      onBlur={() => void handleTimezoneBlur()}
+                      className="ui-focus-surface h-10 min-w-[10rem] rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                    />
+                  </div>
+                  {(emailSettings?.timezone || timezoneDraft) && !isValidTimezone(timezoneDraft || emailSettings?.timezone || "") && (
+                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                      Timezone inválido; não será salvo (será usado America/Sao_Paulo).
+                    </p>
+                  )}
+                  {(lastDispatch ?? emailSettings?.lastDailyEmailSentOn) && (
+                    <div className="mt-2 space-y-0.5 text-xs text-muted">
+                      {lastDispatch?.status === "sent" && (
+                        <p>
+                          Último envio: {lastDispatch.sentAt ? new Date(lastDispatch.sentAt).toLocaleString("pt-BR") : lastDispatch.dateKey}
+                        </p>
+                      )}
+                      {lastDispatch?.status === "skipped" && (
+                        <p>Último status: sem aniversários no dia ({lastDispatch.dateKey}).</p>
+                      )}
+                      {lastDispatch?.status === "error" && (
+                        <p>
+                          Último status: erro no envio
+                          {lastDispatch.errorMessage ? ` — ${lastDispatch.errorMessage}` : ""}
+                        </p>
+                      )}
+                      {lastDispatch?.status === "pending" && (
+                        <p>Último status: em processamento.</p>
+                      )}
+                      {!lastDispatch && emailSettings?.lastDailyEmailSentOn && (
+                        <p>Último envio registrado: {emailSettings.lastDailyEmailSentOn}</p>
+                      )}
+                    </div>
+                  )}
+                  {emailError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{emailError}</p>}
+                </>
+              )}
+            </section>
+
+            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Push (complementar)</h2>
+              {!mounted ? (
+                <p className="mt-2 text-sm text-muted">Carregando...</p>
+              ) : !user ? (
+                <>
+                  <p className="mt-2 text-sm leading-5 text-muted">
+                    Notificações push estão disponíveis para contas conectadas (PWA instalada).
+                  </p>
+                  <Link
+                    href="/login?returnTo=%2Ftoday"
+                    className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+                  >
+                    Entrar para ativar push
+                  </Link>
+                </>
+              ) : !isStandalone ? (
+                <p className="mt-2 text-sm leading-5 text-muted">
+                  Para ativar notificações push, instale o Lembra (PWA) na tela inicial.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-2 text-sm leading-5 text-muted">
+                    Receba um lembrete no dispositivo quando houver aniversários no dia (complementar ao email).
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void handlePushToggle()}
+                    disabled={pushSaving}
+                    className={[
+                      "mt-3 inline-flex h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium focus-visible:outline-none",
+                      pushSettings?.pushEnabled ? "ui-cta-secondary border" : "btn-primary-brand ui-cta-primary bg-accent text-white"
+                    ].join(" ")}
+                  >
+                    {pushSaving ? "Salvando..." : pushSettings?.pushEnabled ? "Desativar push" : "Ativar push"}
+                  </button>
+                  {pushError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{pushError}</p>}
+                </>
+              )}
+            </section>
+
+            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Dados</h2>
               <p className="mt-2 text-sm leading-5 text-muted">Seus aniversários ficam salvos neste dispositivo e você pode exportar em CSV quando quiser.</p>
               <button
