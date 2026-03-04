@@ -7,7 +7,17 @@ name: Cron email (15 min)
 on:
   schedule:
     - cron: "*/15 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      debug_user_id:
+        description: "Optional user ID for debug (sends X-Debug + X-Debug-UserId)"
+        required: false
+        type: string
+      debug_force:
+        description: "Force user as candidate (sends X-Debug-Force: 1)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   trigger-cron:
@@ -29,10 +39,15 @@ jobs:
       - name: Call /api/cron/email
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          DEBUG_USER_ID: ${{ github.event.inputs.debug_user_id }}
+          DEBUG_FORCE: ${{ github.event.inputs.debug_force }}
         run: |
+          EXTRA_HEADERS=()
+          [ -n "$DEBUG_USER_ID" ] && EXTRA_HEADERS+=(-H "X-Debug: 1" -H "X-Debug-UserId: $DEBUG_USER_ID")
+          [ "$DEBUG_FORCE" = "true" ] && EXTRA_HEADERS+=(-H "X-Debug-Force: 1")
           resp=$(curl -s -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer $CRON_SECRET" \
-            -H "X-Debug: 1" \
+            "${EXTRA_HEADERS[@]}" \
             "https://uselembra.com.br/api/cron/email" || true)
           code=$(echo "$resp" | tail -n1)
           body=$(echo "$resp" | sed '$d')
