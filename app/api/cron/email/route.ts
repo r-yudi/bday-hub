@@ -165,6 +165,7 @@ export async function GET(request: Request) {
   const now = new Date();
   const xDebug = request.headers.get("x-debug") === "1";
   const debugUserId = request.headers.get("x-debug-user-id")?.trim() || null;
+  const xDebugResetHeader = request.headers.get("x-debug-reset") === "1";
   const forceCandidate =
     (request.headers.get("x-force") === "1" || request.headers.get("x-debug-force") === "1") &&
     (process.env.NODE_ENV !== "production" || xDebug);
@@ -195,18 +196,34 @@ export async function GET(request: Request) {
           insertsAttempted: 0,
           dispatchRowsWritten: 0,
           skippedAlreadySent: 0,
+          alreadyDispatchedCount: 0,
           lastError: undefined,
           debug: {
             serverNowIso,
             serverNowUtc,
             debugUser: null,
-            reason: "user_not_found"
+            reason: "user_not_found",
+            reset: { attempted: false, deletedCount: 0 }
           }
         },
         { status: 200 }
       );
     }
     const row = userRow as UserSettingsReminderRow;
+    const tzForReset = (row.timezone || "America/Sao_Paulo").trim();
+    const computedDateKey = getDateKey(now, tzForReset);
+    let resetAttempted = false;
+    let resetDeletedCount = 0;
+    if (xDebug && xDebugResetHeader) {
+      resetAttempted = true;
+      const { data: deleted, error: delError } = await supabase
+        .from("daily_email_dispatch" as "user_settings")
+        .delete()
+        .eq("user_id", row.user_id)
+        .eq("date_key", computedDateKey)
+        .select("id");
+      if (!delError && Array.isArray(deleted)) resetDeletedCount = deleted.length;
+    }
     const userDebug = getCandidateDebug(row, now);
     const treatAsCandidate = userDebug.isCandidate || forceCandidate;
     const deps = buildCronDeps(supabase);
@@ -227,6 +244,8 @@ export async function GET(request: Request) {
       if (outcome.outcome === "failed") lastError = outcome.reason;
     }
     const debugUser = buildDebugUser(row, now, outcome);
+    const alreadyDispatchedCount =
+      outcome?.outcome === "skipped" && (outcome.reason === "already_sent" || outcome.reason === "already_processing") ? 1 : 0;
     return NextResponse.json({
       ok: true,
       scannedUsers: 1,
@@ -234,11 +253,13 @@ export async function GET(request: Request) {
       insertsAttempted,
       dispatchRowsWritten,
       skippedAlreadySent: outcome?.outcome === "skipped" && outcome.reason !== "no_birthday" && outcome.reason !== "invalid_email" ? 1 : 0,
+      alreadyDispatchedCount,
       lastError,
       debug: {
         serverNowIso,
         serverNowUtc,
-        debugUser
+        debugUser,
+        reset: { attempted: resetAttempted, deletedCount: resetDeletedCount }
       }
     });
   }
@@ -250,6 +271,7 @@ export async function GET(request: Request) {
     sent: 0,
     skippedNoBirthday: 0,
     skippedAlreadySent: 0,
+    alreadyDispatchedCount: 0,
     skippedInvalidEmail: 0,
     failed: 0,
     recoveredStale: 0,
@@ -258,6 +280,8 @@ export async function GET(request: Request) {
     lastError: null as string | null
   };
   const skipReasons: { userId: string; skipReason: string }[] = [];
+  let resetAttempted = false;
+  let resetDeletedCount = 0;
 
   let rows: UserSettingsReminderRow[];
   if (debugUserId) {
@@ -281,6 +305,21 @@ export async function GET(request: Request) {
     rows = (settingsRows ?? []) as UserSettingsReminderRow[];
   }
   summary.scannedUsers = rows.length;
+
+  if (xDebug && debugUserId && xDebugResetHeader && rows.length > 0) {
+    const row0 = rows[0];
+    const tz0 = (row0.timezone || "America/Sao_Paulo").trim();
+    const dateKey0 = getDateKey(now, tz0);
+    resetAttempted = true;
+    const { data: deleted, error: delError } = await supabase
+      .from("daily_email_dispatch" as "user_settings")
+      .delete()
+      .eq("user_id", debugUserId)
+      .eq("date_key", dateKey0)
+      .select("id");
+    if (!delError && Array.isArray(deleted)) resetDeletedCount = deleted.length;
+  }
+
   let singleUserOutcome: ProcessOutcome | { skipReason: string } | null = null;
 
   for (const row of rows) {
@@ -316,6 +355,9 @@ export async function GET(request: Request) {
         if (outcome.reason !== "already_sent" && outcome.reason !== "already_processing") {
           summary.dispatchRowsWritten += 1;
         }
+        if (outcome.reason === "already_sent" || outcome.reason === "already_processing") {
+          summary.alreadyDispatchedCount += 1;
+        }
         if (outcome.reason === "no_birthday") summary.skippedNoBirthday += 1;
         else if (outcome.reason === "invalid_email") summary.skippedInvalidEmail += 1;
         else summary.skippedAlreadySent += 1;
@@ -347,10 +389,12 @@ export async function GET(request: Request) {
       insertsAttempted: summary.insertsAttempted,
       dispatchRowsWritten: summary.dispatchRowsWritten,
       skippedAlreadySent: summary.skippedAlreadySent,
+      alreadyDispatchedCount: summary.alreadyDispatchedCount,
       lastError: summary.lastError ?? undefined,
       forcedUserId: debugUserId ?? undefined,
       forced: forceCandidate,
-      skipReasons: skipReasons.length ? skipReasons : undefined
+      skipReasons: skipReasons.length ? skipReasons : undefined,
+      reset: { attempted: resetAttempted, deletedCount: resetDeletedCount }
     };
     if (rows.length === 1) {
       debug.debugUser = buildDebugUser(rows[0], now, singleUserOutcome ?? undefined);

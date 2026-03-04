@@ -18,6 +18,11 @@ on:
         required: false
         type: boolean
         default: false
+      debug_reset:
+        description: "Delete today's dispatch row for debug user (sends X-Debug-Reset: 1; use with debug_user_id)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   trigger-cron:
@@ -42,10 +47,12 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           DEBUG_USER_ID: ${{ github.event.inputs.debug_user_id }}
           DEBUG_FORCE: ${{ github.event.inputs.debug_force }}
+          DEBUG_RESET: ${{ github.event.inputs.debug_reset }}
         run: |
           EXTRA_HEADERS=()
           [ -n "$DEBUG_USER_ID" ] && EXTRA_HEADERS+=(-H "X-Debug: 1" -H "X-Debug-UserId: $DEBUG_USER_ID")
           [ "$DEBUG_FORCE" = "true" ] && EXTRA_HEADERS+=(-H "X-Force: 1" -H "X-Debug-Force: 1")
+          [ "$DEBUG_RESET" = "true" ] && [ -n "$DEBUG_USER_ID" ] && EXTRA_HEADERS+=(-H "X-Debug-Reset: 1")
           resp=$(curl -s -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer $CRON_SECRET" \
             "${EXTRA_HEADERS[@]}" \
