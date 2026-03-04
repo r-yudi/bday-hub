@@ -1,0 +1,27 @@
+# Cron de email: chama /api/cron/email a cada 15 min (schedule real).
+# Vercel Hobby: vercel.json usa 1x/dia (0 12 * * *); este workflow fornece */15.
+# Para ativar: criar em GitHub Settings → Secrets and variables → Actions o secret CRON_SECRET
+# (mesmo valor da env CRON_SECRET na Vercel).
+name: Cron email (15 min)
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron/email
+        run: |
+          resp=$(curl -s -w "\n%{http_code}" -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://uselembra.com.br/api/cron/email")
+          code=$(echo "$resp" | tail -n1)
+          body=$(echo "$resp" | sed '$d')
+          echo "Response: $body"
+          if [ "$code" != "200" ]; then
+            echo "Expected 200, got $code"
+            exit 1
+          fi
