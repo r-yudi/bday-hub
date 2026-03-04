@@ -2,15 +2,12 @@
 # Vercel Hobby: vercel.json usa 1x/dia (0 12 * * *); este workflow fornece */15.
 # Para ativar: criar em GitHub Settings → Secrets and variables → Actions o secret CRON_SECRET
 # (mesmo valor da env CRON_SECRET na Vercel).
-# Trigger push (main) é temporário para validar acionamento; remover depois.
 name: Cron email (15 min)
 
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch: {}
-  push:
-    branches: [main]
 
 jobs:
   trigger-cron:
