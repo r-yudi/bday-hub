@@ -21,6 +21,12 @@ import { getDatePartsInTimeZone } from "@/lib/server/dailyReminderDigest";
 const CRON_INTERVAL_MINUTES = 15;
 const MINUTES_PER_DAY = 24 * 60;
 
+function isTruthy(v: string | null | undefined): boolean {
+  if (!v) return false;
+  const s = v.trim().toLowerCase();
+  return s === "1" || s === "true" || s === "yes" || s === "on";
+}
+
 function toMinutes(hhmm: string): number | null {
   const [h, m] = (hhmm ?? "").trim().split(":");
   const hour = Number(h);
@@ -46,13 +52,16 @@ type DebugUser = {
   windowEndLocalIso: string;
   isWithinWindow: boolean;
   computedDateKey: string;
+  forced: boolean;
+  forcedOverrideWindow: boolean;
   reason?: string;
 };
 
 function buildDebugUser(
   row: UserSettingsReminderRow,
   now: Date,
-  outcomeOrSkip?: ProcessOutcome | { skipReason: string }
+  outcomeOrSkip?: ProcessOutcome | { skipReason: string },
+  options?: { forced?: boolean }
 ): DebugUser {
   const tz = (row.timezone || "America/Sao_Paulo").trim();
   const emailTime = (row.email_time || "09:00").trim();
@@ -70,15 +79,20 @@ function buildDebugUser(
         : `${parts.isoDate}T${formatHHMM(windowEndMinutes)}:00`
       : `${parts.isoDate}T00:00:00`;
   const isWithinWindow = shouldSendForNow(emailTime, tz, now);
+  const forced = options?.forced ?? false;
+  const forcedOverrideWindow = forced && !isWithinWindow;
   let reason: string | undefined;
   if (outcomeOrSkip) {
-    if ("skipReason" in outcomeOrSkip) reason = outcomeOrSkip.skipReason === "outside_window" ? "outside_window" : outcomeOrSkip.skipReason;
-    else if (outcomeOrSkip.outcome === "skipped") {
+    if ("skipReason" in outcomeOrSkip) {
+      reason =
+        forcedOverrideWindow ? "forced_override_window" : outcomeOrSkip.skipReason === "outside_window" ? "outside_window" : outcomeOrSkip.skipReason;
+    } else if (outcomeOrSkip.outcome === "skipped") {
       const r = outcomeOrSkip.reason;
       reason = r === "already_sent" || r === "already_processing" ? "already_dispatched" : r === "no_birthday" ? "no_birthdays_today" : r;
     } else if (outcomeOrSkip.outcome === "failed") reason = outcomeOrSkip.reason;
     else if (outcomeOrSkip.outcome === "sent") reason = undefined;
   } else if (!row.email_enabled) reason = "email_disabled";
+  else if (forcedOverrideWindow) reason = "forced_override_window";
   else if (!isWithinWindow) reason = "outside_window";
   return {
     userId: row.user_id,
@@ -91,6 +105,8 @@ function buildDebugUser(
     windowEndLocalIso,
     isWithinWindow,
     computedDateKey: dateKey,
+    forced,
+    forcedOverrideWindow,
     ...(reason && { reason })
   };
 }
@@ -163,12 +179,11 @@ export async function GET(request: Request) {
 
   const supabase = getSupabaseAdminClient();
   const now = new Date();
-  const xDebug = request.headers.get("x-debug") === "1";
-  const debugUserId = request.headers.get("x-debug-user-id")?.trim() || null;
-  const xDebugResetHeader = request.headers.get("x-debug-reset") === "1";
-  const forceCandidate =
-    (request.headers.get("x-force") === "1" || request.headers.get("x-debug-force") === "1") &&
-    (process.env.NODE_ENV !== "production" || xDebug);
+  const xDebug = isTruthy(request.headers.get("x-debug"));
+  const debugUserId = (request.headers.get("x-debug-userid") ?? request.headers.get("x-debug-user-id"))?.trim() || null;
+  const xForce = isTruthy(request.headers.get("x-force")) || isTruthy(request.headers.get("x-debug-force"));
+  const xReset = isTruthy(request.headers.get("x-debug-reset"));
+  const forceCandidate = xForce && (process.env.NODE_ENV !== "production" || xDebug);
   const url = new URL(request.url);
   const userIdParam = url.searchParams.get("userId");
 
@@ -214,7 +229,7 @@ export async function GET(request: Request) {
     const computedDateKey = getDateKey(now, tzForReset);
     let resetAttempted = false;
     let resetDeletedCount = 0;
-    if (xDebug && xDebugResetHeader) {
+    if (xDebug && xReset) {
       resetAttempted = true;
       const { data: deleted, error: delError } = await supabase
         .from("daily_email_dispatch" as "user_settings")
@@ -243,7 +258,7 @@ export async function GET(request: Request) {
       else if (outcome.outcome === "skipped" && outcome.reason !== "already_sent" && outcome.reason !== "already_processing") dispatchRowsWritten = 1;
       if (outcome.outcome === "failed") lastError = outcome.reason;
     }
-    const debugUser = buildDebugUser(row, now, outcome);
+    const debugUser = buildDebugUser(row, now, outcome, { forced: forceCandidate });
     const alreadyDispatchedCount =
       outcome?.outcome === "skipped" && (outcome.reason === "already_sent" || outcome.reason === "already_processing") ? 1 : 0;
     return NextResponse.json({
@@ -306,7 +321,7 @@ export async function GET(request: Request) {
   }
   summary.scannedUsers = rows.length;
 
-  if (xDebug && debugUserId && xDebugResetHeader && rows.length > 0) {
+  if (xDebug && debugUserId && xReset && rows.length > 0) {
     const row0 = rows[0];
     const tz0 = (row0.timezone || "America/Sao_Paulo").trim();
     const dateKey0 = getDateKey(now, tz0);
@@ -397,7 +412,7 @@ export async function GET(request: Request) {
       reset: { attempted: resetAttempted, deletedCount: resetDeletedCount }
     };
     if (rows.length === 1) {
-      debug.debugUser = buildDebugUser(rows[0], now, singleUserOutcome ?? undefined);
+      debug.debugUser = buildDebugUser(rows[0], now, singleUserOutcome ?? undefined, { forced: forceCandidate });
       const row = rows[0];
       const tz = (row.timezone || "America/Sao_Paulo").trim();
       const parts = getDatePartsInTimeZone(tz, now);
