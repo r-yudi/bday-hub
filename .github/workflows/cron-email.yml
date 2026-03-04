@@ -12,15 +12,13 @@ on:
 jobs:
   trigger-cron:
     runs-on: ubuntu-latest
-    environment: production
+    environment: Production
     steps:
-      - name: Log event
-        run: echo "event: $GITHUB_EVENT_NAME"
-
       - name: Debug secret presence
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
+          echo "event: $GITHUB_EVENT_NAME"
           if [ -z "$CRON_SECRET" ]; then
             echo "CRON_SECRET is EMPTY"
             exit 1
@@ -32,13 +30,15 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          resp=$(curl -s -w "\n%{http_code}" -X GET \
+          resp=$(curl -s -w "\n%{http_code}" -X GET --fail \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "https://uselembra.com.br/api/cron/email")
+            "https://uselembra.com.br/api/cron/email" || true)
           code=$(echo "$resp" | tail -n1)
           body=$(echo "$resp" | sed '$d')
-          echo "Response: $body"
           if [ "$code" != "200" ]; then
+            echo "http_code: $code"
+            echo "response_body: $body"
             echo "Expected 200, got $code"
             exit 1
           fi
+          echo "Response: $body"
