@@ -61,6 +61,7 @@ export default function PeoplePage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [showImportContactsModal, setShowImportContactsModal] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<BirthdaySourceFilter>("all");
@@ -173,6 +174,13 @@ export default function PeoplePage() {
             </Link>
             <button
               type="button"
+              onClick={() => setShowImportContactsModal(true)}
+              className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium"
+            >
+              Importar contatos
+            </button>
+            <button
+              type="button"
               onClick={() => setShowImport((v) => !v)}
               className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium"
             >
@@ -232,6 +240,50 @@ export default function PeoplePage() {
           </div>
         </details>
       </section>
+
+      {showImportContactsModal && (
+        <div
+          className="ui-overlay-backdrop fixed inset-0 z-40 grid place-items-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="import-contacts-title"
+        >
+          <div className="ui-modal-surface w-full max-w-sm border p-6">
+            <h2 id="import-contacts-title" className="text-lg font-semibold tracking-tight text-text">
+              Importar contatos
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Encontre aniversários automaticamente nos seus contatos.
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                type="button"
+                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium"
+                onClick={() => setShowImportContactsModal(false)}
+              >
+                Importar do Google
+              </button>
+              <button
+                type="button"
+                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium"
+                onClick={() => {
+                  setShowImportContactsModal(false);
+                  setShowImport(true);
+                }}
+              >
+                Importar CSV
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowImportContactsModal(false)}
+              className="ui-link-tertiary mt-4 text-sm font-medium"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
 
       {showImport && (
         <section className="ui-section">
