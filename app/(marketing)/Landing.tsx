@@ -6,8 +6,8 @@ export function Landing() {
     <LandingMotion>
       <nav>
         <div className="nav-logo">
-          <span className="nav-logo-dot" />
-          Lembra
+          <span className="topnav-brand-dot" aria-hidden />
+          <span className="topnav-brand-title">Lembra.</span>
         </div>
         <ul className="nav-links">
           <li>
@@ -566,16 +566,8 @@ export function Landing() {
       <footer>
         <div className="footer-inner">
           <div className="footer-logo">
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "var(--accent)",
-                display: "inline-block",
-              }}
-            />
-            Lembra
+            <span className="topnav-brand-dot" aria-hidden />
+            <span className="topnav-brand-title">Lembra.</span>
           </div>
           <ul className="footer-links">
             <li>
@@ -588,7 +580,7 @@ export function Landing() {
               <Link href="/terms">Termos</Link>
             </li>
           </ul>
-          <div className="footer-copy">© 2025 Lembra</div>
+          <div className="footer-copy">© 2025 Lembra.</div>
         </div>
       </footer>
     </LandingMotion>

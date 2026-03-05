@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { useThemeMode } from "@/components/ThemeProvider";
 
 const navItems = [
   { href: "/today", label: "Hoje" },
@@ -13,42 +12,23 @@ const navItems = [
 export function TopNav() {
   const pathname = usePathname();
   const { configured, initialized, user, signOut, syncStatus, syncMessage } = useAuth();
-  const { themeMode, setThemeMode } = useThemeMode();
   const displayName = user?.user_metadata?.full_name || user?.email || "Conta";
   const isLanding = pathname === "/" || pathname === "/landing";
 
-  const themeSelectClass = "topnav-theme-select ui-focus-surface rounded-full border focus-visible:outline-none";
-
   if (isLanding) {
     return (
-      <header className="topnav-shell sticky top-0 z-10 border-b backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <Link href="/" className="topnav-brand group inline-flex items-center gap-2 font-semibold tracking-tight">
-            <span className="topnav-brand-mark" aria-hidden>🎉</span>
-            <span className="inline-flex flex-col">
-              <span>Lembra.</span>
-              <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
-            </span>
+      <header className="topnav-shell topnav-landing sticky top-0 z-10 border-b backdrop-blur">
+        <div className="topnav-inner mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="topnav-brand inline-flex items-center gap-2 font-semibold tracking-tight">
+            <span className="topnav-brand-dot" aria-hidden />
+            <span className="topnav-brand-title">Lembra.</span>
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
-            <label className="sr-only" htmlFor="theme-mode-home">
-              Tema
-            </label>
-            <select
-              id="theme-mode-home"
-              value={themeMode}
-              onChange={(e) => setThemeMode(e.target.value as "light" | "dark" | "system")}
-              className={`${themeSelectClass} px-3 py-1.5 text-sm`}
-            >
-              <option value="system">Sistema</option>
-              <option value="light">Claro</option>
-              <option value="dark">Escuro</option>
-            </select>
             <Link
               href={user ? "/today" : "/login?returnTo=%2Ftoday"}
               aria-label={configured && initialized && user ? "Continuar no app" : "Entrar com Google"}
-              className="topnav-pill-cta btn-primary-brand ui-cta-primary rounded-full px-3 py-1.5 text-sm text-primaryForeground focus-visible:outline-none"
+              className="topnav-pill-cta btn-primary-brand ui-cta-primary text-primaryForeground focus-visible:outline-none"
             >
               {configured && initialized && user ? "Continuar" : "Entrar com Google"}
             </Link>
@@ -59,32 +39,14 @@ export function TopNav() {
   }
 
   return (
-    <header className="topnav-shell sticky top-0 z-10 border-b backdrop-blur">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <Link href="/today" className="topnav-brand group inline-flex items-center gap-2 font-semibold tracking-tight">
-          <span className="topnav-brand-mark" aria-hidden>🎉</span>
-          <span className="inline-flex flex-col">
-            <span>Lembra.</span>
-            <span className="mt-1 h-0.5 w-10 rounded-full bg-primary transition-all duration-150 ease-brand group-hover:w-12" />
-          </span>
+    <header className="topnav-shell topnav-app sticky top-0 z-10 border-b backdrop-blur">
+      <div className="topnav-inner mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
+        <Link href="/today" className="topnav-brand inline-flex items-center gap-2 font-semibold tracking-tight">
+          <span className="topnav-brand-dot" aria-hidden />
+          <span className="topnav-brand-title">Lembra.</span>
         </Link>
 
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <label className="sr-only" htmlFor="theme-mode-app">
-            Tema
-          </label>
-          <select
-            id="theme-mode-app"
-            value={themeMode}
-            onChange={(e) => setThemeMode(e.target.value as "light" | "dark" | "system")}
-            className={`${themeSelectClass} px-3 py-1.5 text-xs`}
-            title="Tema"
-          >
-            <option value="system">Sistema</option>
-            <option value="light">Claro</option>
-            <option value="dark">Escuro</option>
-          </select>
-
           <nav className="flex items-center gap-2">
             {navItems.map((item) => {
               const active = pathname === item.href;
@@ -112,18 +74,18 @@ export function TopNav() {
                   className={[
                     "rounded-full px-2 py-0.5 text-[11px] font-medium",
                     syncStatus === "syncing"
-                      ? "bg-warning/15 text-warning dark:bg-warning/20 dark:text-warning"
+                      ? "bg-warning/15 text-warning"
                       : syncStatus === "synced"
-                        ? "bg-success/15 text-success dark:bg-success/20 dark:text-success"
+                        ? "bg-success/15 text-success"
                         : syncStatus === "error"
-                          ? "bg-danger/12 text-danger dark:bg-danger/18 dark:text-danger"
-                          : "bg-surface2 text-muted dark:bg-surface2/90 dark:text-muted"
+                          ? "bg-danger/12 text-danger"
+                          : "bg-surface2 text-muted"
                   ].join(" ")}
                 >
                   {syncStatus === "syncing" ? "Atualizando..." : syncStatus === "synced" ? "Tudo em dia" : syncMessage}
                 </span>
               )}
-              <span className="max-w-40 truncate px-2 text-xs text-muted sm:max-w-52 dark:text-text" title={displayName}>
+              <span className="max-w-40 truncate px-2 text-xs text-muted sm:max-w-52" title={displayName}>
                 {!initialized ? "Carregando sessão..." : user ? displayName : "Não conectado"}
               </span>
               {user ? (

@@ -12,6 +12,9 @@ Formato adotado:
 
 ## [Unreleased]
 
+### Changed
+- **Landing UI inside the app:** páginas internas como extensão da landing (ritmo editorial: mais whitespace, hierarquia eyebrow + h1 serif + subtítulo, superfícies “paper” sem sombras pesadas). Novos utilitários em `globals.css`: `ui-container`, `ui-section`, `ui-section-header`, `ui-eyebrow`, `ui-stack-lg`/`ui-stack-md`. Ajuste de `ui-panel`/`ui-panel-soft`/`ui-page-hero`/`ui-prose-panel` (borda sutil, sombra mínima). Aplicado em `/today`, `/manage`, `/share`, `/share/[token]`, `/login`. TopNav nas rotas app com menos densidade e tema toggle oculto; tema default passou a **light** (preferências salvas respeitadas). Referência de section layout da landing em `docs/REBRAND_LANDING_FIRST_REPORT.md`.
+
 ### Chore
 - Co-Founder Mode permanente: novo `docs/DEFAULT_MODE.md` (estado mental padrão), PIPELINE Fase 0 (Conversação Estratégica), Operating Mode em AGENTS.md, regras estratégicas nos playbooks product/design/dev; execução só após plano e confirmação.
 

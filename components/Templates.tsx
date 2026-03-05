@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { normalizeNfc } from "@/lib/text";
@@ -36,7 +36,7 @@ export function Templates({ person }: { person: BirthdayPerson }) {
             key={template}
             type="button"
             onClick={() => void copyText(template, idx)}
-            className="ui-surface ui-border-subtle w-full rounded-xl border px-3 py-2 text-left text-sm text-text shadow-sm hover:-translate-y-px hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 dark:bg-surface2/70"
+            className="ui-surface ui-border-subtle w-full rounded-xl border px-3 py-2 text-left text-sm text-text shadow-sm hover:-translate-y-px hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
             title={template}
           >
             <span className="line-clamp-2 text-muted">{template}</span>

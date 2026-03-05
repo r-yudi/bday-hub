@@ -131,7 +131,7 @@ test.describe("MVP smoke flows", () => {
 
   test("Email diário section on /today (guest: CTA; no email sent)", async ({ page }) => {
     await gotoTodayReady(page);
-    await expect(page.getByText("Email diário")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Entrar para ativar email" })).toBeVisible();
   });
 

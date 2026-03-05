@@ -1,15 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
-import {
-  applyThemeToDocument,
-  getStoredThemeMode,
-  loadRemoteThemePreference,
-  saveRemoteThemePreference,
-  storeThemeMode,
-  type ThemeMode
-} from "@/lib/theme";
+import { applyThemeToDocument, type ThemeMode } from "@/lib/theme";
 
 type ThemeContextValue = {
   themeMode: ThemeMode;
@@ -18,57 +10,22 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+/** Light-only pre-launch: themeMode is always "light"; setThemeMode is no-op for dark/system. */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
-  const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
+  const [themeMode] = useState<ThemeMode>("light");
 
   useEffect(() => {
-    const mode = getStoredThemeMode();
-    setThemeModeState(mode);
-    applyThemeToDocument(mode);
+    applyThemeToDocument("light");
   }, []);
-
-  useEffect(() => {
-    if (themeMode !== "system") return;
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => applyThemeToDocument("system");
-    media.addEventListener?.("change", onChange);
-    return () => media.removeEventListener?.("change", onChange);
-  }, [themeMode]);
-
-  useEffect(() => {
-    const userId = user?.id;
-    if (!userId) return;
-
-    let active = true;
-    void loadRemoteThemePreference(userId).then((remoteTheme) => {
-      if (!active || !remoteTheme) return;
-      setThemeModeState(remoteTheme);
-      storeThemeMode(remoteTheme);
-      applyThemeToDocument(remoteTheme);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [user?.id]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
-      themeMode,
+      themeMode: "light",
       setThemeMode(mode) {
-        setThemeModeState(mode);
-        storeThemeMode(mode);
-        applyThemeToDocument(mode);
-        const userId = user?.id;
-        if (userId) {
-          void saveRemoteThemePreference(userId, mode);
-        }
+        if (mode === "light") applyThemeToDocument("light");
       }
     }),
-    [themeMode, user?.id]
+    []
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

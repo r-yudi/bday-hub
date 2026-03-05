@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { cn } from "@/lib/cn";
 
 type ChipVariant = "default" | "subtle" | "accent" | "warning" | "danger";
@@ -14,15 +14,15 @@ type ChipProps = ChipButtonProps | ChipSpanProps;
 
 const variants: Record<ChipVariant, string> = {
   default:
-    "border border-border/80 bg-surface text-text dark:border-border/90 dark:bg-surface2/60 dark:text-text",
+    "border border-border/80 bg-surface text-text",
   subtle:
-    "border border-border/70 bg-surface2/70 text-text/90 dark:border-border/90 dark:bg-surface2/80 dark:text-text",
+    "border border-border/70 bg-surface2/70 text-text/90",
   accent:
-    "border border-primary/30 bg-primary/12 text-primary dark:border-primary/45 dark:bg-primary/18 dark:text-primaryForeground",
+    "border border-primary/30 bg-primary/12 text-primary",
   warning:
-    "border border-warning/35 bg-warning/12 text-text dark:border-warning/45 dark:bg-warning/16 dark:text-warning",
+    "border border-warning/35 bg-warning/12 text-text",
   danger:
-    "border border-danger/30 bg-danger/10 text-danger dark:border-danger/45 dark:bg-danger/16 dark:text-danger"
+    "border border-danger/30 bg-danger/10 text-danger"
 };
 
 export function Chip(props: ChipProps) {

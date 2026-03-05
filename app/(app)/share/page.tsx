@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -54,7 +54,7 @@ function QuickAddBirthdayModal({
 
   return (
     <div className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4">
-      <div className="ui-modal-surface w-full max-w-md rounded-2xl border p-5">
+      <div className="ui-modal-surface w-full max-w-md border p-5">
         <h2 className="text-lg font-semibold tracking-tight text-text">Adicionar meu aniversário</h2>
         <p className="mt-2 text-sm text-muted">Cadastre nome e dia/mês para gerar seu link de compartilhamento.</p>
 
@@ -199,11 +199,11 @@ export default function ShareLandingPage() {
 
   return (
     <>
-      <div className="space-y-8 lg:space-y-10">
-        <section className="ui-copy-backdrop px-1 py-1 sm:px-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra • Compartilhamento</p>
-          <h1 className="ui-title-editorial mt-2 text-3xl sm:text-[2.15rem]">Compartilhe aniversários com um link</h1>
-          <p className="ui-subtitle-editorial mt-3 max-w-[64ch] text-sm sm:text-[15px]">
+      <div className="ui-container space-y-8 lg:space-y-10">
+        <section className="ui-section ui-section-header ui-copy-backdrop">
+          <p className="ui-eyebrow text-muted">Lembra • Compartilhamento</p>
+          <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">Compartilhe aniversários com um link</h1>
+          <p className="ui-subtitle-editorial text-sm sm:text-[15px] max-w-[64ch]">
             O link mostra apenas nome e dia/mês (sem ano). Escolha um aniversário abaixo e copie em 1 clique.
           </p>
         </section>
@@ -211,12 +211,12 @@ export default function ShareLandingPage() {
         {loading ? (
           <p className="text-sm text-muted">Carregando...</p>
         ) : sortedPeople.length === 0 ? (
-          <section className="rounded-2xl border border-dashed border-border/70 bg-surface/70 p-8 text-center shadow-sm dark:bg-surface/20">
-            <p className="text-lg font-semibold tracking-tight text-text">Você ainda não tem aniversários cadastrados</p>
-            <p className="mt-2 text-sm text-muted">
+          <div className="ui-empty-hero">
+            <h2 className="ui-empty-title">Você ainda não tem aniversários cadastrados</h2>
+            <p className="ui-empty-subtitle">
               Adicione seu primeiro aniversário para compartilhar em segundos.
             </p>
-            <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+            <div className="ui-empty-actions">
               <button
                 type="button"
                 onClick={() => setShowQuickAdd(true)}
@@ -228,11 +228,11 @@ export default function ShareLandingPage() {
                 Abrir cadastro completo
               </Link>
             </div>
-          </section>
+          </div>
         ) : (
-          <section className="rounded-2xl border border-border/70 bg-surface/70 p-4 shadow-sm dark:bg-surface/20">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Seus aniversários</h2>
+          <section className="ui-feature-block p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="ui-feature-title text-muted">Seus aniversários</h2>
               <button
                 type="button"
                 onClick={() => setShowQuickAdd(true)}
@@ -242,11 +242,11 @@ export default function ShareLandingPage() {
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="ui-list">
               {sortedPeople.map((person) => {
                 const relativeUrl = buildShareUrl(person);
                 return (
-                  <div key={person.id} className="rounded-2xl border border-border/65 bg-surface/80 p-4 shadow-sm dark:bg-surface/15">
+                  <div key={person.id} className="ui-list-item">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="font-medium text-text">{person.name}</p>
@@ -266,7 +266,7 @@ export default function ShareLandingPage() {
                         </Link>
                       </div>
                     </div>
-                    <p className="mt-2 min-h-5 text-xs text-emerald-700">{copiedPersonId === person.id ? "Link copiado ✓" : ""}</p>
+                    <p className="mt-2 min-h-5 text-xs text-success">{copiedPersonId === person.id ? "Link copiado ✓" : ""}</p>
                   </div>
                 );
               })}

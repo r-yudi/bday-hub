@@ -1,21 +1,23 @@
-﻿:root {
+:root {
   color-scheme: light;
+  /* dark disabled pre-launch; .dark class is never applied */
+  /* cream/paper (landing-first) */
+  --bg: 40 33% 98%;
+  --surface: 40 35% 99%;
+  --surface-2: 38 28% 96%;
+  --text: 24 28% 8%;
+  --muted: 28 14% 38%;
+  --border: 30 18% 90%;
 
-  --bg: 30 48% 97%;
-  --surface: 0 0% 100%;
-  --surface-2: 28 42% 95%;
-  --text: 224 18% 12%;
-  --muted: 222 10% 40%;
-  --border: 28 26% 88%;
-
-  --primary: 12 91% 61%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 162 64% 43%;
+  /* primary = CTA dominante (ink); accent = laranja; warning = gold */
+  --primary: 24 28% 10%;
+  --primary-foreground: 40 33% 98%;
+  --accent: 16 77% 53%;
   --accent-foreground: 0 0% 100%;
   --lilac: 266 90% 72%;
 
   --danger: 0 78% 56%;
-  --warning: 35 92% 55%;
+  --warning: 38 52% 51%;
   --success: 152 62% 40%;
 
   --ring: var(--primary);
@@ -23,32 +25,32 @@
   --ui-bg: var(--bg);
   --ui-surface: var(--surface);
   --ui-surface-2: var(--surface-2);
-  --ui-surface-elevated: 0 0% 100%;
-  --ui-surface-overlay: 0 0% 100%;
+  --ui-surface-elevated: 40 38% 99.5%;
+  --ui-surface-overlay: 40 35% 99%;
   --ui-border: var(--border);
-  --ui-border-subtle: 220 14% 86%;
-  --ui-border-strong: 220 14% 78%;
+  --ui-border-subtle: 30 14% 92%;
+  --ui-border-strong: 28 14% 84%;
   --ui-text: var(--text);
   --ui-muted: var(--muted);
   --ui-accent: var(--accent);
   --ui-accent-contrast: var(--accent-foreground);
   --ui-ring: var(--ring);
-  --ui-focus-ring: var(--primary);
-  --ui-link-tertiary: 220 20% 24%;
-  --ui-link-tertiary-hover: 220 22% 14%;
-  --ui-link-tertiary-muted: 220 10% 40%;
-  --ui-link-tertiary-underline: 220 14% 78%;
+  --ui-focus-ring: var(--accent);
+  --ui-link-tertiary: 24 20% 28%;
+  --ui-link-tertiary-hover: 24 24% 14%;
+  --ui-link-tertiary-muted: 28 12% 42%;
+  --ui-link-tertiary-underline: 30 14% 78%;
 
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
   --radius-xl: 24px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px rgba(26, 20, 16, 0.05);
+  --shadow-md: 0 6px 20px rgba(26, 20, 16, 0.06);
+  --shadow-lg: 0 12px 36px rgba(26, 20, 16, 0.08);
 
-  --ease: cubic-bezier(.2,.8,.2,1);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --dur-1: 150ms;
   --dur-2: 250ms;
 }
@@ -56,45 +58,45 @@
 .dark {
   color-scheme: dark;
 
-  --bg: 230 20% 9%;
-  --surface: 230 18% 13%;
-  --surface-2: 230 14% 20%;
-  --text: 34 28% 96%;
-  --muted: 222 12% 79%;
-  --border: 228 12% 32%;
+  --bg: 22 18% 9%;
+  --surface: 24 16% 12%;
+  --surface-2: 26 14% 18%;
+  --text: 40 28% 96%;
+  --muted: 32 18% 80%;
+  --border: 24 12% 32%;
 
-  --primary: 12 90% 65%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 162 64% 47%;
+  --primary: 40 28% 94%;
+  --primary-foreground: 24 28% 10%;
+  --accent: 16 78% 58%;
   --accent-foreground: 0 0% 100%;
   --lilac: 268 92% 76%;
 
   --danger: 0 78% 62%;
-  --warning: 35 92% 60%;
+  --warning: 38 55% 56%;
   --success: 152 62% 46%;
 
   --ring: var(--primary);
 
-  --ui-bg: 228 18% 9%;
-  --ui-surface: 228 15% 13%;
-  --ui-surface-2: 228 14% 17%;
-  --ui-surface-elevated: 228 14% 20%;
-  --ui-surface-overlay: 228 15% 23%;
-  --ui-border: 228 12% 30%;
-  --ui-border-subtle: 228 12% 28%;
-  --ui-border-strong: 228 10% 40%;
-  --ui-text: 34 24% 96%;
-  --ui-muted: 220 12% 80%;
+  --ui-bg: 22 18% 9%;
+  --ui-surface: 24 16% 12%;
+  --ui-surface-2: 26 14% 18%;
+  --ui-surface-elevated: 26 14% 20%;
+  --ui-surface-overlay: 28 12% 24%;
+  --ui-border: 24 12% 32%;
+  --ui-border-subtle: 24 10% 30%;
+  --ui-border-strong: 22 8% 42%;
+  --ui-text: 40 28% 96%;
+  --ui-muted: 32 18% 82%;
   --ui-accent: var(--accent);
   --ui-accent-contrast: var(--accent-foreground);
   --ui-ring: var(--primary);
-  --ui-focus-ring: 12 92% 68%;
-  --ui-link-tertiary: 34 18% 86%;
-  --ui-link-tertiary-hover: 34 22% 95%;
-  --ui-link-tertiary-muted: 220 12% 82%;
-  --ui-link-tertiary-underline: 228 10% 44%;
+  --ui-focus-ring: 16 88% 62%;
+  --ui-link-tertiary: 40 22% 88%;
+  --ui-link-tertiary-hover: 40 26% 95%;
+  --ui-link-tertiary-muted: 32 18% 82%;
+  --ui-link-tertiary-underline: 24 10% 46%;
 
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255, 255, 255, 0.015);
-  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.34), 0 1px 0 rgba(255, 255, 255, 0.02);
-  --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.42), 0 1px 0 rgba(255, 255, 255, 0.025);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.02);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.02);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.38), 0 1px 0 rgba(255, 255, 255, 0.02);
 }

@@ -13,9 +13,9 @@ export function LandingPremiumPageClient() {
   const primaryLabel = useMemo(() => (isLoggedIn ? "Continuar no app" : "Quero aparecer no dia"), [isLoggedIn]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-background px-4 py-6 dark:border-border/60 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-      <div className="pointer-events-none absolute inset-0 bg-grid-subtle opacity-30 dark:opacity-15" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-landing-depth-light dark:bg-landing-depth-dark" />
+    <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-background px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-grid-subtle opacity-30" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-landing-depth-light" />
 
       <div className="relative mx-auto max-w-6xl space-y-10 lg:space-y-12">
         {/* Radial Cut Explosion: abstraction only — shape >= 60vw from corner, ribbon, orbs, large particles; copy over mass */}
@@ -24,16 +24,16 @@ export function LandingPremiumPageClient() {
           <div className="hero-radialcut-spotlight" aria-hidden />
           <Reveal delay={30} className="hero-radialcut-copy flex flex-col items-start">
             <div className="hero-copy-backdrop landing-hero-copy max-w-[42rem]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/80 px-2.5 py-1 text-[10px] font-semibold tracking-[0.02em] text-muted shadow-sm dark:border-border/60 dark:bg-surface/55 dark:text-text/80" aria-hidden>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/80 px-2.5 py-1 text-[10px] font-semibold tracking-[0.02em] text-muted shadow-sm" aria-hidden>
                 <span className="h-1 w-1 rounded-full bg-primary" />
                 Lembra.
               </div>
 
-              <h1 className="mt-5 text-balance text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.04em] text-text sm:text-[3.25rem] lg:text-[3.75rem] xl:text-[4.25rem] dark:text-text dark:[text-shadow:0_2px_22px_hsl(var(--bg)/0.5)]">
+              <h1 className="mt-5 text-balance text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.04em] text-text sm:text-[3.25rem] lg:text-[3.75rem] xl:text-[4.25rem]">
                 Estar presente é <span className="landing-gradient-word">celebrar</span>.
               </h1>
 
-              <p className="mt-5 max-w-[38ch] text-[15px] leading-[1.55] text-muted/95 sm:text-[16px] dark:text-muted">
+              <p className="mt-5 max-w-[38ch] text-[15px] leading-[1.55] text-muted/95 sm:text-[16px]">
                 A gente te avisa no dia. Você celebra.
               </p>
 
@@ -46,7 +46,7 @@ export function LandingPremiumPageClient() {
                   </Link>
                   <Link
                     href="/login?returnTo=%2Ftoday"
-                    className="landing-cta-support ui-focus-surface rounded-md px-2 py-1 text-sm font-medium text-muted hover:text-text dark:text-muted dark:hover:text-text"
+                    className="landing-cta-support ui-focus-surface rounded-md px-2 py-1 text-sm font-medium text-muted hover:text-text"
                   >
                     {configured ? (initialized && isLoggedIn ? "Trocar conta" : "Entrar com Google") : "Entrar com Google"}
                   </Link>
@@ -54,7 +54,7 @@ export function LandingPremiumPageClient() {
               </Reveal>
 
               <Reveal delay={130}>
-                <p className="mt-4 text-xs text-muted/90 dark:text-muted">
+                <p className="mt-4 text-xs text-muted/90">
                   Use sem login. Sincronize quando quiser.
                 </p>
               </Reveal>
@@ -106,7 +106,7 @@ export function LandingPremiumPageClient() {
         </section>
 
         <Reveal delay={220}>
-          <footer className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border/75 bg-surface/70 px-4 py-3 text-sm text-muted shadow-sm sm:flex-row sm:items-center dark:border-border/60 dark:bg-surface/45">
+          <footer className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border/75 bg-surface/70 px-4 py-3 text-sm text-muted shadow-sm sm:flex-row sm:items-center">
             <p>Lembra. • Estar presente é celebrar. 🎉</p>
             <div className="flex items-center gap-3">
               <Link href="/privacy" className="ui-link-tertiary">Privacidade</Link>

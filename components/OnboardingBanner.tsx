@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { hasCompletedOnboarding, markOnboardingCompleted } from "@/lib/onboarding-ui";
@@ -40,13 +40,13 @@ export function OnboardingBanner({ count, mounted }: OnboardingBannerProps) {
 
   if (showSuccess) {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+      <div className="rounded-2xl border border-success/30 bg-success/15 px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium text-emerald-900">🎉 Pronto! Seu Lembra está pronto para comemorar.</p>
-          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-emerald-700">5/5</span>
+          <p className="text-sm font-medium text-success">🎉 Pronto! Seu Lembra está pronto para comemorar.</p>
+          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-success">5/5</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/90">
-          <div className="h-full rounded-full bg-emerald-500" style={{ width: "100%" }} />
+          <div className="h-full rounded-full bg-success" style={{ width: "100%" }} />
         </div>
       </div>
     );
@@ -55,16 +55,16 @@ export function OnboardingBanner({ count, mounted }: OnboardingBannerProps) {
   if (completedPersisted || progress >= 5) return null;
 
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+    <div className="rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium text-amber-900">Adicione 5 aniversários para nunca mais esquecer ninguém 🎉</p>
-        <span className="rounded-full border border-amber-200 bg-white px-2.5 py-1 text-xs font-medium text-amber-700 shadow-sm">
+        <p className="text-sm font-medium text-text">Adicione 5 aniversários para nunca mais esquecer ninguém 🎉</p>
+        <span className="rounded-full border border-warning/40 bg-white px-2.5 py-1 text-xs font-medium text-warning shadow-sm">
           {progress}/5
         </span>
       </div>
-      <p className="mt-1 text-xs text-amber-800/90">Comece com 5 contatos e já sinta o Lembra funcionando por você.</p>
+      <p className="mt-1 text-xs text-muted">Comece com 5 contatos e já sinta o Lembra funcionando por você.</p>
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/90">
-        <div className="h-full rounded-full bg-warm transition-all" style={{ width: progressWidth }} />
+        <div className="h-full rounded-full bg-warning transition-all" style={{ width: progressWidth }} />
       </div>
     </div>
   );

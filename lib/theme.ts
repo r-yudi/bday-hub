@@ -1,4 +1,4 @@
-﻿import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -9,24 +9,26 @@ export function isThemeMode(value: string | null | undefined): value is ThemeMod
 }
 
 export function getStoredThemeMode(): ThemeMode {
-  if (typeof window === "undefined") return "system";
-  const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return isThemeMode(raw) ? raw : "system";
-}
-
-export function resolveThemeMode(mode: ThemeMode): "light" | "dark" {
-  if (mode === "light" || mode === "dark") return mode;
   if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  try {
+    window.localStorage.removeItem(THEME_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+  return "light";
 }
 
-export function applyThemeToDocument(mode: ThemeMode) {
+export function resolveThemeMode(_mode: ThemeMode): "light" | "dark" {
+  return "light";
+}
+
+/** Light-only pre-launch: always applies light; .dark is never added. */
+export function applyThemeToDocument(_mode: ThemeMode) {
   if (typeof document === "undefined") return;
-  const resolved = resolveThemeMode(mode);
   const root = document.documentElement;
-  root.classList.toggle("dark", resolved === "dark");
-  root.dataset.theme = mode;
-  root.style.colorScheme = resolved;
+  root.classList.remove("dark");
+  root.dataset.theme = "light";
+  root.style.colorScheme = "light";
 }
 
 export function storeThemeMode(mode: ThemeMode) {
@@ -63,18 +65,17 @@ export async function saveRemoteThemePreference(userId: string, theme: ThemeMode
   }
 }
 
+/** Light-only pre-launch: always sets light; .dark is never applied. */
 export function getThemeBootScript() {
   return `
   (function () {
     try {
       var key = '${THEME_STORAGE_KEY}';
-      var raw = localStorage.getItem(key);
-      var mode = (raw === 'light' || raw === 'dark' || raw === 'system') ? raw : 'system';
-      var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      try { localStorage.removeItem(key); } catch (_) {}
       var root = document.documentElement;
-      if (isDark) root.classList.add('dark'); else root.classList.remove('dark');
-      root.dataset.theme = mode;
-      root.style.colorScheme = isDark ? 'dark' : 'light';
+      root.classList.remove('dark');
+      root.dataset.theme = 'light';
+      root.style.colorScheme = 'light';
     } catch (_) {}
   })();
   `;
