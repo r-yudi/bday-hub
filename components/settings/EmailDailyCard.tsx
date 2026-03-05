@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import {
   getEmailReminderSettings,
@@ -13,6 +13,8 @@ import { DEFAULT_EMAIL_REMINDER_SETTINGS, type EmailReminderSettings, type LastE
 import { parseTimeHHmm, formatTimeHHmm } from "./timeUtils";
 
 type EmailDailyCardProps = { variant?: "default" | "compact" };
+
+const EMAIL_HOW = "Enviado no horário que você escolher, no seu fuso.";
 
 export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
   const compact = variant === "compact";
@@ -26,6 +28,9 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showHow, setShowHow] = useState(false);
+  const howTriggerRef = useRef<HTMLButtonElement>(null);
+  const howPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -47,6 +52,24 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
     if (!emailSettings || draftDirty) return;
     setEmailTimeDraft(emailSettings.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime);
   }, [emailSettings, draftDirty]);
+
+  useEffect(() => {
+    if (!showHow) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowHow(false); };
+    const onPointer = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node;
+      if (howTriggerRef.current?.contains(t) || howPanelRef.current?.contains(t)) return;
+      setShowHow(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("touchstart", onPointer, { passive: true });
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("touchstart", onPointer);
+    };
+  }, [showHow]);
 
   async function handleToggle() {
     if (!user) return;
@@ -133,7 +156,33 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
 
   return (
     <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
-      <h2 className="ui-feature-title text-muted text-sm">Email diário</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="ui-feature-title text-muted text-sm">Email diário</h2>
+        {!compact && (
+          <span className="relative">
+            <button
+              ref={howTriggerRef}
+              type="button"
+              onClick={() => setShowHow((v) => !v)}
+              className="ui-focus-surface flex h-6 w-6 items-center justify-center rounded-full border border-border text-muted hover:bg-surface2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label="Como funciona?"
+              aria-expanded={showHow}
+            >
+              ?
+            </button>
+            {showHow && (
+              <div
+                ref={howPanelRef}
+                className="ui-panel-soft absolute left-0 top-full z-20 mt-1 min-w-[16rem] rounded-lg border p-2 text-xs shadow-lg"
+                role="tooltip"
+                aria-label="Como funciona?"
+              >
+                {EMAIL_HOW}
+              </div>
+            )}
+          </span>
+        )}
+      </div>
       {!compact && <p className="mt-2 text-sm leading-5 text-muted">{summary}</p>}
       {compact && <p className="mt-1 text-xs text-muted">{summary}</p>}
 

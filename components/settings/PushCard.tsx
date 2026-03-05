@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getSafeBrowserSession } from "@/lib/supabase-browser";
 import { getPushSettings, savePushEnabled } from "@/lib/notificationSettingsRepo";
@@ -17,6 +17,8 @@ function toBase64Url(buf: ArrayBuffer): string {
 
 type PushCardProps = { variant?: "default" | "compact" };
 
+const PUSH_HOW = "Depende do navegador. No iOS, funciona melhor com o app instalado.";
+
 export function PushCard({ variant = "default" }: PushCardProps) {
   const compact = variant === "compact";
   const { user } = useAuth();
@@ -26,6 +28,9 @@ export function PushCard({ variant = "default" }: PushCardProps) {
   const [error, setError] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [showHow, setShowHow] = useState(false);
+  const howTriggerRef = useRef<HTMLButtonElement>(null);
+  const howPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -46,6 +51,24 @@ export function PushCard({ variant = "default" }: PushCardProps) {
     if (!mounted || !user) return;
     void getPushSettings().then((s) => setPushSettings(s ?? { pushEnabled: false }));
   }, [mounted, user?.id]);
+
+  useEffect(() => {
+    if (!showHow) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowHow(false); };
+    const onPointer = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node;
+      if (howTriggerRef.current?.contains(t) || howPanelRef.current?.contains(t)) return;
+      setShowHow(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("touchstart", onPointer, { passive: true });
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("touchstart", onPointer);
+    };
+  }, [showHow]);
 
   async function handleToggle() {
     if (!user || !mounted) return;
@@ -144,7 +167,33 @@ export function PushCard({ variant = "default" }: PushCardProps) {
 
   return (
     <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
-      <h2 className="ui-feature-title text-muted text-sm">Push (complementar)</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="ui-feature-title text-muted text-sm">Push (complementar)</h2>
+        {!compact && (
+          <span className="relative">
+            <button
+              ref={howTriggerRef}
+              type="button"
+              onClick={() => setShowHow((v) => !v)}
+              className="ui-focus-surface flex h-6 w-6 items-center justify-center rounded-full border border-border text-muted hover:bg-surface2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label="Como funciona?"
+              aria-expanded={showHow}
+            >
+              ?
+            </button>
+            {showHow && (
+              <div
+                ref={howPanelRef}
+                className="ui-panel-soft absolute left-0 top-full z-20 mt-1 min-w-[16rem] rounded-lg border p-2 text-xs shadow-lg"
+                role="tooltip"
+                aria-label="Como funciona?"
+              >
+                {PUSH_HOW}
+              </div>
+            )}
+          </span>
+        )}
+      </div>
 
       {!mounted ? (
         <p className="mt-2 text-sm text-muted">Carregando...</p>

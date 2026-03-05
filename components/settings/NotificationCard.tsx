@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getNotificationSupport, requestNotificationPermission } from "@/lib/notifications";
 import { getSettings, saveSettings } from "@/lib/storage";
 import type { AppSettings } from "@/lib/types";
@@ -10,12 +10,17 @@ type NotificationSupport = { supported: boolean; permission: NotificationPermiss
 
 type NotificationCardProps = { variant?: "default" | "compact" };
 
+const LEMBRETES_HOW = "Funciona quando você abre o app no horário escolhido. Não é push em segundo plano.";
+
 export function NotificationCard({ variant = "default" }: NotificationCardProps) {
   const compact = variant === "compact";
   const [mounted, setMounted] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [support, setSupport] = useState<NotificationSupport>({ supported: false, permission: "unsupported" });
   const [saving, setSaving] = useState(false);
+  const [showHow, setShowHow] = useState(false);
+  const howTriggerRef = useRef<HTMLButtonElement>(null);
+  const howPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -26,6 +31,24 @@ export function NotificationCard({ variant = "default" }: NotificationCardProps)
     setSupport(getNotificationSupport());
     void getSettings().then(setSettings);
   }, [mounted]);
+
+  useEffect(() => {
+    if (!showHow) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowHow(false); };
+    const onPointer = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node;
+      if (howTriggerRef.current?.contains(t) || howPanelRef.current?.contains(t)) return;
+      setShowHow(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("touchstart", onPointer, { passive: true });
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("touchstart", onPointer);
+    };
+  }, [showHow]);
 
   async function handleToggle() {
     if (!mounted) return;
@@ -88,7 +111,33 @@ export function NotificationCard({ variant = "default" }: NotificationCardProps)
 
   return (
     <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
-      <h2 className="ui-feature-title text-muted text-sm">Lembretes</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="ui-feature-title text-muted text-sm">Lembretes</h2>
+        {!compact && (
+          <span className="relative">
+            <button
+              ref={howTriggerRef}
+              type="button"
+              onClick={() => setShowHow((v) => !v)}
+              className="ui-focus-surface flex h-6 w-6 items-center justify-center rounded-full border border-border text-muted hover:bg-surface2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label="Como funciona?"
+              aria-expanded={showHow}
+            >
+              ?
+            </button>
+            {showHow && (
+              <div
+                ref={howPanelRef}
+                className="ui-panel-soft absolute left-0 top-full z-20 mt-1 min-w-[16rem] rounded-lg border p-2 text-xs shadow-lg"
+                role="tooltip"
+                aria-label="Como funciona?"
+              >
+                {LEMBRETES_HOW}
+              </div>
+            )}
+          </span>
+        )}
+      </div>
       {!compact && <p className="mt-2 text-sm leading-5 text-muted">{summary}</p>}
       {compact && <p className="mt-1 text-xs text-muted">{summary}</p>}
 
@@ -135,24 +184,6 @@ export function NotificationCard({ variant = "default" }: NotificationCardProps)
           </div>
         );
       })()}
-
-      {!compact && (
-        <details className="ui-disclosure mt-3 px-3 py-2">
-          <summary className="ui-disclosure-summary">Ver detalhes técnicos</summary>
-          <div className="ui-callout mt-2 px-3 py-2 text-xs leading-5">
-            <p>Web Push MVP: notificação local no horário escolhido (ao abrir o app ou com o app aberto). Um aviso por dia; clique abre Hoje.</p>
-            <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não suportado") : "..."}</p>
-            <p>Permissão: {mounted ? (support.permission === "denied" ? "negada" : support.permission) : "..."}</p>
-            <p>Ativado no app: {mounted ? (settings?.notificationEnabled ? "sim" : "não") : "..."}</p>
-            {support.permission === "denied" && (
-              <p className="mt-1 text-warning">Permissão negada no navegador. Reative nas configurações do site para receber lembretes.</p>
-            )}
-            {!support.supported && mounted && (
-              <p className="mt-1 text-muted">Em alguns navegadores (ex.: iOS/Safari) as notificações não estão disponíveis.</p>
-            )}
-          </div>
-        </details>
-      )}
     </section>
   );
 }
