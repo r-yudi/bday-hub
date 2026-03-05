@@ -32,7 +32,6 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   const [alertsDone, setAlertsDone] = useState(false);
   const [showGuestTooltip, setShowGuestTooltip] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [tipImageFailed, setTipImageFailed] = useState<Record<string, boolean>>({});
   const [lightboxTip, setLightboxTip] = useState<string | null>(null);
   const primaryActionRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const guestTooltipRef = useRef<HTMLDivElement | null>(null);
@@ -328,8 +327,6 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                   >
                     <ScrapThumb
                       config={SCRAP_CONFIGS[tip.id as keyof typeof SCRAP_CONFIGS]}
-                      failed={!!tipImageFailed[tip.id]}
-                      onError={() => setTipImageFailed((prev) => ({ ...prev, [tip.id]: true }))}
                     />
                   </button>
                   <div className="min-w-0">
@@ -359,20 +356,11 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                   >
                     ✕
                   </button>
-                  {tipImageFailed[lightboxTip] ? (
-                    <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 p-8 text-muted">
-                      <span className="text-3xl" aria-hidden>🖼</span>
-                      <span className="text-sm">Prévia em breve</span>
-                    </div>
-                  ) : (
-                    <div className="flex max-h-[85vh] min-h-[200px] w-full items-center justify-center">
-                      <ScrapThumb
-                        config={SCRAP_CONFIGS[lightboxTip as keyof typeof SCRAP_CONFIGS]}
-                        failed={false}
-                        onError={() => setTipImageFailed((prev) => ({ ...prev, [lightboxTip]: true }))}
-                      />
-                    </div>
-                  )}
+                  <div className="flex max-h-[85vh] min-h-[200px] w-full items-center justify-center">
+                    <ScrapThumb
+                      config={SCRAP_CONFIGS[lightboxTip as keyof typeof SCRAP_CONFIGS]}
+                    />
+                  </div>
                 </div>
               </div>
             )}
