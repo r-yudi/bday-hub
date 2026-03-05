@@ -20,7 +20,7 @@ export function Landing() {
             <Link href="#trust">Privacidade</Link>
           </li>
           <li>
-            <Link href="/today" className="nav-cta">
+            <Link href="/today?onboarding=1" className="nav-cta">
               Começar grátis
             </Link>
           </li>
@@ -47,7 +47,7 @@ export function Landing() {
               <span className="pill">Sem esquecer quem importa</span>
             </div>
             <div className="hero-actions">
-              <Link href="/today" className="btn-primary">
+              <Link href="/today?onboarding=1" className="btn-primary">
                 Começar grátis
                 <svg
                   width={16}
@@ -546,7 +546,7 @@ export function Landing() {
               <li>Organize aniversários em um só lugar</li>
               <li>Receba lembretes na hora certa</li>
             </ul>
-            <Link href="/today" className="btn-cta-big">
+            <Link href="/today?onboarding=1" className="btn-cta-big">
               Começar grátis
               <svg
                 width={18}

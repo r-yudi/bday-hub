@@ -1,7 +1,13 @@
-﻿"use client";
+"use client";
 
 export const ONBOARDING_COMPLETED_KEY = "bdayhub_onboarding_completed_v1";
 export const PENDING_ADD_TOAST_KEY = "bdayhub_pending_add_toast_v1";
+
+export const ONBOARDING_V1_ALERTS_DONE = "onboarding_v1_alerts_done";
+export const ONBOARDING_V1_PEOPLE_DONE = "onboarding_v1_people_done";
+export const ONBOARDING_V1_TIPS_DONE = "onboarding_v1_tips_done";
+
+export const ONBOARDING_V2_SEEN = "onboarding_v2_seen";
 
 export type OnboardingToast = {
   title: string;
@@ -49,6 +55,51 @@ export function consumeBirthdayAddedToast(): boolean {
     return true;
   } catch {
     return false;
+  }
+}
+
+export function getOnboardingStepDone(key: string): boolean {
+  if (!canUseWindow()) return false;
+  try {
+    return window.localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setOnboardingStepDone(key: string): void {
+  if (!canUseWindow()) return;
+  try {
+    window.localStorage.setItem(key, "1");
+  } catch {
+    // ignore
+  }
+}
+
+export function getOnboardingV2Seen(): boolean {
+  if (!canUseWindow()) return false;
+  try {
+    return window.localStorage.getItem(ONBOARDING_V2_SEEN) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setOnboardingV2Seen(): void {
+  if (!canUseWindow()) return;
+  try {
+    window.localStorage.setItem(ONBOARDING_V2_SEEN, "1");
+  } catch {
+    // ignore
+  }
+}
+
+export function clearOnboardingV2Seen(): void {
+  if (!canUseWindow()) return;
+  try {
+    window.localStorage.removeItem(ONBOARDING_V2_SEEN);
+  } catch {
+    // ignore
   }
 }
 

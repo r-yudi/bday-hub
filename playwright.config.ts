@@ -13,7 +13,7 @@ export default defineConfig({
   webServer: {
     command: "npm run build && npm run start -- -p 3100",
     url: "http://127.0.0.1:3100/today",
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 240_000
   },
   projects: [

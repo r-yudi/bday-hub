@@ -10,10 +10,20 @@ function todayDayMonth() {
   };
 }
 
-async function gotoTodayReady(page: Page) {
+async function gotoTodayReady(page: Page, options?: { showOnboarding?: boolean }) {
   await page.goto("/today");
+  if (!options?.showOnboarding) {
+    await page.evaluate(() => localStorage.setItem("onboarding_v2_seen", "1"));
+    await page.reload();
+  }
   await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
   await expect(page.getByText("Carregando...")).toHaveCount(0);
+}
+
+async function gotoSettingsReady(page: Page) {
+  await page.goto("/settings");
+  await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
 }
 
 async function addBirthday(page: Page, options?: { name?: string; notes?: string; tag?: string }) {
@@ -23,7 +33,7 @@ async function addBirthday(page: Page, options?: { name?: string; notes?: string
   const tag = options?.tag ?? "e2e";
 
   await gotoTodayReady(page);
-  await page.getByRole("link", { name: "Adicionar" }).click();
+  await page.getByRole("link", { name: /Adicionar.*aniversário/ }).first().click();
 
   await page.getByPlaceholder("Ex.: Ana Silva").fill(name);
   await page.locator("form select").nth(0).selectOption(day);
@@ -80,7 +90,7 @@ test.describe("MVP smoke flows", () => {
     ].join("\n");
 
     await gotoTodayReady(page);
-    await page.getByRole("button", { name: "Importar CSV" }).click();
+    await page.getByRole("button", { name: "Importar CSV" }).first().click();
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "playwright-import.csv",
@@ -129,17 +139,77 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByText("compartilhado")).toBeVisible();
   });
 
-  test("Email diário section on /today (guest: CTA; no email sent)", async ({ page }) => {
-    await gotoTodayReady(page);
+  test("Email diário section on /settings (guest: CTA)", async ({ page }) => {
+    await gotoSettingsReady(page);
     await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Entrar para ativar email" })).toBeVisible();
   });
 
-  test("Push (complementar) section on /today: guest sees instruction and CTA", async ({ page }) => {
-    await gotoTodayReady(page);
+  test("Push (complementar) section on /settings: guest sees instruction and CTA", async ({ page }) => {
+    await gotoSettingsReady(page);
     await expect(page.getByRole("heading", { name: "Push (complementar)" })).toBeVisible();
     await expect(page.getByText("Notificações push estão disponíveis para contas conectadas")).toBeVisible();
     await expect(page.getByRole("link", { name: "Entrar para ativar push" })).toBeVisible();
+  });
+
+  test("TopNav: navegar para Pessoas", async ({ page }) => {
+    await page.goto("/today");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await page.getByRole("link", { name: "Pessoas" }).click();
+    await expect(page).toHaveURL(/\/people$/);
+    await expect(page.getByRole("link", { name: "Adicionar" }).first()).toBeVisible();
+  });
+
+  test("TopNav: navegar para Configurações", async ({ page }) => {
+    await page.goto("/today");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await page.getByRole("link", { name: "Configurações" }).click();
+    await expect(page).toHaveURL(/\/settings$/);
+    await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+  });
+
+  test("/manage redireciona para /people", async ({ page }) => {
+    await page.goto("/manage");
+    await expect(page).toHaveURL(/\/people$/);
+    await expect(page.getByRole("link", { name: "Adicionar" }).first()).toBeVisible();
+  });
+});
+
+test.describe("Onboarding gate (logado)", () => {
+  const authPath = join(process.cwd(), "test-results", ".auth", "user.json");
+  const hasAuth = existsSync(authPath);
+  if (hasAuth) test.use({ storageState: authPath });
+  test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json).");
+
+  test("logado: wizard step Alertas com Continuar e Voltar, Continuar avança", async ({ page }) => {
+    await page.goto("/today");
+    await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
+    await page.goto("/today?onboarding=1");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continuar" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Voltar" })).toBeVisible();
+    await page.getByRole("button", { name: "Continuar" }).click();
+    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
+  });
+});
+
+test.describe("Onboarding wizard (guest)", () => {
+  test("guest: /today?onboarding=1 mostra wizard, Continuar sem conta, step Alertas, fechar (X) e não reaparece após reload", async ({ page }) => {
+    await page.goto("/today");
+    await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
+    await page.goto("/today?onboarding=1");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByText("Sincronize em todos os dispositivos")).toBeVisible();
+    await page.getByRole("button", { name: "Continuar sem conta" }).click();
+    await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continuar" })).toBeVisible();
+    await page.getByRole("button", { name: "Fechar onboarding" }).click();
+    await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
   });
 });
 
@@ -149,8 +219,8 @@ test.describe("Push (complementar) logado não-standalone", () => {
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json). Gerar: login em /login e salvar storageState.");
 
-  test("mostra instrução de instalar PWA e não mostra toggle", async ({ page }) => {
-    await page.goto("/today");
+  test("mostra instrução de instalar PWA em /settings e não mostra toggle", async ({ page }) => {
+    await page.goto("/settings");
     await expect(page.getByText("Para ativar notificações push, instale o Lembra (PWA) na tela inicial.")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ativar push|Desativar push/ })).toHaveCount(0);
   });

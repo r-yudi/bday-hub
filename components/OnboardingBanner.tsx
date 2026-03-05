@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { hasCompletedOnboarding, markOnboardingCompleted } from "@/lib/onboarding-ui";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+const DISMISS_KEY = "today_add_more_banner_dismissed";
 
 type OnboardingBannerProps = {
   count: number;
@@ -9,62 +11,54 @@ type OnboardingBannerProps = {
 };
 
 export function OnboardingBanner({ count, mounted }: OnboardingBannerProps) {
-  const [completionKnown, setCompletionKnown] = useState(false);
-  const [completedPersisted, setCompletedPersisted] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const progress = Math.max(0, Math.min(5, count));
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     if (!mounted) return;
-    setCompletedPersisted(hasCompletedOnboarding());
-    setCompletionKnown(true);
+    try {
+      setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
+    } catch {
+      setDismissed(false);
+    }
   }, [mounted]);
 
-  useEffect(() => {
-    if (!mounted || !completionKnown) return;
-    if (completedPersisted) return;
-    if (count < 5) return;
-
-    markOnboardingCompleted();
-    setCompletedPersisted(true);
-    setShowSuccess(true);
-
-    const timer = window.setTimeout(() => setShowSuccess(false), 4200);
-    return () => window.clearTimeout(timer);
-  }, [mounted, completionKnown, completedPersisted, count]);
-
-  const progressWidth = useMemo(() => `${(progress / 5) * 100}%`, [progress]);
-
-  if (!mounted || !completionKnown) return null;
-
-  if (showSuccess) {
-    return (
-      <div className="rounded-2xl border border-success/30 bg-success/15 px-4 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium text-success">🎉 Pronto! Seu Lembra está pronto para comemorar.</p>
-          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-success">5/5</span>
-        </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/90">
-          <div className="h-full rounded-full bg-success" style={{ width: "100%" }} />
-        </div>
-      </div>
-    );
+  function handleDismiss() {
+    try {
+      localStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      // ignore
+    }
+    setDismissed(true);
   }
 
-  if (completedPersisted || progress >= 5) return null;
+  if (!mounted || count >= 5 || dismissed) return null;
 
   return (
-    <div className="rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium text-text">Adicione 5 aniversários para nunca mais esquecer ninguém 🎉</p>
-        <span className="rounded-full border border-warning/40 bg-white px-2.5 py-1 text-xs font-medium text-warning shadow-sm">
-          {progress}/5
-        </span>
-      </div>
-      <p className="mt-1 text-xs text-muted">Comece com 5 contatos e já sinta o Lembra funcionando por você.</p>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/90">
-        <div className="h-full rounded-full bg-warning transition-all" style={{ width: progressWidth }} />
+    <div className="ui-panel-soft rounded-2xl border p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div>
+          <h2 className="font-semibold tracking-tight text-text">
+            Adicione mais algumas pessoas
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            Com 5 aniversários cadastrados o Lembra já começa a te ajudar no dia a dia.
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Link
+            href="/person"
+            className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+          >
+            Adicionar pessoa
+          </Link>
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="ui-link-tertiary text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            Dispensar
+          </button>
+        </div>
       </div>
     </div>
   );
