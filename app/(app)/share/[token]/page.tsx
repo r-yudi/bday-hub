@@ -68,7 +68,7 @@ export default function ShareTokenPage() {
       <div className="grid min-h-[65vh] place-items-center">
         <div className="ui-panel-soft mx-auto w-full max-w-xl rounded-2xl border p-6 text-text">
           <h1 className="text-lg font-semibold tracking-tight">Link inválido</h1>
-          <p className="mt-2 text-sm text-muted">Este token não pôde ser lido ou está malformado.</p>
+          <p className="mt-2 text-sm text-muted">Este link não pôde ser reconhecido. Pode estar incompleto ou incorreto.</p>
           <Link href="/today" className="ui-cta-secondary mt-4 inline-flex items-center rounded-lg border px-3 py-2 text-sm focus-visible:outline-none">
             Ir para o app
           </Link>
@@ -128,7 +128,7 @@ export default function ShareTokenPage() {
         </div>
 
         <p className="text-center text-xs text-muted">
-          v1 sem backend: o token expõe apenas nome + dia/mês e não possui revogação individual.
+          O link mostra apenas nome e dia/mês (sem ano).
         </p>
       </div>
     </div>

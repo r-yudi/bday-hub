@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade",
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
 
         <div>
           <h2 className="font-semibold tracking-tight text-text">5. Compartilhamento</h2>
-          <p className="mt-1">Links de compartilhamento expõem apenas nome e dia/mês (sem ano), conforme o fluxo atual do app.</p>
+          <p className="mt-1">Links de compartilhamento mostram apenas nome e dia/mês (sem ano), conforme o fluxo atual do app.</p>
         </div>
       </section>
     </div>
