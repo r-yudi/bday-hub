@@ -10,8 +10,12 @@ function todayDayMonth() {
   };
 }
 
-async function gotoTodayReady(page: Page) {
+async function gotoTodayReady(page: Page, options?: { showOnboarding?: boolean }) {
   await page.goto("/today");
+  if (!options?.showOnboarding) {
+    await page.evaluate(() => localStorage.setItem("onboarding_v2_seen", "1"));
+    await page.reload();
+  }
   await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
   await expect(page.getByText("Carregando...")).toHaveCount(0);
 }
@@ -178,21 +182,32 @@ test.describe("Onboarding gate (logado)", () => {
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json).");
 
-  test("logado sem flags: /today mostra Configurar alertas e link vai para /settings", async ({ page }) => {
-    await page.goto("/today");
+  test("logado: wizard step Alertas com Abrir configurações e link vai para /settings", async ({ page }) => {
+    await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
+    await page.goto("/today?onboarding=1");
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
-    await expect(page.getByText("Carregando...")).toHaveCount(0);
-    await page.evaluate(() => {
-      localStorage.removeItem("onboarding_v1_alerts_done");
-      localStorage.removeItem("onboarding_v1_people_done");
-      localStorage.removeItem("onboarding_v1_tips_done");
-    });
-    await page.reload();
-    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Configurar alertas" })).toBeVisible();
-    await page.getByRole("link", { name: "Configurar alertas" }).click();
+    await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Abrir configurações" })).toBeVisible();
+    await page.getByRole("link", { name: "Abrir configurações" }).click();
     await expect(page).toHaveURL(/\/settings$/);
     await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+  });
+});
+
+test.describe("Onboarding wizard (guest)", () => {
+  test("guest: /today?onboarding=1 mostra wizard, Continuar sem conta, step Alertas, fechar (X) e não reaparece após reload", async ({ page }) => {
+    await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
+    await page.goto("/today?onboarding=1");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByText("Sincronize em todos os dispositivos")).toBeVisible();
+    await page.getByRole("button", { name: "Continuar sem conta" }).click();
+    await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Abrir configurações" })).toBeVisible();
+    await page.getByRole("button", { name: "Fechar" }).click();
+    await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
   });
 });
 
