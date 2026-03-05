@@ -183,6 +183,7 @@ test.describe("Onboarding gate (logado)", () => {
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json).");
 
   test("logado: wizard step Alertas com Abrir configurações e link vai para /settings", async ({ page }) => {
+    await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
@@ -196,6 +197,7 @@ test.describe("Onboarding gate (logado)", () => {
 
 test.describe("Onboarding wizard (guest)", () => {
   test("guest: /today?onboarding=1 mostra wizard, Continuar sem conta, step Alertas, fechar (X) e não reaparece após reload", async ({ page }) => {
+    await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
@@ -203,7 +205,7 @@ test.describe("Onboarding wizard (guest)", () => {
     await page.getByRole("button", { name: "Continuar sem conta" }).click();
     await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Abrir configurações" })).toBeVisible();
-    await page.getByRole("button", { name: "Fechar" }).click();
+    await page.getByRole("button", { name: "Fechar onboarding" }).click();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
     await page.reload();
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
