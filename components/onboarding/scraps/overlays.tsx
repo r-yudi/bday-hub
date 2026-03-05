@@ -2,47 +2,34 @@
 
 /**
  * Overlay definitions for onboarding scraps (Step 4 Dicas rápidas).
- * Positions in percentage (0–100) of the base image.
- * Base images: public/onboarding/base/people.png, share.png
+ * Hand-drawn SVG overlays (viewBox 0 0 100 100). Base images: public/onboarding/base/people.png, share.png
  */
 
-export type OverlayMark = {
-  label: string;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-};
+import { handArrow, handCircle, handLabel } from "./handDrawn";
+
+export type ScrapId = "editar" | "categorias" | "compartilhar";
 
 export type ScrapOverlayConfig = {
   baseImage: string;
-  marks: OverlayMark[];
+  scrapId: ScrapId;
 };
 
-/** Scrap Editar: marca botão Editar e botão Excluir na tela Pessoas */
+/** Scrap Editar: circundar botão Editar, seta para Excluir, labels "editar aqui" e "remover". */
 export const SCRAP_EDITAR: ScrapOverlayConfig = {
   baseImage: "/onboarding/base/people.png",
-  marks: [
-    { label: "editar aqui", left: 62, top: 22, width: 16, height: 10 },
-    { label: "remover", left: 80, top: 22, width: 14, height: 10 }
-  ]
+  scrapId: "editar"
 };
 
-/** Scrap Categorias: marca chips de categoria na tela Pessoas */
+/** Scrap Categorias: circundar chips (amigos/faculdade), label "categorias". */
 export const SCRAP_CATEGORIAS: ScrapOverlayConfig = {
   baseImage: "/onboarding/base/people.png",
-  marks: [
-    { label: "organize com categorias", left: 8, top: 52, width: 84, height: 22 }
-  ]
+  scrapId: "categorias"
 };
 
-/** Scrap Compartilhar: marca Copiar link e Abrir prévia na tela Share */
+/** Scrap Compartilhar: circundar Copiar link, seta para Abrir prévia, labels "copiar" e "prévia". */
 export const SCRAP_COMPARTILHAR: ScrapOverlayConfig = {
   baseImage: "/onboarding/base/share.png",
-  marks: [
-    { label: "copiar link", left: 12, top: 58, width: 28, height: 16 },
-    { label: "ver prévia", left: 48, top: 58, width: 28, height: 16 }
-  ]
+  scrapId: "compartilhar"
 };
 
 export const SCRAP_CONFIGS = {
@@ -50,6 +37,40 @@ export const SCRAP_CONFIGS = {
   categorias: SCRAP_CATEGORIAS,
   compartilhar: SCRAP_COMPARTILHAR
 } as const;
+
+function ScrapOverlaySvg({ scrapId }: { scrapId: ScrapId }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className="absolute inset-0 h-full w-full pointer-events-none"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      {scrapId === "editar" && (
+        <>
+          {handCircle(70, 27, 9, 5.5, { roughness: true })}
+          {handArrow(78, 27, 87, 27, { curve: 0.15 })}
+          {handLabel("editar aqui", 70, 19)}
+          {handLabel("remover", 87, 19)}
+        </>
+      )}
+      {scrapId === "categorias" && (
+        <>
+          {handCircle(50, 63, 42, 12, { roughness: true })}
+          {handLabel("categorias", 50, 47)}
+        </>
+      )}
+      {scrapId === "compartilhar" && (
+        <>
+          {handCircle(26, 66, 14, 8, { roughness: true })}
+          {handArrow(40, 66, 58, 66, { curve: 0.12 })}
+          {handLabel("copiar", 26, 57)}
+          {handLabel("prévia", 62, 57)}
+        </>
+      )}
+    </svg>
+  );
+}
 
 type ScrapThumbProps = {
   config: ScrapOverlayConfig;
@@ -74,24 +95,7 @@ export function ScrapThumb({ config, failed, onError }: ScrapThumbProps) {
         className="h-full w-full object-cover"
         onError={onError}
       />
-      <div className="absolute inset-0 pointer-events-none">
-        {config.marks.map((mark, i) => (
-          <div
-            key={i}
-            className="absolute border-2 border-primary/70 bg-primary/10 rounded flex items-center justify-center p-0.5"
-            style={{
-              left: `${mark.left}%`,
-              top: `${mark.top}%`,
-              width: `${mark.width}%`,
-              height: `${mark.height}%`
-            }}
-          >
-            <span className="text-[10px] font-medium text-primary leading-tight text-center truncate max-w-full">
-              {mark.label}
-            </span>
-          </div>
-        ))}
-      </div>
+      <ScrapOverlaySvg scrapId={config.scrapId} />
     </div>
   );
 }
