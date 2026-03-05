@@ -174,6 +174,12 @@ test.describe("MVP smoke flows", () => {
     await expect(page).toHaveURL(/\/people$/);
     await expect(page.getByRole("link", { name: "Adicionar" }).first()).toBeVisible();
   });
+
+  test("aba Categorias em /people?tab=categories mostra título Categorias", async ({ page }) => {
+    await page.goto("/people?tab=categories");
+    await expect(page).toHaveURL(/\/people\?tab=categories/);
+    await expect(page.getByRole("heading", { name: "Categorias" })).toBeVisible();
+  });
 });
 
 test.describe("Onboarding gate (logado)", () => {
