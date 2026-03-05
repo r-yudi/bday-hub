@@ -14,6 +14,7 @@ import {
   getOnboardingV2Seen,
   setOnboardingV2Seen
 } from "@/lib/onboarding-ui";
+import { SCRAP_CONFIGS, ScrapThumb } from "@/components/onboarding/scraps/overlays";
 
 type OnboardingGateProps = {
   peopleCount: number;
@@ -315,9 +316,9 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4">
               {[
-                { id: "editar", src: "/onboarding/tip-editar.png", title: "Editar", text: "Altere nome, data ou categorias a qualquer momento." },
-                { id: "categorias", src: "/onboarding/tip-categorias.png", title: "Categorias", text: "Organize pessoas por família, amigos ou trabalho." },
-                { id: "compartilhar", src: "/onboarding/tip-compartilhar.png", title: "Compartilhar", text: "Crie um link para alguém adicionar aniversários à sua lista." }
+                { id: "editar", title: "Editar", text: "Altere nome, data ou categorias a qualquer momento." },
+                { id: "categorias", title: "Categorias", text: "Organize pessoas por família, amigos ou trabalho." },
+                { id: "compartilhar", title: "Compartilhar", text: "Crie um link para alguém adicionar aniversários à sua lista." }
               ].map((tip) => (
                 <div key={tip.id} className="flex gap-3 rounded-xl border border-border p-3">
                   <button
@@ -325,19 +326,11 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                     onClick={() => setLightboxTip(tip.id)}
                     className="ui-surface ui-focus-surface aspect-[16/10] w-32 shrink-0 overflow-hidden rounded-xl border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                   >
-                    {tipImageFailed[tip.id] ? (
-                      <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-surface2/50 p-2 text-center">
-                        <span className="text-lg text-muted" aria-hidden>🖼</span>
-                        <span className="text-xs text-muted">Prévia em breve</span>
-                      </div>
-                    ) : (
-                      <img
-                        src={tip.src}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        onError={() => setTipImageFailed((prev) => ({ ...prev, [tip.id]: true }))}
-                      />
-                    )}
+                    <ScrapThumb
+                      config={SCRAP_CONFIGS[tip.id as keyof typeof SCRAP_CONFIGS]}
+                      failed={!!tipImageFailed[tip.id]}
+                      onError={() => setTipImageFailed((prev) => ({ ...prev, [tip.id]: true }))}
+                    />
                   </button>
                   <div className="min-w-0">
                     <h3 className="font-medium text-text">{tip.title}</h3>
@@ -372,12 +365,13 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                       <span className="text-sm">Prévia em breve</span>
                     </div>
                   ) : (
-                    <img
-                      src={`/onboarding/tip-${lightboxTip}.png`}
-                      alt=""
-                      className="max-h-[85vh] w-full object-contain"
-                      onError={() => setTipImageFailed((prev) => ({ ...prev, [lightboxTip]: true }))}
-                    />
+                    <div className="flex max-h-[85vh] min-h-[200px] w-full items-center justify-center">
+                      <ScrapThumb
+                        config={SCRAP_CONFIGS[lightboxTip as keyof typeof SCRAP_CONFIGS]}
+                        failed={false}
+                        onError={() => setTipImageFailed((prev) => ({ ...prev, [lightboxTip]: true }))}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
