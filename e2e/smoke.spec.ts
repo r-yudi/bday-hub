@@ -16,6 +16,12 @@ async function gotoTodayReady(page: Page) {
   await expect(page.getByText("Carregando...")).toHaveCount(0);
 }
 
+async function gotoSettingsReady(page: Page) {
+  await page.goto("/settings");
+  await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+}
+
 async function addBirthday(page: Page, options?: { name?: string; notes?: string; tag?: string }) {
   const { day, month } = todayDayMonth();
   const name = options?.name ?? `E2E ${Date.now()}`;
@@ -129,17 +135,34 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByText("compartilhado")).toBeVisible();
   });
 
-  test.skip("Email diário section on /today (guest: CTA; no email sent) — config removed from /today (home operacional)", async ({ page }) => {
-    await gotoTodayReady(page);
+  test("Email diário section on /settings (guest: CTA)", async ({ page }) => {
+    await gotoSettingsReady(page);
     await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Entrar para ativar email" })).toBeVisible();
   });
 
-  test.skip("Push (complementar) section on /today: guest sees instruction and CTA — config removed from /today (home operacional)", async ({ page }) => {
-    await gotoTodayReady(page);
+  test("Push (complementar) section on /settings: guest sees instruction and CTA", async ({ page }) => {
+    await gotoSettingsReady(page);
     await expect(page.getByRole("heading", { name: "Push (complementar)" })).toBeVisible();
     await expect(page.getByText("Notificações push estão disponíveis para contas conectadas")).toBeVisible();
     await expect(page.getByRole("link", { name: "Entrar para ativar push" })).toBeVisible();
+  });
+
+  test("TopNav: navegar para Pessoas", async ({ page }) => {
+    await page.goto("/today");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await page.getByRole("link", { name: "Pessoas" }).click();
+    await expect(page).toHaveURL(/\/people$/);
+    await expect(page.getByRole("link", { name: "Adicionar" })).toBeVisible();
+  });
+
+  test("TopNav: navegar para Configurações", async ({ page }) => {
+    await page.goto("/today");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await page.getByRole("link", { name: "Configurações" }).click();
+    await expect(page).toHaveURL(/\/settings$/);
+    await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
   });
 });
 
@@ -149,8 +172,8 @@ test.describe("Push (complementar) logado não-standalone", () => {
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json). Gerar: login em /login e salvar storageState.");
 
-  test.skip("mostra instrução de instalar PWA e não mostra toggle — config (Push) removed from /today (home operacional)", async ({ page }) => {
-    await page.goto("/today");
+  test("mostra instrução de instalar PWA em /settings e não mostra toggle", async ({ page }) => {
+    await page.goto("/settings");
     await expect(page.getByText("Para ativar notificações push, instale o Lembra (PWA) na tela inicial.")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ativar push|Desativar push/ })).toHaveCount(0);
   });
