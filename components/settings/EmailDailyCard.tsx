@@ -12,7 +12,10 @@ import {
 import { DEFAULT_EMAIL_REMINDER_SETTINGS, type EmailReminderSettings, type LastEmailDispatch } from "@/lib/types";
 import { parseTimeHHmm, formatTimeHHmm } from "./timeUtils";
 
-export function EmailDailyCard() {
+type EmailDailyCardProps = { variant?: "default" | "compact" };
+
+export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
+  const compact = variant === "compact";
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [emailSettings, setEmailSettings] = useState<EmailReminderSettings | null>(null);
@@ -129,20 +132,21 @@ export function EmailDailyCard() {
       : "Ative o email diário para receber lembretes fora do app.";
 
   return (
-    <section className="ui-feature-block">
-      <h2 className="ui-feature-title text-muted">Email diário</h2>
-      <p className="mt-2 text-sm leading-5 text-muted">{summary}</p>
+    <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+      <h2 className="ui-feature-title text-muted text-sm">Email diário</h2>
+      {!compact && <p className="mt-2 text-sm leading-5 text-muted">{summary}</p>}
+      {compact && <p className="mt-1 text-xs text-muted">{summary}</p>}
 
       {!user ? (
         <Link
-          href="/login?returnTo=%2Fsettings"
+          href={compact ? "/login?returnTo=%2Ftoday" : "/login?returnTo=%2Fsettings"}
           className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
         >
-          Entrar para ativar email
+          {compact ? "Entrar com Google" : "Entrar para ativar email"}
         </Link>
       ) : (
         <>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className={compact ? "mt-2 flex flex-wrap items-center gap-2" : "mt-3 flex flex-wrap items-center gap-2"}>
             <button
               type="button"
               onClick={() => void handleToggle()}
@@ -189,46 +193,54 @@ export function EmailDailyCard() {
                 </div>
               );
             })()}
-            <label className="text-xs text-muted" htmlFor="daily-email-timezone">
-              Fuso
-            </label>
-            <input
-              id="daily-email-timezone"
-              type="text"
-              placeholder="America/Sao_Paulo"
-              value={timezoneDraft}
-              disabled={saving}
-              onChange={(e) => setTimezoneDraft(e.target.value)}
-              onBlur={() => void handleTimezoneBlur()}
-              className="ui-focus-surface h-10 min-w-[10rem] rounded-xl border px-2.5 text-sm focus-visible:outline-none"
-            />
+            {!compact && (
+              <>
+                <label className="text-xs text-muted" htmlFor="daily-email-timezone">
+                  Fuso
+                </label>
+                <input
+                  id="daily-email-timezone"
+                  type="text"
+                  placeholder="America/Sao_Paulo"
+                  value={timezoneDraft}
+                  disabled={saving}
+                  onChange={(e) => setTimezoneDraft(e.target.value)}
+                  onBlur={() => void handleTimezoneBlur()}
+                  className="ui-focus-surface h-10 min-w-[10rem] rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                />
+              </>
+            )}
           </div>
-          {(emailSettings?.timezone || timezoneDraft) && !isValidTimezone(timezoneDraft || emailSettings?.timezone || "") && (
-            <p className="mt-2 text-xs text-warning">
-              Timezone inválido; não será salvo (será usado America/Sao_Paulo).
-            </p>
-          )}
-          {lastDispatch && (
-            <div className="mt-2 space-y-0.5 text-xs text-muted">
-              {lastDispatch.status === "sent" && (
-                <p>
-                  Último envio: {lastDispatch.sentAt
-                    ? new Date(lastDispatch.sentAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", hour12: false })
-                    : lastDispatch.dateKey}
+          {!compact && (
+            <>
+              {(emailSettings?.timezone || timezoneDraft) && !isValidTimezone(timezoneDraft || emailSettings?.timezone || "") && (
+                <p className="mt-2 text-xs text-warning">
+                  Timezone inválido; não será salvo (será usado America/Sao_Paulo).
                 </p>
               )}
-              {lastDispatch.status === "skipped" && <p>Último status: sem aniversários no dia ({lastDispatch.dateKey}).</p>}
-              {lastDispatch.status === "error" && (
-                <p>Último status: erro no envio{lastDispatch.errorMessage ? ` — ${lastDispatch.errorMessage}` : ""}</p>
+              {lastDispatch && (
+                <div className="mt-2 space-y-0.5 text-xs text-muted">
+                  {lastDispatch.status === "sent" && (
+                    <p>
+                      Último envio: {lastDispatch.sentAt
+                        ? new Date(lastDispatch.sentAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", hour12: false })
+                        : lastDispatch.dateKey}
+                    </p>
+                  )}
+                  {lastDispatch.status === "skipped" && <p>Último status: sem aniversários no dia ({lastDispatch.dateKey}).</p>}
+                  {lastDispatch.status === "error" && (
+                    <p>Último status: erro no envio{lastDispatch.errorMessage ? ` — ${lastDispatch.errorMessage}` : ""}</p>
+                  )}
+                  {lastDispatch.status === "pending" && <p>Último status: em processamento.</p>}
+                </div>
               )}
-              {lastDispatch.status === "pending" && <p>Último status: em processamento.</p>}
-            </div>
+              {emailSettings?.lastDailyEmailSentOn && !lastDispatch && (
+                <p className="mt-2 text-xs text-muted">Último envio registrado: {emailSettings.lastDailyEmailSentOn}</p>
+              )}
+              {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+              {success && <p className="mt-2 text-xs text-success">{success}</p>}
+            </>
           )}
-          {emailSettings?.lastDailyEmailSentOn && !lastDispatch && (
-            <p className="mt-2 text-xs text-muted">Último envio registrado: {emailSettings.lastDailyEmailSentOn}</p>
-          )}
-          {error && <p className="mt-2 text-xs text-danger">{error}</p>}
-          {success && <p className="mt-2 text-xs text-success">{success}</p>}
         </>
       )}
     </section>

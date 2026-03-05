@@ -8,7 +8,10 @@ import { parseTimeHHmm, formatTimeHHmm } from "./timeUtils";
 
 type NotificationSupport = { supported: boolean; permission: NotificationPermission | "unsupported" };
 
-export function NotificationCard() {
+type NotificationCardProps = { variant?: "default" | "compact" };
+
+export function NotificationCard({ variant = "default" }: NotificationCardProps) {
+  const compact = variant === "compact";
   const [mounted, setMounted] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [support, setSupport] = useState<NotificationSupport>({ supported: false, permission: "unsupported" });
@@ -84,9 +87,10 @@ export function NotificationCard() {
           : "Ative os lembretes e escolha o horário. No dia do aniversário você recebe uma notificação (ao abrir o app ou com o app aberto).";
 
   return (
-    <section className="ui-feature-block">
-      <h2 className="ui-feature-title text-muted">Lembretes</h2>
-      <p className="mt-2 text-sm leading-5 text-muted">{summary}</p>
+    <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+      <h2 className="ui-feature-title text-muted text-sm">Lembretes</h2>
+      {!compact && <p className="mt-2 text-sm leading-5 text-muted">{summary}</p>}
+      {compact && <p className="mt-1 text-xs text-muted">{summary}</p>}
 
       <button
         type="button"
@@ -100,12 +104,12 @@ export function NotificationCard() {
       {support.supported && support.permission === "granted" && settings && (() => {
         const nt = parseTimeHHmm(settings.notificationTime ?? "09:00");
         return (
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <label className="text-xs text-muted" htmlFor="daily-notification-hour">
+          <div className={compact ? "mt-2 flex flex-wrap items-center gap-2" : "mt-3 flex flex-wrap items-center gap-2"}>
+            <label className="text-xs text-muted" htmlFor={compact ? "daily-notification-hour-compact" : "daily-notification-hour"}>
               Horário do lembrete (24h)
             </label>
             <select
-              id="daily-notification-hour"
+              id={compact ? "daily-notification-hour-compact" : "daily-notification-hour"}
               value={nt.h}
               disabled={saving}
               onChange={(e) => void handleTimeChange(formatTimeHHmm(parseInt(e.target.value, 10), nt.m))}
@@ -132,21 +136,23 @@ export function NotificationCard() {
         );
       })()}
 
-      <details className="ui-disclosure mt-3 px-3 py-2">
-        <summary className="ui-disclosure-summary">Ver detalhes técnicos</summary>
-        <div className="ui-callout mt-2 px-3 py-2 text-xs leading-5">
-          <p>Web Push MVP: notificação local no horário escolhido (ao abrir o app ou com o app aberto). Um aviso por dia; clique abre Hoje.</p>
-          <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não suportado") : "..."}</p>
-          <p>Permissão: {mounted ? (support.permission === "denied" ? "negada" : support.permission) : "..."}</p>
-          <p>Ativado no app: {mounted ? (settings?.notificationEnabled ? "sim" : "não") : "..."}</p>
-          {support.permission === "denied" && (
-            <p className="mt-1 text-warning">Permissão negada no navegador. Reative nas configurações do site para receber lembretes.</p>
-          )}
-          {!support.supported && mounted && (
-            <p className="mt-1 text-muted">Em alguns navegadores (ex.: iOS/Safari) as notificações não estão disponíveis.</p>
-          )}
-        </div>
-      </details>
+      {!compact && (
+        <details className="ui-disclosure mt-3 px-3 py-2">
+          <summary className="ui-disclosure-summary">Ver detalhes técnicos</summary>
+          <div className="ui-callout mt-2 px-3 py-2 text-xs leading-5">
+            <p>Web Push MVP: notificação local no horário escolhido (ao abrir o app ou com o app aberto). Um aviso por dia; clique abre Hoje.</p>
+            <p className="mt-1">Suporte: {mounted ? (support.supported ? "sim" : "não suportado") : "..."}</p>
+            <p>Permissão: {mounted ? (support.permission === "denied" ? "negada" : support.permission) : "..."}</p>
+            <p>Ativado no app: {mounted ? (settings?.notificationEnabled ? "sim" : "não") : "..."}</p>
+            {support.permission === "denied" && (
+              <p className="mt-1 text-warning">Permissão negada no navegador. Reative nas configurações do site para receber lembretes.</p>
+            )}
+            {!support.supported && mounted && (
+              <p className="mt-1 text-muted">Em alguns navegadores (ex.: iOS/Safari) as notificações não estão disponíveis.</p>
+            )}
+          </div>
+        </details>
+      )}
     </section>
   );
 }

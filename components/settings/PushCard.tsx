@@ -15,7 +15,10 @@ function toBase64Url(buf: ArrayBuffer): string {
     .replace(/=+$/, "");
 }
 
-export function PushCard() {
+type PushCardProps = { variant?: "default" | "compact" };
+
+export function PushCard({ variant = "default" }: PushCardProps) {
+  const compact = variant === "compact";
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [pushSettings, setPushSettings] = useState<{ pushEnabled: boolean } | null>(null);
@@ -140,43 +143,49 @@ export function PushCard() {
   };
 
   return (
-    <section className="ui-feature-block">
-      <h2 className="ui-feature-title text-muted">Push (complementar)</h2>
+    <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+      <h2 className="ui-feature-title text-muted text-sm">Push (complementar)</h2>
 
       {!mounted ? (
         <p className="mt-2 text-sm text-muted">Carregando...</p>
       ) : !user ? (
         <>
-          <p className="mt-2 text-sm leading-5 text-muted">
-            Notificações push estão disponíveis para contas conectadas (PWA instalada).
-          </p>
-          <p className="mt-1 text-xs text-muted">Estado: {stateLabel.guest}</p>
+          {!compact && (
+            <p className="mt-2 text-sm leading-5 text-muted">
+              Notificações push estão disponíveis para contas conectadas (PWA instalada).
+            </p>
+          )}
+          <p className={compact ? "mt-1 text-xs text-muted" : "mt-1 text-xs text-muted"}>Estado: {stateLabel.guest}</p>
           <Link
-            href="/login?returnTo=%2Fsettings"
+            href={compact ? "/login?returnTo=%2Ftoday" : "/login?returnTo=%2Fsettings"}
             className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
           >
-            Entrar para ativar push
+            {compact ? "Entrar com Google" : "Entrar para ativar push"}
           </Link>
         </>
       ) : !isStandalone ? (
         <>
-          <p className="mt-2 text-sm leading-5 text-muted">
-            Para ativar notificações push, instale o Lembra (PWA) na tela inicial.
-          </p>
+          {!compact && (
+            <p className="mt-2 text-sm leading-5 text-muted">
+              Para ativar notificações push, instale o Lembra (PWA) na tela inicial.
+            </p>
+          )}
           <p className="mt-1 text-xs text-muted">Estado: {stateLabel["no-standalone"]}</p>
         </>
       ) : (
         <>
-          <p className="mt-2 text-sm leading-5 text-muted">
-            Receba um lembrete no dispositivo quando houver aniversários no dia (complementar ao email).
-          </p>
+          {!compact && (
+            <p className="mt-2 text-sm leading-5 text-muted">
+              Receba um lembrete no dispositivo quando houver aniversários no dia (complementar ao email).
+            </p>
+          )}
           <p className="mt-1 text-xs text-muted">
             Estado: {permission === "unsupported" ? stateLabel.unsupported : permission === "denied" ? stateLabel.denied : permission === "default" ? stateLabel.default : stateLabel.granted}
           </p>
           {permission === "unsupported" ? (
-            <p className="mt-2 text-xs text-muted">Indisponível por enquanto neste navegador.</p>
+            !compact && <p className="mt-2 text-xs text-muted">Indisponível por enquanto neste navegador.</p>
           ) : permission === "denied" ? (
-            <p className="mt-2 text-xs text-warning">Reative a permissão nas configurações do site para poder ativar push.</p>
+            !compact && <p className="mt-2 text-xs text-warning">Reative a permissão nas configurações do site para poder ativar push.</p>
           ) : (
             <button
               type="button"
