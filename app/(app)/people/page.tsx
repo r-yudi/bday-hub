@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -17,6 +18,7 @@ import {
 import { encodeShareToken } from "@/lib/share";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson, SourceType } from "@/lib/types";
+import { CategoriesManager } from "@/components/people/CategoriesManager";
 
 type BirthdaySourceFilter = "all" | SourceType;
 type MonthFilter = "all" | `${number}`;
@@ -53,7 +55,28 @@ function sortPeople(people: BirthdayPerson[]) {
   });
 }
 
+function PeoplePageFallback() {
+  return (
+    <div className="ui-app-shell">
+      <section className="ui-section ui-panel-soft rounded-2xl border p-8">
+        <p className="text-sm text-muted">Carregando...</p>
+      </section>
+    </div>
+  );
+}
+
 export default function PeoplePage() {
+  return (
+    <Suspense fallback={<PeoplePageFallback />}>
+      <PeoplePageContent />
+    </Suspense>
+  );
+}
+
+function PeoplePageContent() {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") === "categories" ? "categories" : "birthdays";
+
   const [people, setPeople] = useState<BirthdayPerson[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +179,39 @@ export default function PeoplePage() {
           </p>
         </div>
 
+        <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Seções">
+          <Link
+            href="/people"
+            role="tab"
+            aria-selected={tab === "birthdays"}
+            aria-current={tab === "birthdays" ? "page" : undefined}
+            className={[
+              "rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              tab === "birthdays"
+                ? "bg-accent text-white"
+                : "border border-border bg-surface text-muted hover:bg-surface2 hover:text-text"
+            ].join(" ")}
+          >
+            Aniversários
+          </Link>
+          <Link
+            href="/people?tab=categories"
+            role="tab"
+            aria-selected={tab === "categories"}
+            aria-current={tab === "categories" ? "page" : undefined}
+            className={[
+              "rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              tab === "categories"
+                ? "bg-accent text-white"
+                : "border border-border bg-surface text-muted hover:bg-surface2 hover:text-text"
+            ].join(" ")}
+          >
+            Categorias
+          </Link>
+        </div>
+
+        {tab === "birthdays" && (
+        <>
         <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <input
             type="search"
@@ -239,6 +295,18 @@ export default function PeoplePage() {
             </label>
           </div>
         </details>
+        </>
+        )}
+
+        {tab === "categories" && (
+          <div className="mt-6">
+            <CategoriesManager
+              people={people}
+              categories={categories}
+              onRefresh={loadData}
+            />
+          </div>
+        )}
       </section>
 
       {showImportContactsModal && (
@@ -294,7 +362,7 @@ export default function PeoplePage() {
       {error && <Alert variant="danger">{error}</Alert>}
       {notice && <Alert variant="success">{notice}</Alert>}
 
-      {loading ? (
+      {tab === "birthdays" && (loading ? (
         <section className="ui-section ui-panel-soft rounded-2xl border p-8">
           <p className="text-sm text-muted">Carregando...</p>
         </section>
@@ -412,7 +480,7 @@ export default function PeoplePage() {
             })}
           </div>
         </section>
-      )}
+      ) )}
     </div>
   );
 }
