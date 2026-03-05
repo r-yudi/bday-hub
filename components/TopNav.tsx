@@ -7,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 const navItems = [
   { href: "/today", label: "Hoje" },
   { href: "/people", label: "Pessoas" },
+  { href: "/share", label: "Compartilhar" },
   { href: "/settings", label: "Configurações" }
 ];
 
@@ -50,7 +51,9 @@ export function TopNav() {
         <div className="flex flex-wrap items-center justify-end gap-2">
           <nav className="flex items-center gap-2">
             {navItems.map((item) => {
-              const active = pathname === item.href;
+              const active =
+                pathname === item.href ||
+                (item.href === "/share" && pathname.startsWith("/share/"));
               return (
                 <Link
                   key={item.href}

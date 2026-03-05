@@ -392,6 +392,7 @@ export default function PeoplePage() {
                       <button
                         type="button"
                         onClick={() => copyShareLink(person)}
+                        title="Compartilhar por link: envie um link para alguém adicionar este aniversário à própria lista. O link mostra apenas nome e dia/mês (sem ano)."
                         className="ui-focus-surface inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-text hover:bg-surface/80"
                       >
                         Compartilhar

@@ -201,10 +201,9 @@ export default function ShareLandingPage() {
     <>
       <div className="ui-container space-y-8 lg:space-y-10">
         <section className="ui-section ui-section-header ui-copy-backdrop">
-          <p className="ui-eyebrow text-muted">Lembra • Compartilhamento</p>
-          <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">Compartilhe aniversários com um link</h1>
+          <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">Compartilhar</h1>
           <p className="ui-subtitle-editorial text-sm sm:text-[15px] max-w-[64ch]">
-            O link mostra apenas nome e dia/mês (sem ano). Escolha um aniversário abaixo e copie em 1 clique.
+            Envie um link para alguém adicionar aniversários à própria lista.
           </p>
         </section>
 

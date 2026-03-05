@@ -14,6 +14,7 @@ import {
   getOnboardingV2Seen,
   setOnboardingV2Seen
 } from "@/lib/onboarding-ui";
+import { SCRAP_CONFIGS, ScrapThumb } from "@/components/onboarding/scraps/overlays";
 
 type OnboardingGateProps = {
   peopleCount: number;
@@ -31,6 +32,8 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   const [alertsDone, setAlertsDone] = useState(false);
   const [showGuestTooltip, setShowGuestTooltip] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [tipImageFailed, setTipImageFailed] = useState<Record<string, boolean>>({});
+  const [lightboxTip, setLightboxTip] = useState<string | null>(null);
   const primaryActionRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const guestTooltipRef = useRef<HTMLDivElement | null>(null);
   const guestTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -312,40 +315,67 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
               Dicas rápidas
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4">
-              <div className="flex gap-3 rounded-xl border border-border p-3">
-                <div className="ui-surface aspect-[16/10] w-24 shrink-0 overflow-hidden rounded-xl">
-                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' fill='%23e5e7eb'/%3E" alt="" className="h-full w-full object-cover" />
+              {[
+                { id: "editar", title: "Editar", text: "Altere nome, data ou categorias a qualquer momento." },
+                { id: "categorias", title: "Categorias", text: "Organize pessoas por família, amigos ou trabalho." },
+                { id: "compartilhar", title: "Compartilhar", text: "Crie um link para alguém adicionar aniversários à sua lista." }
+              ].map((tip) => (
+                <div key={tip.id} className="flex gap-3 rounded-xl border border-border p-3">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxTip(tip.id)}
+                    className="ui-surface ui-focus-surface aspect-[16/10] w-32 shrink-0 overflow-hidden rounded-xl border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  >
+                    <ScrapThumb
+                      config={SCRAP_CONFIGS[tip.id as keyof typeof SCRAP_CONFIGS]}
+                      failed={!!tipImageFailed[tip.id]}
+                      onError={() => setTipImageFailed((prev) => ({ ...prev, [tip.id]: true }))}
+                    />
+                  </button>
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-text">{tip.title}</h3>
+                    <p className="mt-0.5 text-sm text-muted">{tip.text}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-medium text-text">Editar</h3>
-                  <p className="mt-0.5 text-sm text-muted">
-                    Altere nome, data ou categorias a qualquer momento.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3 rounded-xl border border-border p-3">
-                <div className="ui-surface aspect-[16/10] w-24 shrink-0 overflow-hidden rounded-xl">
-                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' fill='%23e5e7eb'/%3E" alt="" className="h-full w-full object-cover" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-medium text-text">Categorias</h3>
-                  <p className="mt-0.5 text-sm text-muted">
-                    Organize pessoas por família, amigos ou trabalho.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3 rounded-xl border border-border p-3">
-                <div className="ui-surface aspect-[16/10] w-24 shrink-0 overflow-hidden rounded-xl">
-                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' fill='%23e5e7eb'/%3E" alt="" className="h-full w-full object-cover" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-medium text-text">Compartilhar</h3>
-                  <p className="mt-0.5 text-sm text-muted">
-                    Crie um link para alguém adicionar aniversários à sua lista.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
+            {lightboxTip && (
+              <div
+                className="ui-overlay-backdrop fixed inset-0 z-40 grid place-items-center p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Visualização da dica"
+                onClick={() => setLightboxTip(null)}
+              >
+                <div
+                  className="ui-modal-surface relative max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setLightboxTip(null)}
+                    className="absolute right-2 top-2 z-10 rounded-lg p-1.5 text-muted hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    aria-label="Fechar"
+                  >
+                    ✕
+                  </button>
+                  {tipImageFailed[lightboxTip] ? (
+                    <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 p-8 text-muted">
+                      <span className="text-3xl" aria-hidden>🖼</span>
+                      <span className="text-sm">Prévia em breve</span>
+                    </div>
+                  ) : (
+                    <div className="flex max-h-[85vh] min-h-[200px] w-full items-center justify-center">
+                      <ScrapThumb
+                        config={SCRAP_CONFIGS[lightboxTip as keyof typeof SCRAP_CONFIGS]}
+                        failed={false}
+                        onError={() => setTipImageFailed((prev) => ({ ...prev, [lightboxTip]: true }))}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="mt-6 flex justify-end">
               <button
                 ref={primaryActionRef as RefObject<HTMLButtonElement>}
