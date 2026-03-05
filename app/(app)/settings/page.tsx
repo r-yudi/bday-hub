@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { clearOnboardingV2Seen } from "@/lib/onboarding-ui";
 import { ImportCsv } from "@/components/ImportCsv";
 import { ClearDataModal } from "@/components/settings/ClearDataModal";
 import { EmailDailyCard } from "@/components/settings/EmailDailyCard";
@@ -13,6 +15,7 @@ import { importCsvBirthdays } from "@/lib/birthdaysRepo";
 import type { BirthdayPerson } from "@/lib/types";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -177,6 +180,19 @@ export default function SettingsPage() {
                 </div>
               </div>
             </section>
+
+            <p className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  clearOnboardingV2Seen();
+                  router.push("/today?onboarding=1&force=1");
+                }}
+                className="ui-link-tertiary text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                Ver tutorial novamente
+              </button>
+            </p>
           </>
         )}
       </div>

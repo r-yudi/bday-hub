@@ -94,6 +94,15 @@ export function setOnboardingV2Seen(): void {
   }
 }
 
+export function clearOnboardingV2Seen(): void {
+  if (!canUseWindow()) return;
+  try {
+    window.localStorage.removeItem(ONBOARDING_V2_SEEN);
+  } catch {
+    // ignore
+  }
+}
+
 export function buildAddBirthdayToast(totalCount: number): OnboardingToast {
   if (totalCount >= 5) {
     return {
