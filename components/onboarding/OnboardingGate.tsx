@@ -121,7 +121,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
       aria-modal="true"
       aria-labelledby="onboarding-wizard-title"
     >
-      <div className="ui-modal-surface w-full max-w-md border p-6 relative">
+      <div className={`ui-modal-surface w-full border p-6 relative ${step === 4 ? "max-w-lg" : "max-w-md"}`}>
         <button
           type="button"
           onClick={closeWizard}
@@ -234,23 +234,47 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
               Adicionar aniversários
             </h2>
             <p className="mt-2 text-sm text-muted">
+              Adicione algumas pessoas importantes.
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Com 5 aniversários cadastrados você já começa a ver o Lembra funcionando no dia a dia.
+            </p>
+            <p className="mt-3 text-xs text-muted">
               {peopleCount} de 5 pessoas cadastradas.
             </p>
+            {peopleCount >= 5 && (
+              <p className="mt-2 text-sm text-text">
+                Perfeito. Agora o Lembra já consegue te avisar quando alguém importante fizer aniversário.
+              </p>
+            )}
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                ref={primaryActionRef as RefObject<HTMLAnchorElement>}
-                href="/person"
-                className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-              >
-                Adicionar pessoa
-              </Link>
-              <button
-                type="button"
-                onClick={goToStep4}
-                className="ui-link-tertiary text-sm font-medium"
-              >
-                Pular
-              </button>
+              {peopleCount >= 5 ? (
+                <button
+                  ref={primaryActionRef as RefObject<HTMLButtonElement>}
+                  type="button"
+                  onClick={goToStep4}
+                  className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                >
+                  Continuar
+                </button>
+              ) : (
+                <>
+                  <Link
+                    ref={primaryActionRef as RefObject<HTMLAnchorElement>}
+                    href="/person"
+                    className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                  >
+                    Adicionar pessoa
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={goToStep4}
+                    className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
+                  >
+                    Pular por agora
+                  </button>
+                </>
+              )}
             </div>
           </>
         )}
@@ -260,26 +284,35 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
               Dicas rápidas
             </h2>
-            <ul className="mt-4 list-inside list-disc space-y-2 text-sm text-muted">
-              <li>
-                <Link href="/people" className="ui-link-tertiary font-medium text-text">
-                  Editar
-                </Link>
-                {" — altere nome, data e categorias em Pessoas."}
-              </li>
-              <li>
-                <Link href="/people" className="ui-link-tertiary font-medium text-text">
-                  Categorias
-                </Link>
-                {" — organize por família, trabalho, etc. em Pessoas."}
-              </li>
-              <li>
-                <Link href="/share" className="ui-link-tertiary font-medium text-text">
-                  Compartilhar
-                </Link>
-                {" — gere um link para alguém adicionar o aniversário à lista."}
-              </li>
-            </ul>
+            <div className="mt-4 grid grid-cols-1 gap-4">
+              <div className="flex gap-3 rounded-xl border border-border p-3">
+                <div className="h-14 w-20 shrink-0 rounded-lg ui-surface" aria-hidden />
+                <div className="min-w-0">
+                  <h3 className="font-medium text-text">Editar</h3>
+                  <p className="mt-0.5 text-sm text-muted">
+                    Altere nome, data ou categorias a qualquer momento.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 rounded-xl border border-border p-3">
+                <div className="h-14 w-20 shrink-0 rounded-lg ui-surface" aria-hidden />
+                <div className="min-w-0">
+                  <h3 className="font-medium text-text">Categorias</h3>
+                  <p className="mt-0.5 text-sm text-muted">
+                    Organize pessoas por família, amigos ou trabalho.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 rounded-xl border border-border p-3">
+                <div className="h-14 w-20 shrink-0 rounded-lg ui-surface" aria-hidden />
+                <div className="min-w-0">
+                  <h3 className="font-medium text-text">Compartilhar</h3>
+                  <p className="mt-0.5 text-sm text-muted">
+                    Crie um link para alguém adicionar aniversários à sua lista.
+                  </p>
+                </div>
+              </div>
+            </div>
             <div className="mt-6 flex justify-end">
               <button
                 ref={primaryActionRef as RefObject<HTMLButtonElement>}
