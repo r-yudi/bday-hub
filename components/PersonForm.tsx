@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   buildCategoryIndex,
@@ -244,7 +245,12 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
             <span>Categorias</span>
             <HelpDot title="Categorias ajudam a organizar sua lista (ex.: Família, Amigos, Trabalho)." />
           </FieldLabel>
-          <FieldHelper>Opcional. Ex.: Família, Amigos, Trabalho.</FieldHelper>
+          <FieldHelper>
+            Opcional. Ex.: Família, Amigos, Trabalho.{" "}
+            <Link href="/people?tab=categories" className="ui-link-tertiary">
+              Gerenciar categorias
+            </Link>
+          </FieldHelper>
           <div className="space-y-2 rounded-lg border border-border bg-surface2/70 p-3">
             {categories.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
