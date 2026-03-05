@@ -38,6 +38,18 @@ const INITIAL_NOTIFICATION_SUPPORT: NotificationSupport = {
   permission: "unsupported"
 };
 
+function parseTimeHHmm(s: string): { h: number; m: number } {
+  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec((s || "").trim());
+  if (!match) return { h: 9, m: 0 };
+  return { h: parseInt(match[1], 10), m: parseInt(match[2], 10) };
+}
+
+function formatTimeHHmm(h: number, m: number): string {
+  const hh = Math.max(0, Math.min(23, Math.floor(h)));
+  const mm = Math.max(0, Math.min(59, Math.floor(m)));
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
 function ClearDataModal({
   open,
   value,
@@ -114,6 +126,8 @@ export default function TodayPage() {
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const [lastDispatch, setLastDispatch] = useState<LastEmailDispatch | null>(null);
   const [timezoneDraft, setTimezoneDraft] = useState<string>("");
+  const [emailTimeDraft, setEmailTimeDraft] = useState<string>(DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime);
+  const [emailDraftDirty, setEmailDraftDirty] = useState(false);
   const [pushSettings, setPushSettings] = useState<{ pushEnabled: boolean } | null>(null);
   const [pushSaving, setPushSaving] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
@@ -173,6 +187,11 @@ export default function TodayPage() {
     if (!consumeBirthdayAddedToast()) return;
     setToast(buildAddBirthdayToast(people.length));
   }, [mounted, loading, people.length]);
+
+  useEffect(() => {
+    if (!emailSettings || emailDraftDirty) return;
+    setEmailTimeDraft(emailSettings.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime);
+  }, [emailSettings, emailDraftDirty]);
 
   const todayPeople = useMemo(() => getTodayPeople(people), [people]);
   const todayIso = mounted ? todayParts().iso : null;
@@ -254,37 +273,27 @@ export default function TodayPage() {
     setEmailSaving(true);
     setEmailError(null);
     setEmailSuccess(null);
+    const nextEnabled = !(emailSettings?.emailEnabled ?? false);
+    const timezoneToSave =
+      timezoneDraft.trim() && isValidTimezone(timezoneDraft.trim())
+        ? timezoneDraft.trim()
+        : (emailSettings?.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone);
     try {
-      const next = await saveEmailReminderSettings({
-        emailEnabled: !(emailSettings?.emailEnabled ?? false)
+      const saved = await saveEmailReminderSettings({
+        emailEnabled: nextEnabled,
+        emailTime: emailTimeDraft,
+        timezone: timezoneToSave
       });
-      if (next) {
-        setEmailSettings(next);
+      if (saved) {
+        setEmailSettings(saved);
+        setEmailTimeDraft(saved.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime);
+        setEmailDraftDirty(false);
         setEmailError(null);
         setEmailSuccess("Configurações salvas.");
         setTimeout(() => setEmailSuccess(null), 3000);
       }
     } catch (error) {
       setEmailError(error instanceof Error ? error.message : "Não foi possível atualizar lembretes por email.");
-    } finally {
-      setEmailSaving(false);
-    }
-  }
-
-  async function handleEmailTimeChange(value: string) {
-    if (!user) return;
-    setEmailSaving(true);
-    setEmailError(null);
-    setEmailSuccess(null);
-    try {
-      const next = await saveEmailReminderSettings({ emailTime: value });
-      if (next) {
-        setEmailSettings(next);
-        setEmailSuccess("Horário salvo.");
-        setTimeout(() => setEmailSuccess(null), 3000);
-      }
-    } catch (error) {
-      setEmailError(error instanceof Error ? error.message : "Não foi possível salvar o horário de email.");
     } finally {
       setEmailSaving(false);
     }
@@ -533,21 +542,44 @@ export default function TodayPage() {
                 {notificationSaving ? "Salvando..." : notificationCtaLabel}
               </button>
 
-              {support.supported && support.permission === "granted" && (
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <label className="text-xs text-muted" htmlFor="daily-notification-time">
-                    Horário do lembrete
-                  </label>
-                  <input
-                    id="daily-notification-time"
-                    type="time"
-                    value={settings?.notificationTime ?? "09:00"}
-                    disabled={notificationSaving}
-                    onChange={(e) => void handleNotificationTimeChange(e.target.value)}
-                    className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
-                  />
-                </div>
-              )}
+              {support.supported && support.permission === "granted" && (() => {
+                const nt = parseTimeHHmm(settings?.notificationTime ?? "09:00");
+                return (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <label className="text-xs text-muted" htmlFor="daily-notification-hour">
+                      Horário do lembrete (24h)
+                    </label>
+                    <select
+                      id="daily-notification-hour"
+                      value={nt.h}
+                      disabled={notificationSaving}
+                      onChange={(e) => void handleNotificationTimeChange(formatTimeHHmm(parseInt(e.target.value, 10), nt.m))}
+                      className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                      aria-label="Hora do lembrete"
+                    >
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <option key={i} value={i}>
+                          {String(i).padStart(2, "0")}h
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-muted">:</span>
+                    <select
+                      value={nt.m}
+                      disabled={notificationSaving}
+                      onChange={(e) => void handleNotificationTimeChange(formatTimeHHmm(nt.h, parseInt(e.target.value, 10)))}
+                      className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                      aria-label="Minuto do lembrete"
+                    >
+                      {Array.from({ length: 60 }, (_, i) => (
+                        <option key={i} value={i}>
+                          {String(i).padStart(2, "0")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })()}
 
               <details className="ui-disclosure mt-3 px-3 py-2">
                 <summary className="ui-disclosure-summary">Ver detalhes técnicos</summary>
@@ -590,17 +622,53 @@ export default function TodayPage() {
                     >
                       {emailSaving ? "Salvando..." : emailSettings?.emailEnabled ? "Desativar email diário" : "Ativar email diário"}
                     </button>
-                    <label className="text-xs text-muted" htmlFor="daily-email-time">
-                      Horário
+                    <label className="text-xs text-muted" id="daily-email-time-label">
+                      Horário (24h)
                     </label>
-                    <input
-                      id="daily-email-time"
-                      type="time"
-                      value={emailSettings?.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime}
-                      disabled={emailSaving}
-                      onChange={(e) => void handleEmailTimeChange(e.target.value)}
-                      className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
-                    />
+                    {(() => {
+                      const et = parseTimeHHmm(emailTimeDraft);
+                      return (
+                        <div className="flex flex-wrap items-center gap-1">
+                          <select
+                            id="daily-email-time"
+                            aria-labelledby="daily-email-time-label"
+                            value={et.h}
+                            disabled={emailSaving}
+                            onChange={(e) => {
+                              const h = parseInt(e.target.value, 10);
+                              setEmailTimeDraft(formatTimeHHmm(h, et.m));
+                              setEmailDraftDirty(true);
+                            }}
+                            className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                            aria-label="Hora do email diário"
+                          >
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <option key={i} value={i}>
+                                {String(i).padStart(2, "0")}h
+                              </option>
+                            ))}
+                          </select>
+                          <span className="text-muted">:</span>
+                          <select
+                            value={et.m}
+                            disabled={emailSaving}
+                            onChange={(e) => {
+                              const m = parseInt(e.target.value, 10);
+                              setEmailTimeDraft(formatTimeHHmm(et.h, m));
+                              setEmailDraftDirty(true);
+                            }}
+                            className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                            aria-label="Minuto do email diário"
+                          >
+                            {Array.from({ length: 60 }, (_, i) => (
+                              <option key={i} value={i}>
+                                {String(i).padStart(2, "0")}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      );
+                    })()}
                     <label className="text-xs text-muted" htmlFor="daily-email-timezone">
                       Fuso
                     </label>
@@ -624,7 +692,13 @@ export default function TodayPage() {
                     <div className="mt-2 space-y-0.5 text-xs text-muted">
                       {lastDispatch?.status === "sent" && (
                         <p>
-                          Último envio: {lastDispatch.sentAt ? new Date(lastDispatch.sentAt).toLocaleString("pt-BR") : lastDispatch.dateKey}
+                          Último envio: {lastDispatch.sentAt
+                            ? new Date(lastDispatch.sentAt).toLocaleString("pt-BR", {
+                                dateStyle: "short",
+                                timeStyle: "short",
+                                hour12: false
+                              })
+                            : lastDispatch.dateKey}
                         </p>
                       )}
                       {lastDispatch?.status === "skipped" && (

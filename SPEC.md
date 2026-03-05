@@ -34,7 +34,7 @@
   - birthdays sincronizados com Supabase quando usuário está logado
   - fallback local quando não logado
 - UX:
-  - dark mode (light/dark/system)
+  - light-only (pre-launch); ver [docs/THEME.md](docs/THEME.md)
   - onboarding leve e toasts
   - banner PWA contextual
   - links de privacidade/termos no footer interno
@@ -48,6 +48,7 @@
 - Design System:
   - tokens em `app/styles/tokens.css`
   - utilitários globais `ui-*` em `app/globals.css`
+  - tema **light-only (pre-launch):** aplicado em `lib/theme.ts`, `components/ThemeProvider.tsx`; TopNav sem seletor de tema. Ver [docs/THEME.md](docs/THEME.md)
 - Persistência local: IndexedDB (via `idb`) com fallback localStorage
 - PWA: `next-pwa`
 - Deploy: Vercel
@@ -215,14 +216,51 @@
   - `npm run test:e2e`
 
 ## 9.1 Contrato de UI (DS)
-- Reutilizar utilitários `ui-*` antes de criar classes ad hoc:
-  - superfícies/níveis: `ui-surface`, `ui-surface-elevated`, `ui-border-subtle`
-  - CTAs e ações: `ui-cta-primary`, `ui-cta-secondary`, `ui-focus-surface`
-  - links tertiary: `ui-link-tertiary` / `ui-link-tertiary-muted`
-  - callouts/disclosures: `ui-callout`, `ui-disclosure`, `ui-disclosure-summary`
-  - shells centrados/overlays: `ui-page-shell`, `ui-page-shell-centered`, `ui-overlay-backdrop`, `ui-modal-surface`
-- Em dark mode, o fundo deve recuar (grid/glows discretos); conteúdo deve viver em superfícies previsíveis.
-- Referência operacional do contrato visual (dark + elevação + badges + focus + tertiary): `docs/visual-contract.md`
+
+### Design Tokens
+- **Arquivo:** `app/styles/tokens.css`
+- Papéis: `--bg`, `--surface`, `--surface-2`, `--text`, `--muted`, `--border`, `--primary`, `--primary-foreground`, `--accent`, `--warning`, `--success`, `--danger`, `--radius-sm/md/lg/xl`, `--ui-*` (superfícies, bordas, foco).
+- **Light-only:** a classe `.dark` não é aplicada no `<html>`; tokens `.dark` existem no CSS mas não são usados em runtime. Ver [docs/THEME.md](docs/THEME.md).
+
+### UI Utilities
+Composição via classes `ui-*` em `app/globals.css`. Tabela **Utility → Uso recomendado:**
+
+| Utility | Uso recomendado |
+|---------|------------------|
+| `ui-container` | Envolver conteúdo principal da página (max-width 1200px, padding responsivo) |
+| `ui-section` | Bloco com padding vertical generoso |
+| `ui-section-header` | Stack eyebrow + título + subtítulo |
+| `ui-eyebrow` | Label pequeno uppercase (accent ou muted) |
+| `ui-feature-block` (+ title/body/actions) | Blocos laterais (ex.: Lembretes, Email em /today) |
+| `ui-empty-hero` (+ icon/title/subtitle/actions) | Empty state editorial |
+| `ui-list` / `ui-list-item` | Listas com separador sutil, hover leve |
+| `ui-cta-primary` / `ui-cta-secondary` | CTAs alinhados à landing |
+| `ui-panel` / `ui-panel-soft` / `ui-surface` | Superfícies paper, borda sutil |
+| `ui-overlay-backdrop` / `ui-modal-surface` | Overlay e superfície de modal |
+
+### Page Layout Pattern
+- Estrutura típica: `ui-container` > `ui-section` > `ui-section-header` (eyebrow + título + subtítulo) + conteúdo.
+
+### Lists / Empty / Feature Blocks
+- **Listas:** usar `ui-list` como wrapper e `ui-list-item` por item; dentro do item pode haver `ui-panel` (borda/sombra removidas pelo contexto).
+- **Empty state:** usar `ui-empty-hero` com `ui-empty-icon`, `ui-empty-title`, `ui-empty-subtitle`, `ui-empty-actions`.
+- **Blocos laterais:** usar `ui-feature-block` com `ui-feature-title`, `ui-feature-body`, `ui-feature-actions` (ex.: cards de Lembretes/Email em /today).
+
+### Modals
+- Backdrop: `ui-overlay-backdrop` (fixed inset-0, grid place-items-center).
+- Superfície: `ui-modal-surface` (max-width, border, padding).
+
+### Testing/Validation
+- Comandos: `npm run build`, `npm test`, `npm run test:e2e`.
+- Smoke: `npx playwright test e2e/smoke.spec.ts`.
+- Screenshots (polish): `npx playwright test e2e/screenshots-polish.spec.ts`.
+- Contrato visual (referência): [docs/visual-contract.md](docs/visual-contract.md) — não citar dark como ativo (app é light-only).
+
+### Referências de UI
+- [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — contrato completo, tokens, utilitários, páginas migradas
+- [docs/PRODUCT_UI_PHILOSOPHY.md](docs/PRODUCT_UI_PHILOSOPHY.md) — filosofia e guardrails
+- [docs/REBRAND_LANDING_FIRST_REPORT.md](docs/REBRAND_LANDING_FIRST_REPORT.md) — section layout, identity diff
+- [docs/THEME.md](docs/THEME.md) — light-only
 
 ## 10) Limitações / próximos focos (vNext)
 - Revogação completa de links compartilhados com UX de gestão

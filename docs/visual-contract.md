@@ -1,5 +1,7 @@
 # Visual Contract (Dark + DS)
 
+**Nota:** O app está em **light-only** (pre-launch); dark mode desabilitado em runtime. Este contrato descreve as regras visuais quando/se o dark for reativado. Ver `docs/THEME.md`.
+
 ## Objetivo
 Contrato visual executável para manter o dark mode do Lembra. silencioso, legível e premium sem quebrar o modo claro.
 

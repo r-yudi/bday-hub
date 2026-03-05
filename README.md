@@ -232,6 +232,32 @@ Cobertura atual (smoke):
 - Persistencia apos reload
 - `/share/[token]` com CTA "Adicionar a lista"
 
+Para gerar screenshots das rotas principais (light):
+
+- `npx playwright test e2e/screenshots-polish.spec.ts`
+
+## Design / UI (rebrand landing-first)
+
+- **Landing-first:** Páginas internas do app seguem o ritmo editorial da landing (whitespace, hierarquia eyebrow + título serif + subtítulo, superfícies "paper").
+- **Utilitários `ui-*`:** Definidos em `app/globals.css`; tokens em `app/styles/tokens.css`. Contrato canônico em `docs/DESIGN_SYSTEM.md`.
+- **Light-only:** Tema escuro está desabilitado em produção (pre-launch). Apenas light mode é aplicado. Detalhes em `docs/THEME.md`.
+- **Referência da landing:** `app/(marketing)/landing.css` e `docs/REBRAND_LANDING_FIRST_REPORT.md` (section layout, feature cards, identity diff).
+
+## Quality gates
+
+Antes de merge/PR, rodar:
+
+- `npm run build`
+- `npx playwright test e2e/smoke.spec.ts`
+- `npx playwright test e2e/screenshots-polish.spec.ts` (opcional)
+
+## UI reference
+
+- **Landing CSS:** `app/(marketing)/landing.css`
+- **Rebrand report (section layout, tokens, utilitários):** `docs/REBRAND_LANDING_FIRST_REPORT.md`
+- **Design System (contrato, lista de utilitários, páginas migradas):** `docs/DESIGN_SYSTEM.md`
+- **Tema (light-only):** `docs/THEME.md`
+
 ## CSV suportado
 
 Header obrigatório:

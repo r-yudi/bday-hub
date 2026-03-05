@@ -91,8 +91,8 @@ export async function saveEmailReminderSettings(partial: Partial<EmailReminderSe
     timezone: partial.timezone !== undefined ? partial.timezone : (current.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone)
   };
 
-  const payload = buildEmailReminderPayload(partial, userId);
-  if (Object.keys(payload).length === 1) return next; // only user_id, nothing to persist
+  // Always persist full email state so upsert never leaves email_time/timezone to DB default (avoids reset to 09:00 when only toggling enabled)
+  const payload = buildEmailReminderPayloadFromFull(next, userId);
   await upsertUserSettingsEmail(supabase as unknown as Parameters<typeof upsertUserSettingsEmail>[0], payload);
   return next;
 }
@@ -107,6 +107,16 @@ export function buildEmailReminderPayload(
   if (partial.emailTime !== undefined) payload.email_time = normalizeEmailTime(partial.emailTime);
   if (partial.timezone !== undefined) payload.timezone = partial.timezone;
   return payload;
+}
+
+/** Full payload for upsert so email_time/timezone are never left to DB default when toggling email_enabled. */
+function buildEmailReminderPayloadFromFull(settings: EmailReminderSettings, userId: string): Record<string, unknown> {
+  return {
+    user_id: userId,
+    email_enabled: settings.emailEnabled,
+    email_time: normalizeEmailTime(settings.emailTime),
+    timezone: settings.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone
+  };
 }
 
 /** Used by saveEmailReminderSettings; exported for unit tests. Throws on DB error. */
