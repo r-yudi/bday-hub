@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ImportCsv } from "@/components/ImportCsv";
 import { PersonCard } from "@/components/PersonCard";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
+import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { AppToast } from "@/components/AppToast";
 import { getTodayPeople, getUpcomingPeople, formatRelativeLabel } from "@/lib/dates";
 import { deleteBirthday, importCsvBirthdays, listBirthdays } from "@/lib/birthdaysRepo";
@@ -110,6 +111,10 @@ export default function TodayPage() {
             </div>
           </div>
         </section>
+
+        {!loading && mounted && (
+          <OnboardingGate peopleCount={people.length} mounted={mounted} />
+        )}
 
         {!loading && <OnboardingBanner count={people.length} mounted={mounted} />}
 

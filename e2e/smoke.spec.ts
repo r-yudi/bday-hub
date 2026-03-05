@@ -153,7 +153,7 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
     await page.getByRole("link", { name: "Pessoas" }).click();
     await expect(page).toHaveURL(/\/people$/);
-    await expect(page.getByRole("link", { name: "Adicionar" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Adicionar" }).first()).toBeVisible();
   });
 
   test("TopNav: navegar para Configurações", async ({ page }) => {
@@ -162,6 +162,36 @@ test.describe("MVP smoke flows", () => {
     await page.getByRole("link", { name: "Configurações" }).click();
     await expect(page).toHaveURL(/\/settings$/);
     await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+  });
+
+  test("/manage redireciona para /people", async ({ page }) => {
+    await page.goto("/manage");
+    await expect(page).toHaveURL(/\/people$/);
+    await expect(page.getByRole("link", { name: "Adicionar" }).first()).toBeVisible();
+  });
+});
+
+test.describe("Onboarding gate (logado)", () => {
+  const authPath = join(process.cwd(), "test-results", ".auth", "user.json");
+  const hasAuth = existsSync(authPath);
+  if (hasAuth) test.use({ storageState: authPath });
+  test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json).");
+
+  test("logado sem flags: /today mostra Configurar alertas e link vai para /settings", async ({ page }) => {
+    await page.goto("/today");
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByText("Carregando...")).toHaveCount(0);
+    await page.evaluate(() => {
+      localStorage.removeItem("onboarding_v1_alerts_done");
+      localStorage.removeItem("onboarding_v1_people_done");
+      localStorage.removeItem("onboarding_v1_tips_done");
+    });
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Configurar alertas" })).toBeVisible();
+    await page.getByRole("link", { name: "Configurar alertas" }).click();
+    await expect(page).toHaveURL(/\/settings$/);
     await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
   });
 });
