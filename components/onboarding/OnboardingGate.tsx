@@ -194,7 +194,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             </p>
             {!user && (
               <p className="mt-2 text-xs text-muted">
-                Email e push exigem login e suporte do dispositivo.
+                Email e push ficam disponíveis quando você entra com sua conta.
               </p>
             )}
             <div className="mt-4 space-y-3">
@@ -202,6 +202,9 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
               <EmailDailyCard variant="compact" />
               <PushCard variant="compact" />
             </div>
+            <p className="mt-4 text-xs text-muted">
+              Você pode ajustar tudo depois em Configurações.
+            </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
                 ref={primaryActionRef as RefObject<HTMLButtonElement>}
@@ -211,16 +214,10 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
               >
                 Continuar
               </button>
-              <Link
-                href="/settings"
-                className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
-              >
-                Abrir configurações
-              </Link>
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="ui-link-tertiary text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
               >
                 Voltar
               </button>
@@ -286,7 +283,9 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4">
               <div className="flex gap-3 rounded-xl border border-border p-3">
-                <div className="h-14 w-20 shrink-0 rounded-lg ui-surface" aria-hidden />
+                <div className="ui-surface aspect-[16/10] w-24 shrink-0 overflow-hidden rounded-xl">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' fill='%23e5e7eb'/%3E" alt="" className="h-full w-full object-cover" />
+                </div>
                 <div className="min-w-0">
                   <h3 className="font-medium text-text">Editar</h3>
                   <p className="mt-0.5 text-sm text-muted">
@@ -295,7 +294,9 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                 </div>
               </div>
               <div className="flex gap-3 rounded-xl border border-border p-3">
-                <div className="h-14 w-20 shrink-0 rounded-lg ui-surface" aria-hidden />
+                <div className="ui-surface aspect-[16/10] w-24 shrink-0 overflow-hidden rounded-xl">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' fill='%23e5e7eb'/%3E" alt="" className="h-full w-full object-cover" />
+                </div>
                 <div className="min-w-0">
                   <h3 className="font-medium text-text">Categorias</h3>
                   <p className="mt-0.5 text-sm text-muted">
@@ -304,7 +305,9 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                 </div>
               </div>
               <div className="flex gap-3 rounded-xl border border-border p-3">
-                <div className="h-14 w-20 shrink-0 rounded-lg ui-surface" aria-hidden />
+                <div className="ui-surface aspect-[16/10] w-24 shrink-0 overflow-hidden rounded-xl">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' fill='%23e5e7eb'/%3E" alt="" className="h-full w-full object-cover" />
+                </div>
                 <div className="min-w-0">
                   <h3 className="font-medium text-text">Compartilhar</h3>
                   <p className="mt-0.5 text-sm text-muted">

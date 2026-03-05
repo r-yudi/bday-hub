@@ -182,16 +182,16 @@ test.describe("Onboarding gate (logado)", () => {
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json).");
 
-  test("logado: wizard step Alertas com Abrir configurações e link vai para /settings", async ({ page }) => {
+  test("logado: wizard step Alertas com Continuar e Voltar, Continuar avança", async ({ page }) => {
     await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Abrir configurações" })).toBeVisible();
-    await page.getByRole("link", { name: "Abrir configurações" }).click();
-    await expect(page).toHaveURL(/\/settings$/);
-    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continuar" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Voltar" })).toBeVisible();
+    await page.getByRole("button", { name: "Continuar" }).click();
+    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
   });
 });
 
@@ -204,7 +204,7 @@ test.describe("Onboarding wizard (guest)", () => {
     await expect(page.getByText("Sincronize em todos os dispositivos")).toBeVisible();
     await page.getByRole("button", { name: "Continuar sem conta" }).click();
     await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Abrir configurações" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continuar" })).toBeVisible();
     await page.getByRole("button", { name: "Fechar onboarding" }).click();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
     await page.reload();
