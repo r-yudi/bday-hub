@@ -23,7 +23,7 @@ async function addBirthday(page: Page, options?: { name?: string; notes?: string
   const tag = options?.tag ?? "e2e";
 
   await gotoTodayReady(page);
-  await page.getByRole("link", { name: "Adicionar" }).click();
+  await page.getByRole("link", { name: /Adicionar.*aniversário/ }).first().click();
 
   await page.getByPlaceholder("Ex.: Ana Silva").fill(name);
   await page.locator("form select").nth(0).selectOption(day);
@@ -80,7 +80,7 @@ test.describe("MVP smoke flows", () => {
     ].join("\n");
 
     await gotoTodayReady(page);
-    await page.getByRole("button", { name: "Importar CSV" }).click();
+    await page.getByRole("button", { name: "Importar CSV" }).first().click();
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "playwright-import.csv",
@@ -129,13 +129,13 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByText("compartilhado")).toBeVisible();
   });
 
-  test("Email diário section on /today (guest: CTA; no email sent)", async ({ page }) => {
+  test.skip("Email diário section on /today (guest: CTA; no email sent) — config removed from /today (home operacional)", async ({ page }) => {
     await gotoTodayReady(page);
     await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Entrar para ativar email" })).toBeVisible();
   });
 
-  test("Push (complementar) section on /today: guest sees instruction and CTA", async ({ page }) => {
+  test.skip("Push (complementar) section on /today: guest sees instruction and CTA — config removed from /today (home operacional)", async ({ page }) => {
     await gotoTodayReady(page);
     await expect(page.getByRole("heading", { name: "Push (complementar)" })).toBeVisible();
     await expect(page.getByText("Notificações push estão disponíveis para contas conectadas")).toBeVisible();
@@ -149,7 +149,7 @@ test.describe("Push (complementar) logado não-standalone", () => {
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json). Gerar: login em /login e salvar storageState.");
 
-  test("mostra instrução de instalar PWA e não mostra toggle", async ({ page }) => {
+  test.skip("mostra instrução de instalar PWA e não mostra toggle — config (Push) removed from /today (home operacional)", async ({ page }) => {
     await page.goto("/today");
     await expect(page.getByText("Para ativar notificações push, instale o Lembra (PWA) na tela inicial.")).toBeVisible();
     await expect(page.getByRole("button", { name: /Ativar push|Desativar push/ })).toHaveCount(0);
