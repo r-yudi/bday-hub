@@ -30,6 +30,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   const [step, setStep] = useState<Step>(user ? 2 : 1);
   const [alertsDone, setAlertsDone] = useState(false);
   const [showGuestTooltip, setShowGuestTooltip] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const primaryActionRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const guestTooltipRef = useRef<HTMLDivElement | null>(null);
   const guestTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -111,8 +112,37 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   const finish = () => {
     setOnboardingV2Seen();
     setDismissed(true);
-    router.replace("/today");
+    setShowSuccessModal(true);
   };
+
+  if (showSuccessModal) {
+    return (
+      <div
+        className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-success-title"
+      >
+        <div className="ui-modal-surface w-full max-w-sm border p-6">
+          <h2 id="onboarding-success-title" className="text-lg font-semibold tracking-tight text-text">
+            Tudo pronto 🎉
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Quando alguém da sua lista fizer aniversário, o Lembra vai te avisar no horário escolhido.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/people"
+              onClick={() => setShowSuccessModal(false)}
+              className="ui-cta-primary inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+            >
+              Ver minha lista
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
