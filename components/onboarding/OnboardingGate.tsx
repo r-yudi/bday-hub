@@ -1,16 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getEmailReminderSettings, getPushSettings } from "@/lib/notificationSettingsRepo";
 import { getSettings } from "@/lib/storage";
 import {
-  getOnboardingStepDone,
-  ONBOARDING_V1_ALERTS_DONE,
-  ONBOARDING_V1_PEOPLE_DONE,
-  ONBOARDING_V1_TIPS_DONE,
-  setOnboardingStepDone
+  getOnboardingV2Seen,
+  setOnboardingV2Seen
 } from "@/lib/onboarding-ui";
 
 type OnboardingGateProps = {
@@ -18,27 +16,26 @@ type OnboardingGateProps = {
   mounted: boolean;
 };
 
-export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
-  const { user } = useAuth();
-  const [alertsDone, setAlertsDone] = useState(false);
-  const [peopleDone, setPeopleDone] = useState(false);
-  const [tipsDone, setTipsDone] = useState(false);
-  const [alertsChecked, setAlertsChecked] = useState(false);
-  const [showTipsModal, setShowTipsModal] = useState(false);
+type Step = 1 | 2 | 3 | 4;
 
-  const persistAlertsDone = useCallback(() => {
-    setOnboardingStepDone(ONBOARDING_V1_ALERTS_DONE);
-    setAlertsDone(true);
+export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
+  const [step, setStep] = useState<Step>(user ? 2 : 1);
+  const [alertsDone, setAlertsDone] = useState(false);
+
+  const onboardingParam = searchParams.get("onboarding") === "1";
+  const v2Seen = mounted && getOnboardingV2Seen();
+  const showWizard = mounted && (onboardingParam || !v2Seen) && !dismissed;
+
+  const closeWizard = useCallback(() => {
+    setOnboardingV2Seen();
+    setDismissed(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || !user) return;
-    const stored = getOnboardingStepDone(ONBOARDING_V1_ALERTS_DONE);
-    if (stored) {
-      setAlertsDone(true);
-      setAlertsChecked(true);
-      return;
-    }
+    if (!mounted || step < 2) return;
     Promise.all([getSettings(), getEmailReminderSettings(), getPushSettings()])
       .then(([settings, email, push]) => {
         const anyOn = Boolean(
@@ -46,158 +43,137 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             email?.emailEnabled ||
             push?.pushEnabled
         );
-        if (anyOn) persistAlertsDone();
-        setAlertsChecked(true);
+        if (anyOn) setAlertsDone(true);
       })
-      .catch(() => setAlertsChecked(true));
-  }, [mounted, user, persistAlertsDone]);
+      .catch(() => {});
+  }, [mounted, step, user?.id]);
 
   useEffect(() => {
-    if (!mounted) return;
-    if (getOnboardingStepDone(ONBOARDING_V1_PEOPLE_DONE)) {
-      setPeopleDone(true);
-      return;
-    }
-    if (peopleCount >= 5) {
-      setOnboardingStepDone(ONBOARDING_V1_PEOPLE_DONE);
-      setPeopleDone(true);
-    }
-  }, [mounted, peopleCount]);
+    if (user && step === 1) setStep(2);
+  }, [user, step]);
 
-  useEffect(() => {
-    if (!mounted) return;
-    setTipsDone(getOnboardingStepDone(ONBOARDING_V1_TIPS_DONE));
-  }, [mounted]);
+  if (!showWizard) return null;
 
-  const skipPeople = useCallback(() => {
-    setOnboardingStepDone(ONBOARDING_V1_PEOPLE_DONE);
-    setPeopleDone(true);
-  }, []);
-
-  const openTips = useCallback(() => setShowTipsModal(true), []);
-  const closeTips = useCallback(() => {
-    setShowTipsModal(false);
-    setOnboardingStepDone(ONBOARDING_V1_TIPS_DONE);
-    setTipsDone(true);
-  }, []);
-
-  const skipTips = useCallback(() => {
-    setOnboardingStepDone(ONBOARDING_V1_TIPS_DONE);
-    setTipsDone(true);
-  }, []);
-
-  if (!mounted || !user || (alertsDone && peopleDone && tipsDone)) return null;
-
-  const step1Done = alertsDone;
-  const step2Done = peopleDone;
-  const step3Done = tipsDone;
+  const goToStep2 = () => setStep(2);
+  const goToStep3 = () => setStep(3);
+  const goToStep4 = () => setStep(4);
+  const finish = () => {
+    setOnboardingV2Seen();
+    setDismissed(true);
+  };
 
   return (
-    <>
-      <section
-        className="ui-section ui-panel rounded-2xl border border-border/80 p-6 sm:p-8"
-        aria-label="Onboarding"
-      >
-        <h2 className="mb-4 text-lg font-semibold tracking-tight text-text">
-          Configure seu Lembra
-        </h2>
-        <ul className="space-y-3 text-sm">
-          <li className="flex items-center gap-3">
-            {step1Done ? (
-              <span className="text-success" aria-hidden>✓</span>
-            ) : (
-              <span className="h-5 w-5 rounded-full border-2 border-border" aria-hidden />
-            )}
-            <span className={step1Done ? "text-muted" : "text-text"}>
-              1. Configurar alertas (email ou lembretes no app)
-            </span>
-          </li>
-          <li className="flex items-center gap-3">
-            {step2Done ? (
-              <span className="text-success" aria-hidden>✓</span>
-            ) : (
-              <span className="h-5 w-5 rounded-full border-2 border-border" aria-hidden />
-            )}
-            <span className={step2Done ? "text-muted" : "text-text"}>
-              2. Adicionar 5 aniversários {!step2Done && `(${peopleCount} de 5)`}
-            </span>
-          </li>
-          <li className="flex items-center gap-3">
-            {step3Done ? (
-              <span className="text-success" aria-hidden>✓</span>
-            ) : (
-              <span className="h-5 w-5 rounded-full border-2 border-border" aria-hidden />
-            )}
-            <span className={step3Done ? "text-muted" : "text-text"}>
-              3. Dicas rápidas (Editar, Categorias, Compartilhar)
-            </span>
-          </li>
-        </ul>
+    <div
+      className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="onboarding-wizard-title"
+    >
+      <div className="ui-modal-surface w-full max-w-md border p-6 relative">
+        <button
+          type="button"
+          onClick={closeWizard}
+          className="absolute right-3 top-3 rounded-lg p-1.5 text-muted hover:bg-surface2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          aria-label="Fechar"
+        >
+          <span aria-hidden>✕</span>
+        </button>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          {!step1Done && (
-            <Link
-              href="/settings"
-              className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-            >
-              Configurar alertas
-            </Link>
-          )}
-          {step1Done && !step2Done && (
-            <>
+        {step === 1 && (
+          <>
+            <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
+              Sincronize em todos os dispositivos
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Entre com sua conta para acessar seus aniversários em qualquer lugar.
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                href="/login?returnTo=%2Ftoday"
+                className="btn-primary-brand ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+              >
+                Entrar com Google
+              </Link>
+              <button
+                type="button"
+                onClick={goToStep2}
+                className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
+              >
+                Continuar sem conta
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
+              Alertas
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Configure lembretes para não esquecer nenhum aniversário.
+            </p>
+            {!user && (
+              <p className="mt-2 text-xs text-muted">
+                Email e push exigem login.
+              </p>
+            )}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/settings"
+                className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+              >
+                Abrir configurações
+              </Link>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                onClick={goToStep3}
+                className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
+              >
+                Continuar
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
+              Adicionar aniversários
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              {peopleCount} de 5 pessoas cadastradas.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/person"
-                className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
                 Adicionar pessoa
               </Link>
-              <Link
-                href="/people"
-                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
-              >
-                Ver pessoas
-              </Link>
               <button
                 type="button"
-                onClick={skipPeople}
+                onClick={goToStep4}
                 className="ui-link-tertiary text-sm font-medium"
               >
-                Pular por agora
+                Pular
               </button>
-            </>
-          )}
-          {step1Done && step2Done && !step3Done && (
-            <>
-              <button
-                type="button"
-                onClick={openTips}
-                className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-              >
-                Ver dicas
-              </button>
-              <button
-                type="button"
-                onClick={skipTips}
-                className="ui-link-tertiary text-sm font-medium"
-              >
-                Pular por agora
-              </button>
-            </>
-          )}
-        </div>
-      </section>
+            </div>
+          </>
+        )}
 
-      {showTipsModal && (
-        <div
-          className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="onboarding-tips-title"
-        >
-          <div className="ui-modal-surface w-full max-w-md border p-6">
-            <h3 id="onboarding-tips-title" className="text-lg font-semibold tracking-tight text-text">
+        {step === 4 && (
+          <>
+            <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
               Dicas rápidas
-            </h3>
+            </h2>
             <ul className="mt-4 list-inside list-disc space-y-2 text-sm text-muted">
               <li>
                 <Link href="/people" className="ui-link-tertiary font-medium text-text">
@@ -221,15 +197,15 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             <div className="mt-6 flex justify-end">
               <button
                 type="button"
-                onClick={closeTips}
-                className="ui-cta-primary rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                onClick={finish}
+                className="ui-cta-primary rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
                 Entendi
               </button>
             </div>
-          </div>
-        </div>
-      )}
-    </>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

@@ -7,6 +7,8 @@ export const ONBOARDING_V1_ALERTS_DONE = "onboarding_v1_alerts_done";
 export const ONBOARDING_V1_PEOPLE_DONE = "onboarding_v1_people_done";
 export const ONBOARDING_V1_TIPS_DONE = "onboarding_v1_tips_done";
 
+export const ONBOARDING_V2_SEEN = "onboarding_v2_seen";
+
 export type OnboardingToast = {
   title: string;
   subtitle?: string;
@@ -69,6 +71,24 @@ export function setOnboardingStepDone(key: string): void {
   if (!canUseWindow()) return;
   try {
     window.localStorage.setItem(key, "1");
+  } catch {
+    // ignore
+  }
+}
+
+export function getOnboardingV2Seen(): boolean {
+  if (!canUseWindow()) return false;
+  try {
+    return window.localStorage.getItem(ONBOARDING_V2_SEEN) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setOnboardingV2Seen(): void {
+  if (!canUseWindow()) return;
+  try {
+    window.localStorage.setItem(ONBOARDING_V2_SEEN, "1");
   } catch {
     // ignore
   }

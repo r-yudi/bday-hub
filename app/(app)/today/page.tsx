@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { ImportCsv } from "@/components/ImportCsv";
 import { PersonCard } from "@/components/PersonCard";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
@@ -113,7 +113,9 @@ export default function TodayPage() {
         </section>
 
         {!loading && mounted && (
-          <OnboardingGate peopleCount={people.length} mounted={mounted} />
+          <Suspense fallback={null}>
+            <OnboardingGate peopleCount={people.length} mounted={mounted} />
+          </Suspense>
         )}
 
         {!loading && <OnboardingBanner count={people.length} mounted={mounted} />}
