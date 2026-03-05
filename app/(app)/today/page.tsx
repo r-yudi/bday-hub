@@ -199,11 +199,26 @@ export default function TodayPage() {
               )}
             </section>
 
-            {upcomingPeople.length > 0 && (
-              <section className="ui-section" aria-label="Em breve">
-                <h2 className="ui-section-header mb-4 text-lg font-semibold tracking-tight text-text">
-                  Em breve
-                </h2>
+            <section className="ui-section" aria-label="Próximos aniversários">
+              <h2 className="ui-section-header mb-4 text-lg font-semibold tracking-tight text-text">
+                Próximos aniversários
+              </h2>
+              {upcomingPeople.length === 0 ? (
+                <div className="ui-panel-soft rounded-2xl border border-border/80 p-6">
+                  <p className="text-sm text-muted">
+                    Nenhum aniversário nos próximos dias.
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    Adicione algumas pessoas importantes para o Lembra começar a te ajudar.
+                  </p>
+                  <Link
+                    href="/person"
+                    className="ui-cta-primary mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                  >
+                    Adicionar pessoa
+                  </Link>
+                </div>
+              ) : (
                 <div className="ui-list rounded-2xl border border-border/80 bg-surface2/30 divide-y divide-border/60">
                   {upcomingPeople.map((person) => (
                     <div key={person.id} className="ui-list-item flex flex-wrap items-center justify-between gap-2 py-3">
@@ -222,8 +237,8 @@ export default function TodayPage() {
                     </div>
                   ))}
                 </div>
-              </section>
-            )}
+              )}
+            </section>
 
             <section className="ui-section flex flex-wrap gap-2">
               <Link
