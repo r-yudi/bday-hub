@@ -29,10 +29,10 @@ test("upsertUserSettingsEmail does not throw when upsert succeeds", async () => 
   );
 });
 
-test("toggle only: buildEmailReminderPayload({ emailEnabled: true }) does not include email_time so DB keeps existing 00:13", () => {
+test("buildEmailReminderPayload with only emailEnabled returns partial payload (no email_time/timezone)", () => {
   const payload = buildEmailReminderPayload({ emailEnabled: true }, "user-1");
   assert.equal(payload.user_id, "user-1");
   assert.equal(payload.email_enabled, true);
-  assert.ok(!("email_time" in payload), "payload must not include email_time so toggle does not overwrite existing value");
-  assert.ok(!("timezone" in payload), "payload must not include timezone");
+  assert.ok(!("email_time" in payload));
+  assert.ok(!("timezone" in payload));
 });

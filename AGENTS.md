@@ -108,13 +108,14 @@ Use os playbooks em `playbooks/` para acelerar entregas com consistência, sem m
 - Produto: `playbooks/product-skill.md`
   - decidir escopo, fora de escopo, hipótese, critérios de aceite e atualização de `PRD.md`/`SPEC.md`
 - Design: `playbooks/design-skill.md`
-  - evoluir UI com contrato visual (`ui-*`, tokens, dark mode, acessibilidade)
+  - evoluir UI com contrato visual (`ui-*`, tokens, tema light-only, acessibilidade)
 - Desenvolvimento: `playbooks/dev-skill.md`
   - implementar rápido com segurança (`scaffold -> wired -> polish -> harden`)
 
 ### Fonte única do design system
-- `DESIGN_SYSTEM.md`
+- `docs/DESIGN_SYSTEM.md` (canônico; raiz `DESIGN_SYSTEM.md` aponta para este)
 - `docs/visual-contract.md`
+- `docs/THEME.md` (light-only)
 - `app/styles/tokens.css`
 - `app/globals.css`
 

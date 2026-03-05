@@ -1,4 +1,4 @@
-﻿# Lembra. — PRD (baseline + status atual)
+# Lembra. — PRD (baseline + status atual)
 
 ## Status do projeto (atualizado em 2026-02-25)
 
@@ -31,8 +31,8 @@
 - Onboarding leve com progresso (5 aniversários) + feedback visual.
 - Toasts discretos ao adicionar aniversários.
 - PWA install banner contextual (compacto, com dismiss e instruções).
-- Dark mode (`Claro / Escuro / Sistema`) com persistência local e remota (`user_settings.theme`).
-- Contrato visual compartilhado via utilitários `ui-*` (tipografia, CTAs, links tertiary, callouts/disclosures, overlays/modais).
+- Tema **light-only (pre-launch)**: dark mode desabilitado em runtime; detalhes em [docs/THEME.md](docs/THEME.md).
+- Contrato visual **landing-first** via utilitários `ui-*` e tokens; referência em [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 - Cartões com ações de copiar mensagem/link e feedback visual.
 - Footer global com links para privacidade e termos nas páginas internas.
 
@@ -48,6 +48,15 @@
 - `npm run build` passando
 - `npm test` passando
 - `npm run test:e2e` (Playwright smoke) passando
+
+### UI/Brand Experience
+- **Landing-first:** O app interno é continuação da landing — ritmo editorial, superfícies paper, sombras mínimas (ver [docs/PRODUCT_UI_PHILOSOPHY.md](docs/PRODUCT_UI_PHILOSOPHY.md)).
+- **Hierarquia:** eyebrow + título editorial (serif) + subtítulo; padrão em [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
+- **Feature blocks** no lugar de sidebars/widgets; empty states como hero sections; listas leves com separadores.
+- **CTAs** alinhados à landing (`ui-cta-primary`, `ui-cta-secondary`).
+- **Brand lockup** único: dot + "Lembra." no TopNav (landing e rotas do app).
+- **Qualidade UI:** build + smoke E2E (`npx playwright test e2e/smoke.spec.ts`) + spec de screenshots (`e2e/screenshots-polish.spec.ts`).
+- Referências: [docs/PRODUCT_UI_PHILOSOPHY.md](docs/PRODUCT_UI_PHILOSOPHY.md), [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md), [docs/THEME.md](docs/THEME.md), [docs/REBRAND_LANDING_FIRST_REPORT.md](docs/REBRAND_LANDING_FIRST_REPORT.md).
 
 ## 1) Problema
 Hoje os aniversários estão espalhados (contatos, redes sociais, anotações). O usuário quer um lugar simples para:
@@ -88,7 +97,7 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 - Login Google com Supabase + sessão persistente
 - Sync de aniversários com Supabase quando logado
 - Categorias predefinidas e custom (guest + Supabase)
-- Dark mode e refinamentos de UX/PWA
+- Light-only (pre-launch) e refinamentos de UX/PWA (landing-first)
 
 ### 5.2 Restrições mantidas
 - Sem backend próprio (usa Supabase diretamente)

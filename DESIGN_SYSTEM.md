@@ -1,84 +1,18 @@
-# DESIGN_SYSTEM.md
+# Design System
 
-## Objetivo
-Definir a fonte única do contrato visual do Lembra. para manter consistência entre landing, páginas do app e fluxos novos.
+**Documentação canônica:** [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
 
-## Princípios
-- Reutilizar antes de criar: use `ui-*` em `app/globals.css` antes de classes ad hoc.
-- Tokens primeiro: cores, sombras, raios e motion vêm de `app/styles/tokens.css`.
-- Clareza de hierarquia: uma ação principal por contexto, apoio visual previsível.
-- Dark mode é requisito: não tratar como afterthought.
-- Acessibilidade faz parte do visual: foco visível, contraste e reduced motion.
+Este arquivo é um ponteiro. O contrato visual completo (Design Contract, tokens, utilitários `ui-*`, padrões "Landing UI inside the app", páginas migradas, tema light-only) está em `docs/DESIGN_SYSTEM.md`.
 
 ## Fonte única (onde editar)
+
 - Tokens: `app/styles/tokens.css`
-- Utilitários globais e padrões `ui-*`: `app/globals.css`
-- Contexto de uso/contrato do produto: `SPEC.md` (seção de UI/DS) e `AGENTS.md`
+- Utilitários globais `ui-*`: `app/globals.css`
+- Contrato e lista de utilitários: `docs/DESIGN_SYSTEM.md`
+- Filosofia de UI (guardrails): `docs/PRODUCT_UI_PHILOSOPHY.md`
+- Tema (light-only): `docs/THEME.md`
+- Referência da landing: `docs/REBRAND_LANDING_FIRST_REPORT.md`
 
-## Mapa rápido de utilitários `ui-*` (atuais)
-### Superfícies e níveis
-- `ui-surface`
-- `ui-surface-elevated`
-- `ui-panel`
-- `ui-panel-soft`
-- `ui-border-subtle`
-- `ui-border-strong`
-- `ui-backdrop`
+## Ajustes visuais
 
-### Ações e foco
-- `ui-cta-primary`
-- `ui-cta-secondary`
-- `ui-focus-surface`
-
-### Links e texto de apoio
-- `ui-link-tertiary`
-- `ui-link-tertiary-muted`
-
-### Callouts e disclosures
-- `ui-callout`
-- `ui-disclosure`
-- `ui-disclosure-summary`
-
-### Badges (tipos/estado)
-- `ui-badge-predefined`
-- `ui-badge-custom`
-- `ui-badge-usage`
-
-### Overlays e modais
-- `ui-overlay-backdrop`
-- `ui-modal-surface`
-
-### Layout/shell
-- `ui-page-shell`
-- `ui-page-shell-centered`
-- `ui-page-hero`
-- `ui-prose-panel`
-
-### Código/diagnóstico
-- `ui-code-block`
-
-### Tipografia/estado
-- `ui-title-editorial`
-- `ui-subtitle-editorial`
-- `ui-inline-status`
-- `ui-inline-status-dot`
-
-## Como adicionar novo utilitário `ui-*` sem bagunçar
-1. Confirmar que o padrão não já existe em `app/globals.css`.
-2. Definir objetivo claro do utilitário (semântica de uso, não só visual).
-3. Reusar tokens existentes em `app/styles/tokens.css` (cores/sombra/raio/motion).
-4. Implementar estados necessários (`hover`, `active`, `focus-visible`, dark se aplicável).
-5. Validar uso em pelo menos 2 contextos (evitar utilitário ultra-específico).
-6. Atualizar este arquivo (`DESIGN_SYSTEM.md`) e, se virar contrato, mencionar em `SPEC.md`/`AGENTS.md`.
-7. Evitar duplicar algo que já é composição simples de classes utilitárias do Tailwind.
-
-## Observações
-- `ds_base.html` pode servir como referência visual histórica/exploratória, mas não substitui o contrato real em `tokens.css` + `globals.css`.
-- Para ajustes visuais, siga `playbooks/design-skill.md`.
-
-## Atualizações V2 (Series A)
-- Hero e header da landing priorizam clareza extrema: menos elementos competitivos acima da dobra.
-- CTA primário com dominância explícita (`landing-cta-dominant`) e secundário subordinado (`landing-cta-support`).
-- Novo tratamento de profundidade da landing com `bg-landing-depth-light` e `bg-landing-depth-dark`.
-- Reforço de superfícies elevadas em dark para separação real de camadas (`.dark .ui-surface-elevated`).
-- Empty states devem seguir formato: título forte + contexto curto + CTA principal + opcional secundário.
+Seguir `playbooks/design-skill.md`.

@@ -227,3 +227,17 @@
 
 ### Gaps e stacks
 - Hero actions: gap 16px. Cards grid: gap 24px. Section header: eyebrow mb 16px; h2 mb 20px; sub mb 64px.
+
+---
+
+## Light-only (pre-launch)
+
+O app está em **light-only**: dark mode desabilitado em runtime. A classe `.dark` não é aplicada no `<html>`. Implementação em `lib/theme.ts` e `components/ThemeProvider.tsx`; TopNav sem seletor de tema. Detalhes em `docs/THEME.md`. Tokens `.dark` permanecem no CSS mas não são usados.
+
+---
+
+## Utilitários e páginas impactados (rebrand em produção)
+
+**Novos utilitários em `app/globals.css`:** ui-container, ui-section, ui-section-header, ui-eyebrow, ui-stack-lg, ui-stack-md, ui-feature-block, ui-feature-title/body/actions/meta, ui-empty-hero, ui-empty-icon/title/subtitle/actions, ui-list, ui-list-item.
+
+**Páginas com padrão landing UI:** app/(app)/today/page.tsx, app/(app)/manage/page.tsx, app/(app)/share/page.tsx, app/(app)/share/[token]/page.tsx, components/LoginPageClient.tsx; app/(app)/upcoming/page.tsx, app/(app)/person/page.tsx. Shell: components/TopNav.tsx, components/AppShell.tsx.
