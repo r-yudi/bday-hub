@@ -6,7 +6,8 @@ import { useAuth } from "@/components/AuthProvider";
 
 const navItems = [
   { href: "/today", label: "Hoje" },
-  { href: "/upcoming", label: "Próximos 7 dias" }
+  { href: "/people", label: "Pessoas" },
+  { href: "/settings", label: "Configurações" }
 ];
 
 export function TopNav() {
@@ -54,11 +55,12 @@ export function TopNav() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   className={[
                     "rounded-full px-3 py-1.5 text-sm transform-gpu duration-150 ease-brand",
                     active
                       ? "topnav-pill-active scale-[1.02] text-primaryForeground shadow-sm"
-                      : "topnav-pill ui-focus-surface border focus-visible:outline-none"
+                      : "topnav-pill ui-focus-surface border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   ].join(" ")}
                 >
                   {item.label}
