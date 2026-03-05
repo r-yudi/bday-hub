@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { RefObject } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getEmailReminderSettings, getPushSettings } from "@/lib/notificationSettingsRepo";
 import { getSettings } from "@/lib/storage";
@@ -19,20 +20,24 @@ type OnboardingGateProps = {
 type Step = 1 | 2 | 3 | 4;
 
 export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(false);
   const [step, setStep] = useState<Step>(user ? 2 : 1);
   const [alertsDone, setAlertsDone] = useState(false);
+  const primaryActionRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
 
   const onboardingParam = searchParams.get("onboarding") === "1";
+  const force = searchParams.get("force") === "1";
   const v2Seen = mounted && getOnboardingV2Seen();
-  const showWizard = mounted && (onboardingParam || !v2Seen) && !dismissed;
+  const showWizard = mounted && !dismissed && (force || !v2Seen);
 
   const closeWizard = useCallback(() => {
     setOnboardingV2Seen();
     setDismissed(true);
-  }, []);
+    router.replace("/today");
+  }, [router]);
 
   useEffect(() => {
     if (!mounted || step < 2) return;
@@ -52,6 +57,21 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
     if (user && step === 1) setStep(2);
   }, [user, step]);
 
+  useEffect(() => {
+    if (!showWizard) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeWizard();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [showWizard, closeWizard]);
+
+  useEffect(() => {
+    if (showWizard && primaryActionRef.current) {
+      primaryActionRef.current.focus({ preventScroll: true });
+    }
+  }, [showWizard, step]);
+
   if (!showWizard) return null;
 
   const goToStep2 = () => setStep(2);
@@ -60,6 +80,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   const finish = () => {
     setOnboardingV2Seen();
     setDismissed(true);
+    router.replace("/today");
   };
 
   return (
@@ -74,7 +95,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
           type="button"
           onClick={closeWizard}
           className="absolute right-3 top-3 rounded-lg p-1.5 text-muted hover:bg-surface2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-          aria-label="Fechar"
+          aria-label="Fechar onboarding"
         >
           <span aria-hidden>✕</span>
         </button>
@@ -87,8 +108,10 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             <p className="mt-2 text-sm text-muted">
               Entre com sua conta para acessar seus aniversários em qualquer lugar.
             </p>
+            <p className="mt-1 text-xs text-muted">Você pode usar sem conta.</p>
             <div className="mt-6 flex flex-col gap-3">
               <Link
+                ref={primaryActionRef as RefObject<HTMLAnchorElement>}
                 href="/login?returnTo=%2Ftoday"
                 className="btn-primary-brand ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
@@ -115,11 +138,12 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             </p>
             {!user && (
               <p className="mt-2 text-xs text-muted">
-                Email e push exigem login.
+                Email e push exigem login e suporte do dispositivo.
               </p>
             )}
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
+                ref={primaryActionRef as RefObject<HTMLAnchorElement>}
                 href="/settings"
                 className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
@@ -153,6 +177,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
+                ref={primaryActionRef as RefObject<HTMLAnchorElement>}
                 href="/person"
                 className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
@@ -196,6 +221,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             </ul>
             <div className="mt-6 flex justify-end">
               <button
+                ref={primaryActionRef as RefObject<HTMLButtonElement>}
                 type="button"
                 onClick={finish}
                 className="ui-cta-primary rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
