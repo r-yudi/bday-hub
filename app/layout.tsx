@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/app/globals.css";
@@ -7,8 +7,17 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getThemeBootScript } from "@/lib/theme";
 
-const inter = Inter({
-  subsets: ["latin"]
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans"
+});
+
+const dmSerifDisplay = DM_Serif_Display({
+  subsets: ["latin"],
+  display: "swap",
+  weight: "400",
+  variable: "--font-display"
 });
 
 export const metadata: Metadata = {
@@ -37,7 +46,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${dmSans.variable} ${dmSerifDisplay.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: getThemeBootScript() }} />
         <AuthProvider>
           <ThemeProvider>{children}</ThemeProvider>

@@ -59,7 +59,7 @@ function ClearDataModal({
 
   return (
     <div className="ui-overlay-backdrop fixed inset-0 z-30 grid place-items-center p-4">
-      <div className="ui-modal-surface w-full max-w-md rounded-2xl border p-5">
+      <div className="ui-modal-surface w-full max-w-md border p-5">
         <h3 className="text-lg font-semibold tracking-tight text-text">Tem certeza?</h3>
         <p className="mt-2 text-sm text-muted">
           Todos os aniversários salvos localmente neste dispositivo serão apagados. Esta ação não pode ser desfeita.
@@ -85,7 +85,7 @@ function ClearDataModal({
             type="button"
             onClick={onConfirm}
             disabled={!canConfirm}
-            className="rounded-xl bg-rose-600 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-danger px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-95"
           >
             {loading ? "Limpando..." : "Confirmar"}
           </button>
@@ -442,13 +442,13 @@ export default function TodayPage() {
 
   return (
     <>
-      <div className="space-y-9 lg:space-y-12">
-        <section className="rounded-2xl border border-border/75 bg-surface/75 p-5 shadow-sm dark:border-border/65 dark:bg-surface/35 sm:p-6">
+      <div className="ui-container space-y-9 lg:space-y-12">
+        <section className="ui-section ui-panel p-6 sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Painel principal</p>
-              <h1 className="ui-title-editorial mt-2 text-4xl sm:text-[2.45rem]">Hoje</h1>
-              <p className="ui-subtitle-editorial mt-3 max-w-[62ch] text-sm sm:text-[15px]">Veja quem faz aniversário hoje, mantenha seus lembretes ativos e registre pessoas sem perder ritmo.</p>
+            <div className="ui-section-header">
+              <p className="ui-eyebrow">Painel principal</p>
+              <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">Hoje</h1>
+              <p className="ui-subtitle-editorial text-sm sm:text-[15px]">Veja quem faz aniversário hoje, mantenha seus lembretes ativos e registre pessoas sem perder ritmo.</p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
               <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none">
@@ -467,7 +467,7 @@ export default function TodayPage() {
 
         {!loading && <OnboardingBanner count={people.length} mounted={mounted} />}
 
-        {banner && <div className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">{banner}</div>}
+        {banner && <div className="rounded-2xl border border-warning/25 bg-warning/10 px-4 py-3 text-sm text-text">{banner}</div>}
 
         <section className="grid gap-5 lg:grid-cols-[1.95fr_1fr] lg:gap-6">
           <div className="space-y-4">
@@ -476,15 +476,15 @@ export default function TodayPage() {
             {loading ? (
               <p className="text-sm text-muted">Carregando...</p>
             ) : todayPeople.length === 0 ? (
-              <div className="ui-surface-elevated rounded-2xl border p-8 text-center shadow-md sm:p-10">
-                <div className="mx-auto grid h-20 w-20 place-items-center rounded-2xl bg-paper text-3xl shadow-sm dark:bg-surface/55" aria-hidden>🎂</div>
-                <h2 className="mt-5 text-2xl font-semibold tracking-tight text-text sm:text-[1.5rem]">Hoje sua lista está tranquila 🎈</h2>
-                <p className="mt-3 max-w-[42ch] mx-auto text-sm text-muted">Use esse momento para preparar os próximos dias e não deixar nenhum parabéns passar.</p>
-                <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+              <div className="ui-empty-hero">
+                <div className="ui-empty-icon" aria-hidden>🎂</div>
+                <h2 className="ui-empty-title">Hoje sua lista está tranquila 🎈</h2>
+                <p className="ui-empty-subtitle">Use esse momento para preparar os próximos dias e não deixar nenhum parabéns passar.</p>
+                <div className="ui-empty-actions">
                   <Link
                     href="/person"
                     aria-label="Criar novo aniversário"
-                    className="btn-primary-brand ui-cta-primary order-first inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+                    className="btn-primary-brand ui-cta-primary order-first inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                   >
                     Adicionar agora
                   </Link>
@@ -501,23 +501,22 @@ export default function TodayPage() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="ui-list">
                 {todayPeople.map((person) => (
-                  <PersonCard key={person.id} person={person} onDelete={handleDelete} />
+                  <div key={person.id} className="ui-list-item">
+                    <PersonCard person={person} onDelete={handleDelete} />
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-xl border border-amber-300/80 bg-amber-50/80 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/60 dark:bg-amber-950/50 dark:text-amber-200" aria-hidden>
-              BUILD: Email diário section expected — {typeof process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA === "string" ? process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA : "local"}
-            </div>
-            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
+            <section className="ui-feature-block">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Lembretes</h2>
+                <h2 className="ui-feature-title text-muted">Lembretes</h2>
                 {reminderSentToday && (
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 shadow-sm">
+                  <span className="rounded-full border border-success/30 bg-success/15 px-2.5 py-1 text-[11px] font-medium text-success">
                     Lembrete enviado hoje
                   </span>
                 )}
@@ -529,7 +528,7 @@ export default function TodayPage() {
                 type="button"
                 onClick={() => void handleNotificationToggle()}
                 disabled={!mounted || !support.supported || support.permission === "denied" || notificationSaving}
-                className="btn-primary-brand ui-cta-primary mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white shadow-sm hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted disabled:shadow-none focus-visible:outline-none"
+                className="btn-primary-brand ui-cta-primary mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted focus-visible:outline-none"
               >
                 {notificationSaving ? "Salvando..." : notificationCtaLabel}
               </button>
@@ -558,7 +557,7 @@ export default function TodayPage() {
                   <p>Permissão: {mounted ? (support.permission === "denied" ? "negada" : support.permission) : "..."}</p>
                   <p>Ativado no app: {mounted ? (settings?.notificationEnabled ? "sim" : "não") : "..."}</p>
                   {support.permission === "denied" && (
-                    <p className="mt-1 text-amber-700 dark:text-amber-300">Permissão negada no navegador. Reative nas configurações do site para receber lembretes.</p>
+                    <p className="mt-1 text-warning">Permissão negada no navegador. Reative nas configurações do site para receber lembretes.</p>
                   )}
                   {!support.supported && mounted && (
                     <p className="mt-1 text-muted">Em alguns navegadores (ex.: iOS/Safari) as notificações não estão disponíveis.</p>
@@ -567,8 +566,8 @@ export default function TodayPage() {
               </details>
             </section>
 
-            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Email diário</h2>
+            <section className="ui-feature-block">
+              <h2 className="ui-feature-title text-muted">Email diário</h2>
               <p className="mt-2 text-sm leading-5 text-muted">{emailSummary}</p>
               {!user ? (
                 <Link
@@ -617,7 +616,7 @@ export default function TodayPage() {
                     />
                   </div>
                   {(emailSettings?.timezone || timezoneDraft) && !isValidTimezone(timezoneDraft || emailSettings?.timezone || "") && (
-                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                    <p className="mt-2 text-xs text-warning">
                       Timezone inválido; não será salvo (será usado America/Sao_Paulo).
                     </p>
                   )}
@@ -645,14 +644,14 @@ export default function TodayPage() {
                       )}
                     </div>
                   )}
-                  {emailError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{emailError}</p>}
-                  {emailSuccess && <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-300">{emailSuccess}</p>}
+                  {emailError && <p className="mt-2 text-xs text-danger">{emailError}</p>}
+                  {emailSuccess && <p className="mt-2 text-xs text-success">{emailSuccess}</p>}
                 </>
               )}
             </section>
 
-            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Push (complementar)</h2>
+            <section className="ui-feature-block">
+              <h2 className="ui-feature-title text-muted">Push (complementar)</h2>
               {!mounted ? (
                 <p className="mt-2 text-sm text-muted">Carregando...</p>
               ) : !user ? (
@@ -687,13 +686,13 @@ export default function TodayPage() {
                   >
                     {pushSaving ? "Salvando..." : pushSettings?.pushEnabled ? "Desativar push" : "Ativar push"}
                   </button>
-                  {pushError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{pushError}</p>}
+                  {pushError && <p className="mt-2 text-xs text-danger">{pushError}</p>}
                 </>
               )}
             </section>
 
-            <section className="ui-surface-elevated rounded-2xl border p-4 shadow-md">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Dados</h2>
+            <section className="ui-feature-block">
+              <h2 className="ui-feature-title text-muted">Dados</h2>
               <p className="mt-2 text-sm leading-5 text-muted">Seus aniversários ficam salvos neste dispositivo e você pode exportar em CSV quando quiser.</p>
               <button
                 type="button"

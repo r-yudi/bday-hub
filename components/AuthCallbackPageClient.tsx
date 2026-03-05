@@ -115,11 +115,11 @@ export function AuthCallbackPageClient({ returnTo }: { returnTo: string }) {
       </section>
 
       {state.status === "error" && (
-        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-300/30 dark:bg-rose-500/10 dark:text-rose-200">
+        <section className="rounded-2xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger">
           <p className="font-medium">Não foi possível confirmar a sessão.</p>
           <p className="mt-1">{state.message}</p>
 
-          <div className="mt-4 space-y-2 rounded-xl border border-rose-200/80 bg-white/70 p-3 text-xs text-rose-900/90 dark:border-rose-300/20 dark:bg-white/5 dark:text-rose-100/90">
+          <div className="mt-4 space-y-2 rounded-xl border border-danger/25 bg-surface/90 p-3 text-xs text-text">
             <p>
               <span className="font-semibold">Querystring atual:</span> <code>{debugInfo.querystring || "(vazia)"}</code>
             </p>

@@ -26,13 +26,13 @@ function SessionGuardNotice() {
   if (!sessionNotice) return null;
 
   return (
-    <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    <div className="mb-4 rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-text">
       <div className="flex items-start justify-between gap-3">
         <p>{sessionNotice}</p>
         <button
           type="button"
           onClick={dismissSessionNotice}
-          className="rounded-md px-2 py-0.5 text-xs text-amber-900/80 hover:bg-amber-100"
+          className="rounded-md px-2 py-0.5 text-xs text-muted hover:bg-warning/20"
           aria-label="Fechar aviso de sessão"
         >
           Fechar
@@ -144,17 +144,17 @@ function PwaInstallBanner() {
   const showDesktopInstructions = platform === "desktop-chrome" || installEvent !== null;
 
   return (
-    <section className="mb-4 rounded-xl border border-border/70 bg-surface/75 px-3 py-2 shadow-sm dark:bg-surface/20 sm:px-4 sm:py-2.5">
-      <div className="flex items-start gap-2 sm:gap-3">
+    <section className="ui-panel-soft mb-4 rounded-xl border px-3 py-2 shadow-sm sm:px-4 sm:py-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium leading-5 text-text">Instale o Lembra. para acessar seus aniversários mais rápido.</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-3">
           <button
             type="button"
             onClick={() => void handleInstallClick()}
-            className="btn-primary-brand ui-cta-primary h-9 rounded-xl bg-accent px-3 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
+            className="ui-cta-primary inline-flex h-9 items-center justify-center px-4 py-2 text-sm font-medium leading-none focus-visible:outline-none"
           >
             Instalar
           </button>
@@ -162,7 +162,7 @@ function PwaInstallBanner() {
             type="button"
             onClick={handleDismiss}
             aria-label="Dispensar sugestão de instalação"
-            className="ui-focus-surface inline-flex h-8 w-8 items-center justify-center rounded-lg border p-0 text-sm focus-visible:outline-none"
+            className="ui-focus-surface inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border p-0 text-sm leading-none focus-visible:outline-none"
           >
             ×
           </button>
@@ -239,7 +239,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
 
         {showGlobalFooter && (
-          <footer className="ui-surface mt-10 rounded-2xl border px-4 py-4 text-center text-xs text-black/65 shadow-sm sm:text-right dark:text-muted">
+          <footer className="ui-surface mt-10 rounded-2xl border px-4 py-4 text-center text-xs text-muted shadow-sm sm:text-right">
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-end sm:gap-4">
               <Link href="/privacy" className="ui-link-tertiary">
                 Política de Privacidade

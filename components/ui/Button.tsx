@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/cn";
@@ -18,7 +18,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     "ui-cta-secondary border text-text shadow-sm hover:-translate-y-px hover:shadow-sm disabled:border-border/80 disabled:bg-surface2/70 disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0",
   ghost:
-    "border border-transparent bg-transparent text-text hover:border-border/70 hover:bg-surface2/45 active:bg-surface2/65 dark:text-text dark:hover:border-border/90 dark:hover:bg-surface2/60 dark:active:bg-surface2/80 disabled:border-border/40 disabled:bg-surface2/30 disabled:text-muted disabled:hover:bg-surface2/30",
+    "border border-transparent bg-transparent text-text hover:border-border/70 hover:bg-surface2/45 active:bg-surface2/65 disabled:border-border/40 disabled:bg-surface2/30 disabled:text-muted disabled:hover:bg-surface2/30",
   destructive:
     "bg-danger text-white shadow-sm hover:-translate-y-px hover:shadow-md hover:brightness-95 active:brightness-90 disabled:bg-danger/65 disabled:text-white/95 disabled:shadow-none disabled:hover:translate-y-0"
 };

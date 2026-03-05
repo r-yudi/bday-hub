@@ -131,7 +131,7 @@ export function LandingCelebrationScene({ variant = "default" }: { variant?: "de
             alt=""
             width={720}
             height={560}
-            className="outdoor-party-illustration h-full max-h-[280px] w-full max-w-[320px] object-contain opacity-95 dark:opacity-90 lg:max-h-[340px] lg:max-w-[420px]"
+            className="outdoor-party-illustration h-full max-h-[280px] w-full max-w-[320px] object-contain opacity-95 lg:max-h-[340px] lg:max-w-[420px]"
             loading="lazy"
             decoding="async"
           />

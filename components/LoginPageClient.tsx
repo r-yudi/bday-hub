@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -27,19 +27,19 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
   }
 
   return (
-    <div className="ui-page-shell ui-page-shell-centered max-w-md">
+    <div className="ui-container ui-page-shell ui-page-shell-centered max-w-md">
       <div className="mx-auto w-full">
-        <section className="ui-surface-elevated ui-border-subtle rounded-3xl border p-6 shadow-md sm:p-8">
-          <div className="ui-copy-backdrop">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra. • Login</p>
-            <h1 className="ui-title-editorial mt-2 text-3xl sm:text-[2rem]">Entrar com Google</h1>
-            <p className="ui-subtitle-editorial mt-2 text-sm sm:text-[15px]">
+        <section className="ui-panel rounded-3xl border p-6 sm:p-8">
+          <div className="ui-section-header ui-copy-backdrop">
+            <p className="ui-eyebrow text-muted">Lembra. • Login</p>
+            <h1 className="ui-title-editorial text-3xl sm:text-[2rem]">Entrar com Google</h1>
+            <p className="ui-subtitle-editorial text-sm sm:text-[15px]">
               Faça login para continuar com seus aniversários em qualquer dispositivo.
             </p>
           </div>
 
           {!configured && (
-            <div className="mt-5 rounded-2xl border border-amber-300/60 bg-amber-50/90 p-3 text-sm text-amber-900 dark:border-amber-300/20 dark:bg-surface2/65 dark:text-amber-200">
+            <div className="mt-5 rounded-2xl border border-warning/30 bg-warning/10 p-3 text-sm text-text">
               O login com Google ainda não está configurado neste ambiente. Defina `NEXT_PUBLIC_SUPABASE_URL` e
               `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
             </div>

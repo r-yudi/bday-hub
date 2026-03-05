@@ -19,8 +19,8 @@ export function AppToast({ toast, onClose }: AppToastProps) {
 
   const toneClasses =
     toast.tone === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : "border-amber-200 bg-amber-50 text-amber-900";
+      ? "border-success/30 bg-success/15 text-success"
+      : "border-warning/30 bg-warning/10 text-text";
 
   return (
     <div className="pointer-events-none fixed bottom-4 right-4 z-40 w-[min(360px,calc(100vw-2rem))]">

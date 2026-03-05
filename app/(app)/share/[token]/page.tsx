@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -66,7 +66,7 @@ export default function ShareTokenPage() {
   if (!validPayload) {
     return (
       <div className="grid min-h-[65vh] place-items-center">
-        <div className="ui-surface-elevated ui-border-subtle mx-auto w-full max-w-xl rounded-2xl border p-6 text-text shadow-md">
+        <div className="ui-panel-soft mx-auto w-full max-w-xl rounded-2xl border p-6 text-text">
           <h1 className="text-lg font-semibold tracking-tight">Link inválido</h1>
           <p className="mt-2 text-sm text-muted">Este token não pôde ser lido ou está malformado.</p>
           <Link href="/today" className="ui-cta-secondary mt-4 inline-flex items-center rounded-lg border px-3 py-2 text-sm focus-visible:outline-none">
@@ -78,16 +78,16 @@ export default function ShareTokenPage() {
   }
 
   return (
-    <div className="grid min-h-[65vh] place-items-center py-4">
+    <div className="ui-container grid min-h-[65vh] place-items-center py-4">
       <div className="mx-auto w-full max-w-xl space-y-4">
-        <div className="ui-surface-elevated ui-border-subtle rounded-3xl border p-6 text-center shadow-md sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Lembra • Link compartilhado</p>
+        <div className="ui-panel rounded-3xl border p-6 text-center sm:p-8">
+          <p className="ui-eyebrow text-muted">Lembra • Link compartilhado</p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-text sm:text-[2.1rem]">{validPayload.name}</h1>
           <p className="mt-2 text-sm text-muted">
             Aniversário: <span className="font-medium text-text">{formatDayMonth(validPayload.day, validPayload.month)}</span>
           </p>
 
-          <div className="ui-surface ui-border-subtle mt-5 rounded-2xl border px-4 py-3 text-left text-sm text-muted dark:bg-surface2/55">
+          <div className="ui-surface ui-border-subtle mt-5 rounded-2xl border px-4 py-3 text-left text-sm text-muted">
             <p>
               <span className="font-medium text-text">Importante:</span> Este link compartilha apenas nome e dia/mês. Não inclui ano.
             </p>
@@ -112,7 +112,7 @@ export default function ShareTokenPage() {
             </button>
           </div>
 
-          <p aria-live="polite" className="mt-3 min-h-5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+          <p aria-live="polite" className="mt-3 min-h-5 text-xs font-medium text-success">
             {copied ? "Link copiado ✓" : ""}
           </p>
 

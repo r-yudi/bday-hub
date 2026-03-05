@@ -327,18 +327,18 @@ export default function ManagePage() {
   );
 
   return (
-    <div className="ui-page-shell mx-auto max-w-6xl space-y-8">
-      <section className="rounded-2xl border border-border/75 bg-surface/75 p-5 shadow-sm dark:border-border/65 dark:bg-surface/35 sm:p-6">
+    <div className="ui-container space-y-8">
+      <section className="ui-section ui-panel p-6 sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Centro de controle</p>
-            <h1 className="ui-title-editorial mt-2 text-4xl sm:text-[2.45rem]">Gestão</h1>
-            <p className="ui-subtitle-editorial mt-3 max-w-[72ch] text-sm sm:text-[15px]">
+          <div className="ui-section-header">
+            <p className="ui-eyebrow text-muted">Centro de controle</p>
+            <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">Gestão</h1>
+            <p className="ui-subtitle-editorial text-sm sm:text-[15px] max-w-[72ch]">
               Organize aniversários e categorias em um fluxo único, com filtros claros e ações seguras.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-white shadow-sm hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
+            <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
               Adicionar aniversário
             </Link>
             <Link href="/today" className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2">
@@ -349,29 +349,29 @@ export default function ManagePage() {
       </section>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="ui-surface-elevated p-4 shadow-md">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Aniversários</p>
+        <div className="ui-feature-block">
+          <p className="ui-feature-title text-muted">Aniversários</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight text-text">{people.length}</p>
-          <p className="mt-1 text-xs text-muted">Total cadastrado (guest/local-first ou sync via Supabase).</p>
-        </Card>
-        <Card className="ui-surface-elevated p-4 shadow-md">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Categorias</p>
+          <p className="mt-1 text-xs text-muted ui-feature-body">Total cadastrado (guest/local-first ou sync via Supabase).</p>
+        </div>
+        <div className="ui-feature-block">
+          <p className="ui-feature-title text-muted">Categorias</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight text-text">{categoryRows.length}</p>
-          <p className="mt-1 text-xs text-muted">Predefinidas + custom (custom são editáveis/excluíveis nesta tela).</p>
-        </Card>
-        <Card className="ui-surface-elevated p-4 shadow-md">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Em uso</p>
+          <p className="mt-1 text-xs text-muted ui-feature-body">Predefinidas + custom (custom são editáveis/excluíveis nesta tela).</p>
+        </div>
+        <div className="ui-feature-block">
+          <p className="ui-feature-title text-muted">Em uso</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight text-text">
             {categoryRows.filter((row) => row.usageCount > 0).length}
           </p>
-          <p className="mt-1 text-xs text-muted">Categorias com pelo menos um aniversário associado.</p>
-        </Card>
+          <p className="mt-1 text-xs text-muted ui-feature-body">Categorias com pelo menos um aniversário associado.</p>
+        </div>
       </div>
 
       <div
         role="tablist"
         aria-label="Gestão de aniversários e categorias"
-        className="ui-surface-elevated flex flex-wrap gap-2 rounded-2xl border p-2 shadow-md"
+        className="ui-panel-soft flex flex-wrap gap-2 rounded-2xl border p-2"
       >
         <button
           type="button"
@@ -380,7 +380,7 @@ export default function ManagePage() {
           onClick={() => setTab("birthdays")}
           className={[
             "ui-focus-surface min-h-10 rounded-xl border px-3 py-2 text-sm font-medium",
-            tab === "birthdays" ? "bg-primary text-primaryForeground shadow-sm border-primary/40" : ""
+            tab === "birthdays" ? "bg-primary text-primaryForeground border-primary/50" : "border-border/60"
           ].join(" ")}
         >
           Aniversários
@@ -392,7 +392,7 @@ export default function ManagePage() {
           onClick={() => setTab("categories")}
           className={[
             "ui-focus-surface min-h-10 rounded-xl border px-3 py-2 text-sm font-medium",
-            tab === "categories" ? "bg-primary text-primaryForeground shadow-sm border-primary/40" : ""
+            tab === "categories" ? "bg-primary text-primaryForeground border-primary/50" : "border-border/60"
           ].join(" ")}
         >
           Categorias
@@ -408,7 +408,7 @@ export default function ManagePage() {
         </Card>
       ) : tab === "birthdays" ? (
         <section className="space-y-4" role="tabpanel" aria-label="Lista de aniversários">
-          <Card variant="elevated" className="p-4 shadow-md sm:p-5">
+          <Card variant="elevated" className="p-4 sm:p-5">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <FieldGroup>
                 <FieldLabel htmlFor="manage-birthday-search">Buscar</FieldLabel>
@@ -472,12 +472,12 @@ export default function ManagePage() {
           </Card>
 
           {filteredPeople.length === 0 ? (
-            <Card className="ui-surface-elevated p-8 text-center shadow-md sm:p-10">
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-paper text-2xl shadow-sm dark:bg-surface/55" aria-hidden>🎯</div>
-              <h2 className="mt-4 text-xl font-semibold tracking-tight text-text">Nada por aqui com esses filtros</h2>
-              <p className="mt-2 max-w-[38ch] mx-auto text-sm text-muted">Ajuste os filtros ou cadastre um novo aniversário para continuar.</p>
-              <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-11 min-w-[10rem] items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
+            <div className="ui-empty-hero">
+              <div className="ui-empty-icon" aria-hidden>🎯</div>
+              <h2 className="ui-empty-title">Nada por aqui com esses filtros</h2>
+              <p className="ui-empty-subtitle">Ajuste os filtros ou cadastre um novo aniversário para continuar.</p>
+              <div className="ui-empty-actions">
+                <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-11 min-w-[10rem] items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
                   Adicionar aniversário
                 </Link>
                 <button
@@ -493,14 +493,14 @@ export default function ManagePage() {
                   Limpar filtros
                 </button>
               </div>
-            </Card>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="ui-list">
               {filteredPeople.map((person) => {
                 const personCategories = getPersonCategories(person);
                 const deleting = busyKey === `birthday-delete:${person.id}`;
                 return (
-                  <Card key={person.id} className="ui-surface-elevated p-4 shadow-md">
+                  <div key={person.id} className="ui-list-item">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -543,7 +543,7 @@ export default function ManagePage() {
                         </Button>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 );
               })}
             </div>
@@ -551,7 +551,7 @@ export default function ManagePage() {
         </section>
       ) : (
         <section className="space-y-4" role="tabpanel" aria-label="Lista de categorias">
-          <Card variant="elevated" className="p-4 shadow-md sm:p-5">
+          <Card variant="elevated" className="p-4 sm:p-5">
             <div className="grid gap-3 md:grid-cols-3">
               <FieldGroup>
                 <FieldLabel htmlFor="manage-category-search">Buscar categoria</FieldLabel>
@@ -600,16 +600,16 @@ export default function ManagePage() {
           </Card>
 
           {filteredCategoryRows.length === 0 ? (
-            <Card className="ui-surface-elevated p-8 text-center shadow-md sm:p-10">
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-paper text-2xl shadow-sm dark:bg-surface/55" aria-hidden>📁</div>
-              <h2 className="mt-4 text-xl font-semibold tracking-tight text-text">Nenhuma categoria com esses critérios</h2>
-              <p className="mt-2 max-w-[38ch] mx-auto text-sm text-muted">Revise os filtros ou adicione aniversários para criar categorias em uso.</p>
-              <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-11 min-w-[10rem] items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
+            <div className="ui-empty-hero">
+              <div className="ui-empty-icon" aria-hidden>📁</div>
+              <h2 className="ui-empty-title">Nenhuma categoria com esses critérios</h2>
+              <p className="ui-empty-subtitle">Revise os filtros ou adicione aniversários para criar categorias em uso.</p>
+              <div className="ui-empty-actions">
+                <Link href="/person" className="btn-primary-brand ui-cta-primary inline-flex h-11 min-w-[10rem] items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2">
                   Adicionar aniversário
                 </Link>
               </div>
-            </Card>
+            </div>
           ) : (
             <div className="space-y-3">
               {filteredCategoryRows.map((row) => {

@@ -879,6 +879,10 @@
   gap: 8px;
 }
 
+.landing .footer-logo .topnav-brand-title {
+  font-size: 20px;
+}
+
 .landing .footer-links {
   display: flex;
   gap: 28px;
