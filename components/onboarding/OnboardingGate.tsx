@@ -40,9 +40,17 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   }, [showGuestTooltip]);
 
   const onboardingParam = searchParams.get("onboarding") === "1";
+  const obStep = searchParams.get("obStep");
   const force = searchParams.get("force") === "1";
   const v2Seen = mounted && getOnboardingV2Seen();
   const showWizard = mounted && !dismissed && (force || !v2Seen);
+
+  useEffect(() => {
+    if (!showWizard || !obStep) return;
+    if (obStep === "alerts") setStep(2);
+    else if (obStep === "people") setStep(3);
+    else if (obStep === "tips") setStep(4);
+  }, [showWizard, obStep]);
 
   const closeWizard = useCallback(() => {
     setOnboardingV2Seen();
@@ -308,7 +316,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                 <>
                   <Link
                     ref={primaryActionRef as RefObject<HTMLAnchorElement>}
-                    href="/person"
+                    href={`/person?returnTo=${encodeURIComponent("/today?onboarding=1&obStep=people")}`}
                     className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
                   >
                     Adicionar pessoa

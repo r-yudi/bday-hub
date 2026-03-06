@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
@@ -35,20 +35,22 @@ function PersonPageContent() {
     };
   }, [id]);
 
+  const returnTo = searchParams.get("returnTo") || "/today";
+
   async function handleSave(person: BirthdayPerson) {
     const isNewPerson = !id;
     await upsertBirthday(person);
     if (isNewPerson) {
       queueBirthdayAddedToast();
     }
-    router.push("/today");
+    router.push(returnTo);
   }
 
   async function handleDelete(personId: string) {
     const confirmed = window.confirm("Excluir este aniversário?");
     if (!confirmed) return;
     await deleteBirthday(personId);
-    router.push("/today");
+    router.push(returnTo);
   }
 
   return (
@@ -61,7 +63,7 @@ function PersonPageContent() {
           <p className="ui-subtitle-editorial mt-2 text-sm sm:text-[15px]">Adicione nome, data e categorias em poucos passos.</p>
         </div>
         <Link
-          href="/today"
+          href={returnTo}
           className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
         >
           Voltar
