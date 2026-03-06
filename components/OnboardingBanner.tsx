@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const DISMISS_KEY = "today_add_more_banner_dismissed";
+const DISMISS_KEY = "onboarding_banner_dismissed_v1";
 
 type OnboardingBannerProps = {
   count: number;
@@ -38,10 +38,10 @@ export function OnboardingBanner({ count, mounted }: OnboardingBannerProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <h2 className="font-semibold tracking-tight text-text">
-            Adicione mais algumas pessoas
+            Complete sua lista ({count} de 5)
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Com 5 aniversários cadastrados o Lembra já começa a te ajudar no dia a dia.
+            Com 5 pessoas, o Lembra já começa a te lembrar na hora certa.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
