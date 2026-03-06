@@ -50,8 +50,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
     router.replace("/today");
   }, [router]);
 
-  useEffect(() => {
-    if (!mounted || step < 2) return;
+  const refreshAlertsDone = useCallback(() => {
     Promise.all([getSettings(), getEmailReminderSettings(), getPushSettings()])
       .then(([settings, email, push]) => {
         const anyOn = Boolean(
@@ -62,7 +61,16 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
         if (anyOn) setAlertsDone(true);
       })
       .catch(() => {});
-  }, [mounted, step, user?.id]);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || step < 2) return;
+    refreshAlertsDone();
+  }, [mounted, step, user?.id, refreshAlertsDone]);
+
+  useEffect(() => {
+    if (showSuccessModal) refreshAlertsDone();
+  }, [showSuccessModal, refreshAlertsDone]);
 
   useEffect(() => {
     if (user && step === 1) setStep(2);
@@ -130,7 +138,10 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
           <p className="mt-2 text-sm text-muted">
             Quando alguém da sua lista fizer aniversário, o Lembra vai te avisar no horário escolhido.
           </p>
-          <div className="mt-6">
+          <p className="mt-2 text-sm text-muted">
+            Quando chegar o próximo aniversário da sua lista, o Lembra te avisa no horário escolhido.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
             <Link
               href="/people"
               onClick={() => setShowSuccessModal(false)}
@@ -138,6 +149,15 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             >
               Ver minha lista
             </Link>
+            {!alertsDone && (
+              <Link
+                href="/settings"
+                onClick={() => setShowSuccessModal(false)}
+                className="ui-cta-secondary inline-flex h-11 w-full items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                Configurar alertas
+              </Link>
+            )}
           </div>
         </div>
       </div>
