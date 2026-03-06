@@ -7,6 +7,7 @@ import { PersonCard } from "@/components/PersonCard";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { AppToast } from "@/components/AppToast";
+import { Chip } from "@/components/ui/Chip";
 import { getTodayPeople, getUpcomingPeople, formatRelativeLabel } from "@/lib/dates";
 import { deleteBirthday, importCsvBirthdays, listBirthdays } from "@/lib/birthdaysRepo";
 import { buildAddBirthdayToast, consumeBirthdayAddedToast, type OnboardingToast } from "@/lib/onboarding-ui";
@@ -42,10 +43,23 @@ export default function TodayPage() {
     void loadData();
   }, [mounted]);
 
+  const LIST_COMPLETE_TOAST_KEY = "onboarding_banner_complete_toast_shown_v1";
   useEffect(() => {
     if (!mounted || loading) return;
-    if (!consumeBirthdayAddedToast()) return;
-    setToast(buildAddBirthdayToast(people.length));
+    if (consumeBirthdayAddedToast()) {
+      setToast(buildAddBirthdayToast(people.length));
+      return;
+    }
+    if (people.length >= 5) {
+      try {
+        if (localStorage.getItem(LIST_COMPLETE_TOAST_KEY) !== "1") {
+          localStorage.setItem(LIST_COMPLETE_TOAST_KEY, "1");
+          setToast({ title: "Perfeito — sua lista já está pronta 🎉", tone: "success" });
+        }
+      } catch {
+        // ignore
+      }
+    }
   }, [mounted, loading, people.length]);
 
   const todayPeople = useMemo(() => getTodayPeople(people), [people]);
@@ -206,10 +220,7 @@ export default function TodayPage() {
               {upcomingPeople.length === 0 ? (
                 <div className="ui-panel-soft rounded-2xl border border-border/80 p-6">
                   <p className="text-sm text-muted">
-                    Nenhum aniversário nos próximos dias.
-                  </p>
-                  <p className="mt-1 text-sm text-muted">
-                    Adicione algumas pessoas importantes para o Lembra começar a te ajudar.
+                    Nada nos próximos dias. Adicione algumas pessoas para o Lembra começar a te ajudar.
                   </p>
                   <Link
                     href="/person"
@@ -220,11 +231,16 @@ export default function TodayPage() {
                 </div>
               ) : (
                 <div className="ui-list rounded-2xl border border-border/80 bg-surface2/30 divide-y divide-border/60">
-                  {upcomingPeople.map((person) => (
+                  {upcomingPeople.map((person, index) => (
                     <div key={person.id} className="ui-list-item flex flex-wrap items-center justify-between gap-2 py-3">
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex flex-wrap items-center gap-2">
+                        {index === 0 && (
+                          <Chip as="span" variant="subtle" className="ui-chip">
+                            Próximo
+                          </Chip>
+                        )}
                         <span className="font-medium text-text">{person.name}</span>
-                        <span className="ml-2 text-sm text-muted">
+                        <span className="text-sm text-muted">
                           {formatRelativeLabel(person.daysUntil)} · {String(person.day).padStart(2, "0")}/{String(person.month).padStart(2, "0")}
                         </span>
                       </div>
