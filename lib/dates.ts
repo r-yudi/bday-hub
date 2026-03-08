@@ -102,5 +102,5 @@ export function getUpcomingPeople(
 export function formatRelativeLabel(daysUntil: number): string {
   if (daysUntil === 0) return "Hoje";
   if (daysUntil === 1) return "Amanhã";
-  return `Em ${daysUntil} dias`;
+  return `em ${daysUntil} dias`;
 }

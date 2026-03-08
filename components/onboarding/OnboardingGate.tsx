@@ -14,7 +14,6 @@ import {
   getOnboardingV2Seen,
   setOnboardingV2Seen
 } from "@/lib/onboarding-ui";
-import { SCRAP_CONFIGS, ScrapThumb } from "@/components/onboarding/scraps/overlays";
 
 type OnboardingGateProps = {
   peopleCount: number;
@@ -32,7 +31,6 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   const [alertsDone, setAlertsDone] = useState(false);
   const [showGuestTooltip, setShowGuestTooltip] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [lightboxTip, setLightboxTip] = useState<string | null>(null);
   const primaryActionRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const guestTooltipRef = useRef<HTMLDivElement | null>(null);
   const guestTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -42,9 +40,17 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
   }, [showGuestTooltip]);
 
   const onboardingParam = searchParams.get("onboarding") === "1";
+  const obStep = searchParams.get("obStep");
   const force = searchParams.get("force") === "1";
   const v2Seen = mounted && getOnboardingV2Seen();
   const showWizard = mounted && !dismissed && (force || !v2Seen);
+
+  useEffect(() => {
+    if (!showWizard || !obStep) return;
+    if (obStep === "alerts") setStep(2);
+    else if (obStep === "people") setStep(3);
+    else if (obStep === "tips") setStep(4);
+  }, [showWizard, obStep]);
 
   const closeWizard = useCallback(() => {
     setOnboardingV2Seen();
@@ -52,8 +58,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
     router.replace("/today");
   }, [router]);
 
-  useEffect(() => {
-    if (!mounted || step < 2) return;
+  const refreshAlertsDone = useCallback(() => {
     Promise.all([getSettings(), getEmailReminderSettings(), getPushSettings()])
       .then(([settings, email, push]) => {
         const anyOn = Boolean(
@@ -64,7 +69,16 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
         if (anyOn) setAlertsDone(true);
       })
       .catch(() => {});
-  }, [mounted, step, user?.id]);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || step < 2) return;
+    refreshAlertsDone();
+  }, [mounted, step, user?.id, refreshAlertsDone]);
+
+  useEffect(() => {
+    if (showSuccessModal) refreshAlertsDone();
+  }, [showSuccessModal, refreshAlertsDone]);
 
   useEffect(() => {
     if (user && step === 1) setStep(2);
@@ -132,7 +146,10 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
           <p className="mt-2 text-sm text-muted">
             Quando alguém da sua lista fizer aniversário, o Lembra vai te avisar no horário escolhido.
           </p>
-          <div className="mt-6">
+          <p className="mt-2 text-sm text-muted">
+            Quando chegar o próximo aniversário da sua lista, o Lembra te avisa no horário escolhido.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
             <Link
               href="/people"
               onClick={() => setShowSuccessModal(false)}
@@ -140,6 +157,15 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             >
               Ver minha lista
             </Link>
+            {!alertsDone && (
+              <Link
+                href="/settings"
+                onClick={() => setShowSuccessModal(false)}
+                className="ui-cta-secondary inline-flex h-11 w-full items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                Configurar alertas
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -290,7 +316,7 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
                 <>
                   <Link
                     ref={primaryActionRef as RefObject<HTMLAnchorElement>}
-                    href="/person"
+                    href={`/person?returnTo=${encodeURIComponent("/today?onboarding=1&obStep=people")}`}
                     className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
                   >
                     Adicionar pessoa
@@ -313,57 +339,27 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
             <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
               Dicas rápidas
             </h2>
-            <div className="mt-4 grid grid-cols-1 gap-4">
-              {[
-                { id: "editar", title: "Editar", text: "Altere nome, data ou categorias a qualquer momento." },
-                { id: "categorias", title: "Categorias", text: "Organize pessoas por família, amigos ou trabalho." },
-                { id: "compartilhar", title: "Compartilhar", text: "Crie um link para alguém adicionar aniversários à sua lista." }
-              ].map((tip) => (
-                <div key={tip.id} className="flex gap-3 rounded-xl border border-border p-3">
-                  <button
-                    type="button"
-                    onClick={() => setLightboxTip(tip.id)}
-                    className="ui-surface ui-focus-surface aspect-[16/10] w-32 shrink-0 overflow-hidden rounded-xl border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                  >
-                    <ScrapThumb
-                      config={SCRAP_CONFIGS[tip.id as keyof typeof SCRAP_CONFIGS]}
-                    />
-                  </button>
-                  <div className="min-w-0">
-                    <h3 className="font-medium text-text">{tip.title}</h3>
-                    <p className="mt-0.5 text-sm text-muted">{tip.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {lightboxTip && (
-              <div
-                className="ui-overlay-backdrop fixed inset-0 z-40 grid place-items-center p-4"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Visualização da dica"
-                onClick={() => setLightboxTip(null)}
-              >
-                <div
-                  className="ui-modal-surface relative max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setLightboxTip(null)}
-                    className="absolute right-2 top-2 z-10 rounded-lg p-1.5 text-muted hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                    aria-label="Fechar"
-                  >
-                    ✕
-                  </button>
-                  <div className="flex max-h-[85vh] min-h-[200px] w-full items-center justify-center">
-                    <ScrapThumb
-                      config={SCRAP_CONFIGS[lightboxTip as keyof typeof SCRAP_CONFIGS]}
-                    />
-                  </div>
-                </div>
+            <div className="mt-4 space-y-3">
+              <div className="ui-panel-soft rounded-xl p-4 space-y-1">
+                <h3 className="font-semibold text-text">Pessoas</h3>
+                <p className="text-sm text-muted">
+                  Veja todos os aniversários que você salvou.
+                  Você pode adicionar novos, editar informações ou remover quando quiser.
+                </p>
               </div>
-            )}
+              <div className="ui-panel-soft rounded-xl p-4 space-y-1">
+                <h3 className="font-semibold text-text">Compartilhar</h3>
+                <p className="text-sm text-muted">
+                  Envie um link para alguém adicionar um aniversário diretamente à própria lista.
+                </p>
+              </div>
+              <div className="ui-panel-soft rounded-xl p-4 space-y-1">
+                <h3 className="font-semibold text-text">Configurações</h3>
+                <p className="text-sm text-muted">
+                  Escolha como quer ser lembrado: notificações no app ou email diário.
+                </p>
+              </div>
+            </div>
             <div className="mt-6 flex justify-end">
               <button
                 ref={primaryActionRef as RefObject<HTMLButtonElement>}
