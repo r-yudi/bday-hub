@@ -120,6 +120,13 @@ function isAuthorized(request: Request): boolean {
   return bearer === `Bearer ${expected}`;
 }
 
+/** Allowed user IDs for single-user diagnostic/filter (env CRON_TEST_USER_ID, comma-separated). */
+function getAllowedTestUserIds(): string[] {
+  const raw = process.env.CRON_TEST_USER_ID;
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 function buildCronDeps(supabase: ReturnType<typeof getSupabaseAdminClient>): DailyEmailCronDeps {
   const table = () => supabase.from("daily_email_dispatch" as "user_settings");
   return {
@@ -179,22 +186,26 @@ export async function GET(request: Request) {
 
   const supabase = getSupabaseAdminClient();
   const now = new Date();
-  const xDebug = isTruthy(request.headers.get("x-debug"));
-  const debugUserId = (request.headers.get("x-debug-userid") ?? request.headers.get("x-debug-user-id"))?.trim() || null;
-  const xForce = isTruthy(request.headers.get("x-force")) || isTruthy(request.headers.get("x-debug-force"));
-  const xReset = isTruthy(request.headers.get("x-debug-reset"));
-  const forceCandidate = xForce && (process.env.NODE_ENV !== "production" || xDebug);
   const url = new URL(request.url);
+  const xDebug = isTruthy(request.headers.get("x-debug"));
+  const diagnosticParam = url.searchParams.get("diagnostic")?.toLowerCase() ?? "";
+  const diagnostic = xDebug || diagnosticParam === "1" || diagnosticParam === "true" || diagnosticParam === "yes";
+  const dryRun = url.searchParams.get("dry-run") === "true";
+  const allowedTestIds = getAllowedTestUserIds();
+  const debugUserId = (request.headers.get("x-debug-userid") ?? request.headers.get("x-debug-user-id"))?.trim() || null;
   const userIdParam = url.searchParams.get("userId");
-
+  const effectiveTestUserId =
+    (userIdParam && allowedTestIds.includes(userIdParam) ? userIdParam : null) ||
+    (debugUserId && allowedTestIds.includes(debugUserId) ? debugUserId : null);
+  const xReset = isTruthy(request.headers.get("x-debug-reset"));
   const serverNowIso = now.toISOString();
   const serverNowUtc = now.toUTCString();
 
-  if (xDebug && userIdParam) {
+  if (diagnostic && effectiveTestUserId) {
     const { data: userRow, error: userError } = await supabase
       .from("user_settings")
       .select("user_id,email_enabled,email_time,timezone,push_enabled")
-      .eq("user_id", userIdParam)
+      .eq("user_id", effectiveTestUserId)
       .maybeSingle();
     if (userError) {
       return NextResponse.json(
@@ -229,7 +240,7 @@ export async function GET(request: Request) {
     const computedDateKey = getDateKey(now, tzForReset);
     let resetAttempted = false;
     let resetDeletedCount = 0;
-    if (xDebug && xReset) {
+    if (!dryRun && xReset) {
       resetAttempted = true;
       const { data: deleted, error: delError } = await supabase
         .from("daily_email_dispatch" as "user_settings")
@@ -240,40 +251,70 @@ export async function GET(request: Request) {
       if (!delError && Array.isArray(deleted)) resetDeletedCount = deleted.length;
     }
     const userDebug = getCandidateDebug(row, now);
-    const treatAsCandidate = userDebug.isCandidate || forceCandidate;
-    const deps = buildCronDeps(supabase);
+    const treatAsCandidate = userDebug.isCandidate;
+    const debugUser = buildDebugUser(row, now, undefined);
     let outcome: ProcessOutcome | undefined;
     let insertsAttempted = 0;
     let dispatchRowsWritten = 0;
     let lastError: string | undefined;
-    if (treatAsCandidate) {
+    let alreadyDispatchedCount = 0;
+    if (treatAsCandidate && !dryRun) {
+      const deps = buildCronDeps(supabase);
       insertsAttempted = 1;
-      outcome = await processOneCandidate(
-        deps,
-        row,
-        now,
-        forceCandidate ? { debugNoBirthdaysMessage: "forced_debug_no_birthdays" } : undefined
-      );
+      outcome = await processOneCandidate(deps, row, now);
       if (outcome.outcome === "sent") dispatchRowsWritten = 1;
       else if (outcome.outcome === "skipped" && outcome.reason !== "already_sent" && outcome.reason !== "already_processing") dispatchRowsWritten = 1;
       if (outcome.outcome === "failed") lastError = outcome.reason;
+      alreadyDispatchedCount =
+        outcome.outcome === "skipped" && (outcome.reason === "already_sent" || outcome.reason === "already_processing") ? 1 : 0;
+      Object.assign(debugUser, buildDebugUser(row, now, outcome));
+    } else if (treatAsCandidate && dryRun) {
+      const table = () => supabase.from("daily_email_dispatch" as "user_settings");
+      const existing = await (table() as ReturnType<typeof supabase.from>)
+        .select("id, status, created_at")
+        .eq("user_id", row.user_id)
+        .eq("date_key", computedDateKey)
+        .maybeSingle();
+      const data = existing.data as DispatchRow | null;
+      if (data?.status && data.status !== "pending") outcome = { outcome: "skipped", reason: "already_sent" };
+      else if (data?.status === "pending") outcome = { outcome: "skipped", reason: "already_processing" };
+      else {
+        const { day, month } = dateKeyToDayMonth(computedDateKey);
+        const bd = await supabase.from("birthdays").select("name,day,month").eq("user_id", row.user_id).eq("day", day).eq("month", month);
+        const to = (await supabase.auth.admin.getUserById(row.user_id)).data.user?.email ?? null;
+        const hasBirthdays = Array.isArray(bd.data) && bd.data.length > 0;
+        const hasValidEmail = typeof to === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to);
+        if (!hasBirthdays) outcome = { outcome: "skipped", reason: "no_birthday" };
+        else if (!hasValidEmail) outcome = { outcome: "skipped", reason: "invalid_email" };
+        else outcome = { outcome: "sent" };
+      }
+      Object.assign(debugUser, buildDebugUser(row, now, outcome));
     }
-    const debugUser = buildDebugUser(row, now, outcome, { forced: forceCandidate });
-    const alreadyDispatchedCount =
-      outcome?.outcome === "skipped" && (outcome.reason === "already_sent" || outcome.reason === "already_processing") ? 1 : 0;
+    const { day, month } = dateKeyToDayMonth(computedDateKey);
+    const birthdaysForToday =
+      (await supabase.from("birthdays").select("name,day,month").eq("user_id", row.user_id).eq("day", day).eq("month", month)).data ?? [];
+    const debugUserPayload = {
+      ...debugUser,
+      localNowHHMM: userDebug.localNowHHMM,
+      windowStart: userDebug.windowStart,
+      windowEnd: userDebug.windowEnd,
+      reasonIfNot: userDebug.reasonIfNot,
+      birthdaysFoundForToday: birthdaysForToday.length
+    };
     return NextResponse.json({
       ok: true,
+      dryRun: dryRun,
       scannedUsers: 1,
       candidates: treatAsCandidate ? 1 : 0,
       insertsAttempted,
-      dispatchRowsWritten,
+      dispatchRowsWritten: dryRun ? 0 : (outcome?.outcome === "sent" ? 1 : outcome?.outcome === "skipped" && outcome.reason !== "already_sent" && outcome.reason !== "already_processing" ? 1 : 0),
       skippedAlreadySent: outcome?.outcome === "skipped" && outcome.reason !== "no_birthday" && outcome.reason !== "invalid_email" ? 1 : 0,
       alreadyDispatchedCount,
       lastError,
       debug: {
         serverNowIso,
         serverNowUtc,
-        debugUser,
+        debugUser: debugUserPayload,
         reset: { attempted: resetAttempted, deletedCount: resetDeletedCount }
       }
     });
@@ -282,6 +323,7 @@ export async function GET(request: Request) {
   const deps = buildCronDeps(supabase);
   const summary = {
     scannedUsers: 0,
+    outsideWindow: 0,
     candidates: 0,
     sent: 0,
     skippedNoBirthday: 0,
@@ -299,11 +341,11 @@ export async function GET(request: Request) {
   let resetDeletedCount = 0;
 
   let rows: UserSettingsReminderRow[];
-  if (debugUserId) {
+  if (effectiveTestUserId) {
     const { data: userRow, error: userError } = await supabase
       .from("user_settings")
       .select("user_id,email_enabled,email_time,timezone,push_enabled")
-      .eq("user_id", debugUserId)
+      .eq("user_id", effectiveTestUserId)
       .maybeSingle();
     if (userError) {
       return NextResponse.json({ ok: false, message: userError.message }, { status: 500 });
@@ -321,7 +363,7 @@ export async function GET(request: Request) {
   }
   summary.scannedUsers = rows.length;
 
-  if (xDebug && debugUserId && xReset && rows.length > 0) {
+  if (!dryRun && diagnostic && effectiveTestUserId && xReset && rows.length > 0) {
     const row0 = rows[0];
     const tz0 = (row0.timezone || "America/Sao_Paulo").trim();
     const dateKey0 = getDateKey(now, tz0);
@@ -329,7 +371,7 @@ export async function GET(request: Request) {
     const { data: deleted, error: delError } = await supabase
       .from("daily_email_dispatch" as "user_settings")
       .delete()
-      .eq("user_id", debugUserId)
+      .eq("user_id", effectiveTestUserId)
       .eq("date_key", dateKey0)
       .select("id");
     if (!delError && Array.isArray(deleted)) resetDeletedCount = deleted.length;
@@ -337,27 +379,58 @@ export async function GET(request: Request) {
 
   let singleUserOutcome: ProcessOutcome | { skipReason: string } | null = null;
 
+  const tableDispatch = () => supabase.from("daily_email_dispatch" as "user_settings");
   for (const row of rows) {
     const timezone = (row.timezone || "America/Sao_Paulo").trim();
     const emailTime = (row.email_time || "09:00").trim();
     const isInWindow = shouldSendForNow(emailTime, timezone, now);
-    const treatAsCandidate =
-      isInWindow || (forceCandidate && debugUserId !== null && row.user_id === debugUserId);
+    const treatAsCandidate = isInWindow;
 
     if (!treatAsCandidate) {
+      summary.outsideWindow += 1;
       skipReasons.push({ userId: row.user_id, skipReason: "outside_window" });
       if (rows.length === 1) singleUserOutcome = { skipReason: "outside_window" };
       continue;
     }
     summary.candidates += 1;
-    summary.insertsAttempted += 1;
 
-    const outcome = await processOneCandidate(
-      deps,
-      row,
-      now,
-      forceCandidate ? { debugNoBirthdaysMessage: "forced_debug_no_birthdays" } : undefined
-    );
+    if (dryRun) {
+      summary.insertsAttempted += 1;
+      const dateKey = getDateKey(now, timezone);
+      const { day, month } = dateKeyToDayMonth(dateKey);
+      const existing = await (tableDispatch() as ReturnType<typeof supabase.from>)
+        .select("id, status, created_at")
+        .eq("user_id", row.user_id)
+        .eq("date_key", dateKey)
+        .maybeSingle();
+      const data = existing.data as DispatchRow | null;
+      if (data?.status && data.status !== "pending") {
+        summary.alreadyDispatchedCount += 1;
+        if (rows.length === 1) singleUserOutcome = { outcome: "skipped", reason: "already_sent" };
+      } else if (data?.status === "pending") {
+        summary.alreadyDispatchedCount += 1;
+        if (rows.length === 1) singleUserOutcome = { outcome: "skipped", reason: "already_processing" };
+      } else {
+        const bd = await supabase.from("birthdays").select("name,day,month").eq("user_id", row.user_id).eq("day", day).eq("month", month);
+        const to = (await supabase.auth.admin.getUserById(row.user_id)).data.user?.email ?? null;
+        const hasBirthdays = Array.isArray(bd.data) && bd.data.length > 0;
+        const hasValidEmail = typeof to === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to);
+        if (!hasBirthdays) {
+          summary.skippedNoBirthday += 1;
+          if (rows.length === 1) singleUserOutcome = { outcome: "skipped", reason: "no_birthday" };
+        } else if (!hasValidEmail) {
+          summary.skippedInvalidEmail += 1;
+          if (rows.length === 1) singleUserOutcome = { outcome: "skipped", reason: "invalid_email" };
+        } else {
+          summary.sent += 1;
+          if (rows.length === 1) singleUserOutcome = { outcome: "sent" };
+        }
+      }
+      continue;
+    }
+
+    summary.insertsAttempted += 1;
+    const outcome = await processOneCandidate(deps, row, now);
     if (rows.length === 1) singleUserOutcome = outcome;
 
     if ("recoveredStale" in outcome && outcome.recoveredStale) summary.recoveredStale += 1;
@@ -393,35 +466,45 @@ export async function GET(request: Request) {
     }
   }
 
-  const showDebug = process.env.NODE_ENV !== "production" || xDebug;
+  const showDebug = diagnostic;
   const body: Record<string, unknown> = { ok: true, ...summary };
+  if (dryRun) body.dryRun = true;
   if (showDebug) {
     const debug: Record<string, unknown> = {
       serverNowIso,
       serverNowUtc,
       scannedUsers: summary.scannedUsers,
+      outsideWindow: summary.outsideWindow,
       candidates: summary.candidates,
       insertsAttempted: summary.insertsAttempted,
       dispatchRowsWritten: summary.dispatchRowsWritten,
       skippedAlreadySent: summary.skippedAlreadySent,
       alreadyDispatchedCount: summary.alreadyDispatchedCount,
       lastError: summary.lastError ?? undefined,
-      forcedUserId: debugUserId ?? undefined,
-      forced: forceCandidate,
+      testUserId: effectiveTestUserId ?? undefined,
       skipReasons: skipReasons.length ? skipReasons : undefined,
       reset: { attempted: resetAttempted, deletedCount: resetDeletedCount }
     };
     if (rows.length === 1) {
-      debug.debugUser = buildDebugUser(rows[0], now, singleUserOutcome ?? undefined, { forced: forceCandidate });
-      const row = rows[0];
-      const tz = (row.timezone || "America/Sao_Paulo").trim();
-      const parts = getDatePartsInTimeZone(tz, now);
-      const dateKey = getDateKey(now, tz);
-      const { day, month } = dateKeyToDayMonth(dateKey);
-      const birthdaysResult = await deps.getBirthdays(row.user_id, day, month);
-      debug.todayInUserTz = parts.isoDate;
-      debug.nowInUserTz = parts.hhmm;
-      debug.birthdaysFoundForToday = Array.isArray(birthdaysResult) ? birthdaysResult.length : 0;
+      const row0 = rows[0];
+      const candidateDebug = getCandidateDebug(row0, now);
+      const tz0 = (row0.timezone || "America/Sao_Paulo").trim();
+      const parts0 = getDatePartsInTimeZone(tz0, now);
+      const dateKey0 = getDateKey(now, tz0);
+      const { day, month } = dateKeyToDayMonth(dateKey0);
+      const birthdaysResult = await deps.getBirthdays(row0.user_id, day, month);
+      const birthdaysCount = Array.isArray(birthdaysResult) ? birthdaysResult.length : 0;
+      debug.todayInUserTz = parts0.isoDate;
+      debug.nowInUserTz = parts0.hhmm;
+      debug.birthdaysFoundForToday = birthdaysCount;
+      debug.debugUser = {
+        ...buildDebugUser(row0, now, singleUserOutcome ?? undefined),
+        localNowHHMM: candidateDebug.localNowHHMM,
+        windowStart: candidateDebug.windowStart,
+        windowEnd: candidateDebug.windowEnd,
+        reasonIfNot: candidateDebug.reasonIfNot,
+        birthdaysFoundForToday: birthdaysCount
+      };
     }
     body.debug = debug;
   }
