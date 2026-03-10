@@ -168,6 +168,120 @@ test("stale pending: atomic claim succeeds -> process and update status", async 
   assert.ok(updateCalls.some((u) => u.status === "skipped"));
 });
 
+test("today wins: when today has birthdays only one getBirthdays (today) and send today email", async () => {
+  let getBirthdaysCalls: Array<{ day: number; month: number }> = [];
+  let sentSubject = "";
+  const deps: DailyEmailCronDeps = {
+    insertDispatch: async () => ({ id: "id-1" }),
+    getExistingDispatch: async () => null,
+    claimStalePending: async () => false,
+    updateDispatch: async () => {},
+    getBirthdays: async (_userId, day, month) => {
+      getBirthdaysCalls.push({ day, month });
+      return [{ name: "Alice", day: 10, month: 3 }];
+    },
+    getUserEmail: async () => "u@example.com",
+    sendReminderEmail: async (input) => {
+      sentSubject = input.subject;
+      return { ok: true };
+    }
+  };
+  const outcome = await processOneCandidate(deps, ROW, NOW);
+  assert.equal(outcome.outcome, "sent");
+  assert.equal(getBirthdaysCalls.length, 1);
+  assert.equal(getBirthdaysCalls[0].day, 10);
+  assert.equal(getBirthdaysCalls[0].month, 3);
+  assert.ok(sentSubject.includes("Hoje") || sentSubject.includes("Alice"));
+  assert.ok(!sentSubject.includes("Amanhã"));
+});
+
+test("tomorrow sends when today empty: subject and hero are tomorrow copy", async () => {
+  let sentPayload: { subject: string; html: string } | null = null;
+  const deps: DailyEmailCronDeps = {
+    insertDispatch: async () => ({ id: "id-1" }),
+    getExistingDispatch: async () => null,
+    claimStalePending: async () => false,
+    updateDispatch: async () => {},
+    getBirthdays: async (_userId, day, month) => {
+      if (day === 10 && month === 3) return [];
+      return [{ name: "Bob", day: 11, month: 3 }];
+    },
+    getUserEmail: async () => "u@example.com",
+    sendReminderEmail: async (input) => {
+      sentPayload = { subject: input.subject, html: input.html };
+      return { ok: true };
+    }
+  };
+  const outcome = await processOneCandidate(deps, ROW, NOW);
+  assert.equal(outcome.outcome, "sent");
+  assert.ok(sentPayload);
+  assert.ok(sentPayload!.subject.includes("Amanhã"));
+  assert.ok(sentPayload!.subject.includes("Bob"));
+  assert.ok(sentPayload!.html.includes("Amanhã alguém importante faz aniversário"));
+  assert.ok(sentPayload!.html.includes("Amanhã tem aniversário chegando"));
+});
+
+test("priority tomorrow over 7 days: when today empty, tomorrow and 7 days both have birthdays, send tomorrow email", async () => {
+  let getBirthdaysCalls: Array<{ day: number; month: number }> = [];
+  let sentPayload: { subject: string; html: string } | null = null;
+  const deps: DailyEmailCronDeps = {
+    insertDispatch: async () => ({ id: "id-1" }),
+    getExistingDispatch: async () => null,
+    claimStalePending: async () => false,
+    updateDispatch: async () => {},
+    getBirthdays: async (_userId, day, month) => {
+      getBirthdaysCalls.push({ day, month });
+      if (day === 10 && month === 3) return [];
+      if (day === 11 && month === 3) return [{ name: "Bob", day: 11, month: 3 }];
+      return [{ name: "Carol", day: 17, month: 3 }];
+    },
+    getUserEmail: async () => "u@example.com",
+    sendReminderEmail: async (input) => {
+      sentPayload = { subject: input.subject, html: input.html };
+      return { ok: true };
+    }
+  };
+  const outcome = await processOneCandidate(deps, ROW, NOW);
+  assert.equal(outcome.outcome, "sent");
+  assert.equal(getBirthdaysCalls.length, 2, "must query only today and tomorrow, not 7 days");
+  assert.deepEqual(getBirthdaysCalls[0], { day: 10, month: 3 });
+  assert.deepEqual(getBirthdaysCalls[1], { day: 11, month: 3 });
+  assert.ok(sentPayload);
+  assert.ok(sentPayload!.subject.includes("Amanhã"));
+  assert.ok(sentPayload!.subject.includes("Bob"));
+  assert.ok(!sentPayload!.subject.includes("7 dias") && !sentPayload!.subject.includes("semana"));
+  assert.ok(sentPayload!.html.includes("Amanhã alguém importante faz aniversário"));
+  assert.ok(sentPayload!.html.includes("Bob"));
+  assert.ok(!sentPayload!.html.includes("Um aniversário está chegando"));
+});
+
+test("7 days sends when today and tomorrow empty: subject and hero are week copy", async () => {
+  let sentPayload: { subject: string; html: string } | null = null;
+  const deps: DailyEmailCronDeps = {
+    insertDispatch: async () => ({ id: "id-1" }),
+    getExistingDispatch: async () => null,
+    claimStalePending: async () => false,
+    updateDispatch: async () => {},
+    getBirthdays: async (_userId, day, month) => {
+      if (day === 10 && month === 3) return [];
+      if (day === 11 && month === 3) return [];
+      return [{ name: "Carol", day: 17, month: 3 }];
+    },
+    getUserEmail: async () => "u@example.com",
+    sendReminderEmail: async (input) => {
+      sentPayload = { subject: input.subject, html: input.html };
+      return { ok: true };
+    }
+  };
+  const outcome = await processOneCandidate(deps, ROW, NOW);
+  assert.equal(outcome.outcome, "sent");
+  assert.ok(sentPayload);
+  assert.ok(sentPayload!.subject.includes("7 dias") || sentPayload!.subject.includes("semana"));
+  assert.ok(sentPayload!.subject.includes("Carol"));
+  assert.ok(sentPayload!.html.includes("Um aniversário está chegando"));
+  assert.ok(sentPayload!.html.includes("Carol"));
+});
+
 test("stale pending: atomic claim fails -> already_processing, sendReminderEmail NOT called", async () => {
   const oldCreated = new Date(NOW.getTime() - 3 * 60 * 60 * 1000).toISOString();
   let sendCalls = 0;
@@ -193,4 +307,16 @@ test("stale pending: atomic claim fails -> already_processing, sendReminderEmail
   assert.equal(outcome.outcome, "skipped");
   assert.equal(outcome.outcome === "skipped" && outcome.reason, "already_processing");
   assert.equal(sendCalls, 0);
+});
+
+test("cron route returns 401 without valid CRON_SECRET", async () => {
+  const { GET } = await import("@/app/api/cron/email/route");
+  const req = new Request("https://uselembra.com.br/api/cron/email", {
+    headers: { Authorization: "Bearer wrong-secret" }
+  });
+  const res = await GET(req);
+  assert.equal(res.status, 401);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.equal(body.message, "unauthorized");
 });

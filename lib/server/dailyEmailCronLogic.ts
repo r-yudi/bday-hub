@@ -3,7 +3,7 @@
  * Exported for use in route and unit tests (mocked deps).
  */
 
-import { getDateKey } from "@/lib/timezone";
+import { addDaysToDateKey, getDateKey } from "@/lib/timezone";
 import { buildDailyReminderEmail, getDatePartsInTimeZone } from "@/lib/server/dailyReminderDigest";
 
 export const STALE_PENDING_MS = 2 * 60 * 60 * 1000;
@@ -221,13 +221,41 @@ export async function processOneCandidate(
     return { outcome: "failed", reason: birthdaysResult.error };
   }
 
-  const birthdays = birthdaysResult;
+  let birthdays = birthdaysResult;
+  let digestIsoDate = dateKey;
+  let mode: "today" | "tomorrow" | "week" = "today";
+
   if (birthdays.length === 0) {
-    await deps.updateDispatch(dispatchId, {
-      status: "skipped",
-      ...(options?.debugNoBirthdaysMessage && { error_message: options.debugNoBirthdaysMessage })
-    });
-    return { outcome: "skipped", reason: "no_birthday", ...(recoveredStale && { recoveredStale: true }) };
+    const tomorrowDateKey = addDaysToDateKey(dateKey, 1);
+    const { day: dayTomorrow, month: monthTomorrow } = dateKeyToDayMonth(tomorrowDateKey);
+    const birthdaysTomorrowResult = await deps.getBirthdays(row.user_id, dayTomorrow, monthTomorrow);
+    if (!Array.isArray(birthdaysTomorrowResult)) {
+      await deps.updateDispatch(dispatchId, { status: "error", error_message: truncateError(birthdaysTomorrowResult.error) });
+      return { outcome: "failed", reason: birthdaysTomorrowResult.error };
+    }
+    if (birthdaysTomorrowResult.length > 0) {
+      birthdays = birthdaysTomorrowResult;
+      digestIsoDate = tomorrowDateKey;
+      mode = "tomorrow";
+    } else {
+      const weekDateKey = addDaysToDateKey(dateKey, 7);
+      const { day: dayWeek, month: monthWeek } = dateKeyToDayMonth(weekDateKey);
+      const birthdaysWeekResult = await deps.getBirthdays(row.user_id, dayWeek, monthWeek);
+      if (!Array.isArray(birthdaysWeekResult)) {
+        await deps.updateDispatch(dispatchId, { status: "error", error_message: truncateError(birthdaysWeekResult.error) });
+        return { outcome: "failed", reason: birthdaysWeekResult.error };
+      }
+      if (birthdaysWeekResult.length === 0) {
+        await deps.updateDispatch(dispatchId, {
+          status: "skipped",
+          ...(options?.debugNoBirthdaysMessage && { error_message: options.debugNoBirthdaysMessage })
+        });
+        return { outcome: "skipped", reason: "no_birthday", ...(recoveredStale && { recoveredStale: true }) };
+      }
+      birthdays = birthdaysWeekResult;
+      digestIsoDate = weekDateKey;
+      mode = "week";
+    }
   }
 
   const to = await deps.getUserEmail(row.user_id);
@@ -236,7 +264,7 @@ export async function processOneCandidate(
     return { outcome: "skipped", reason: "invalid_email" };
   }
 
-  const digest = buildDailyReminderEmail(birthdays);
+  const digest = buildDailyReminderEmail(birthdays, digestIsoDate, mode);
   const sent = await deps.sendReminderEmail({ to, subject: digest.subject, html: digest.html, text: digest.text });
 
   if (!sent.ok) {
