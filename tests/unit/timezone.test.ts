@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getDateKey } from "@/lib/timezone";
+import { addDaysToDateKey, getDateKey } from "@/lib/timezone";
 
 test("getDateKey returns YYYY-MM-DD for America/Sao_Paulo", () => {
   const date = new Date("2026-06-15T12:00:00Z");
@@ -43,4 +43,16 @@ test("getDateKey works with UTC", () => {
   const date = new Date("2026-12-31T23:59:00Z");
   const result = getDateKey(date, "UTC");
   assert.equal(result, "2026-12-31");
+});
+
+test("addDaysToDateKey +1 day", () => {
+  assert.equal(addDaysToDateKey("2026-03-10", 1), "2026-03-11");
+});
+
+test("addDaysToDateKey month rollover", () => {
+  assert.equal(addDaysToDateKey("2026-03-31", 1), "2026-04-01");
+});
+
+test("addDaysToDateKey year rollover", () => {
+  assert.equal(addDaysToDateKey("2026-12-31", 1), "2027-01-01");
 });
