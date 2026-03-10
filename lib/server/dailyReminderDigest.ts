@@ -45,6 +45,7 @@ export function getDatePartsInTimeZone(timezone: string, now = new Date()) {
 const BRAND = "Lembra.";
 const APP_URL = "https://uselembra.com.br/today";
 const ACCENT_HEX = "#f26452";
+const BORDER_WEEK = "#e0e0e0";
 
 function formatDateForLocale(isoDate: string): string {
   const [y, m, d] = isoDate.split("-").map(Number);
@@ -159,29 +160,38 @@ export function buildDailyReminderEmail(
           : "Não deixe esse momento passar. Um parabéns pode transformar o dia de alguém.";
   const ctaLabel = isWeek ? "🎁 Abrir Lembra" : "🎂 Abrir Lembra";
 
+  const containerBorderTop = isWeek ? BORDER_WEEK : ACCENT_HEX;
   const items =
     total === 0
       ? ""
       : names
           .map(
             (person) =>
-              `<li style="margin:0 0 10px 0;padding:0 0 10px 0;border-bottom:1px solid #eee;list-style:none;font-size:16px;color:#333;"><strong style="color:#1a1a1a;">${person.name}</strong> <span style="color:#666;font-size:14px;">— ${pad(person.day)}/${pad(person.month)}</span></li>`
+              `<li style="margin:0;padding:14px 0;border-bottom:1px solid #f0f0f0;list-style:none;font-size:16px;color:#333;"><strong style="color:#1a1a1a;font-weight:600;">${person.name}</strong> <span style="color:#666;font-size:14px;">— ${pad(person.day)}/${pad(person.month)}</span></li>`
           )
           .join("");
 
   const footer = "Lembra. Nunca esqueça quem importa.";
-  const html = [
-    `<span style="display:none;max-height:0;max-width:0;overflow:hidden;mso-hide:all;">${PREHEADER}</span>`,
-    `<p style="margin:0 0 24px 0;font-size:11px;color:#888;letter-spacing:0.05em;text-transform:uppercase;">${BRAND}</p>`,
-    `<h1 style="margin:0 0 12px 0;font-size:26px;font-weight:700;color:#1a1a1a;line-height:1.2;">${hero}</h1>`,
-    `<p style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#333;line-height:1.4;">${mainMessage}</p>`,
-    `<p style="margin:0 0 24px 0;font-size:16px;color:#555;line-height:1.5;">${subtext}</p>`,
-    total > 0 ? `<ul style="margin:0 0 28px 0;padding:0;list-style:none;border-top:1px solid #eee;padding-top:16px;">${items}</ul>` : "",
-    `<a href="${APP_URL}" style="display:inline-block;padding:14px 24px;border-radius:10px;background:${ACCENT_HEX};color:#ffffff;text-decoration:none;font-weight:600;font-size:16px;">${ctaLabel}</a>`,
-    `<p style="margin:28px 0 0 0;font-size:13px;color:#888;">${footer}</p>`
+  const innerContent = [
+    `<p style="margin:0 0 32px 0;font-size:13px;font-weight:600;color:#555;letter-spacing:0.05em;text-transform:uppercase;">${BRAND}</p>`,
+    `<h1 style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;line-height:1.25;">${hero}</h1>`,
+    `<p style="margin:0 0 20px 0;font-size:18px;font-weight:600;color:#333;line-height:1.4;">${mainMessage}</p>`,
+    `<p style="margin:0 0 ${total > 0 ? "32" : "24"}px 0;font-size:16px;color:#555;line-height:1.5;">${subtext}</p>`,
+    total > 0 ? `<ul style="margin:0 0 32px 0;padding:0;list-style:none;border-top:1px solid #eee;padding-top:20px;">${items}</ul>` : "",
+    `<p style="margin:32px 0 0 0;"><a href="${APP_URL}" style="display:inline-block;padding:16px 28px;border-radius:10px;background:${ACCENT_HEX};color:#ffffff;text-decoration:none;font-weight:600;font-size:16px;">${ctaLabel}</a></p>`,
+    `<p style="margin:32px 0 0 0;font-size:13px;color:#888;">${footer}</p>`
   ]
     .filter(Boolean)
     .join("");
+
+  const html = [
+    `<span style="display:none;max-height:0;max-width:0;overflow:hidden;mso-hide:all;">${PREHEADER}</span>`,
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;"><tr><td align="center" style="padding:24px 16px;">`,
+    `<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-top:3px solid ${containerBorderTop};border-radius:0;" align="center"><tr><td style="padding:32px 24px;">`,
+    innerContent,
+    `</td></tr></table>`,
+    `</td></tr></table>`
+  ].join("");
 
   const textList = total === 0 ? "" : names.map((person) => `• ${person.name} (${pad(person.day)}/${pad(person.month)})`).join("\n");
   const text =
