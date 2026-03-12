@@ -60,6 +60,7 @@ Env vars usadas no client:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL` (opcional; em produção defina para o domínio canônico do app, ex.: `https://uselembra.com.br`, para o redirect pós-login sempre apontar para esse domínio)
 - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (opcional, meta tag do Google Search Console)
 
 Checklist de configuração (Supabase + Google):
@@ -67,10 +68,11 @@ Checklist de configuração (Supabase + Google):
 - Supabase `Authentication > Providers > Google` configurado com Client ID/Secret
 - Supabase `Authentication > URL Configuration` inclui:
   - `http://localhost:3000/**`
-  - `https://bday-hub.vercel.app/**` (ou seu dominio atual de producao)
+  - `https://uselembra.com.br/**` (produção canônica; opcional `https://*.vercel.app/**` para previews)
 - Google Cloud OAuth inclui:
   - Authorized JavaScript origins: `http://localhost:3000` e dominio de producao
   - Redirect URI: callback do Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`)
+- Para confiança no login: [docs/GOOGLE_OAUTH_TRUST.md](docs/GOOGLE_OAUTH_TRUST.md) (diagnóstico e limitações). Checklist: [docs/GOOGLE_OAUTH_TRUST_CHECKLIST.md](docs/GOOGLE_OAUTH_TRUST_CHECKLIST.md). QA: [docs/QA_GOOGLE_LOGIN_TRUST.md](docs/QA_GOOGLE_LOGIN_TRUST.md). Handoff e decisão de launch: [docs/GOOGLE_LOGIN_RELEASE_READY.md](docs/GOOGLE_LOGIN_RELEASE_READY.md). Mitigação sem custom domain: [docs/GOOGLE_LOGIN_TRUST_MITIGATION_WITHOUT_CUSTOM_DOMAIN.md](docs/GOOGLE_LOGIN_TRUST_MITIGATION_WITHOUT_CUSTOM_DOMAIN.md).
 
 Env vars adicionais para email diário (server):
 
@@ -122,6 +124,7 @@ Vercel:
 
 - Definir `NEXT_PUBLIC_SUPABASE_URL`
 - Definir `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- (Recomendado) Definir `NEXT_PUBLIC_SITE_URL` para o domínio canônico (ex.: `https://uselembra.com.br`) para redirect pós-login
 - (Opcional) Definir `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` para Google Search Console
 - Redeploy após mudança de env vars
 - Smoke test:

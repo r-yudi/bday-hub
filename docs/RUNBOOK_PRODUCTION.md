@@ -153,6 +153,20 @@ Com um usuário real de teste (logado):
 - `daily_email_dispatch` para hoje: `sent` (se havia aniversários) ou `skipped` (se não havia)
 - Rodar cron 2x no mesmo período: não duplica (UNIQUE + insert-first)
 
+### Diagnóstico quando candidates: 0
+
+1. **Dry-run + breakdown** (nenhum envio, nenhuma escrita):
+   ```bash
+   curl -s -H "Authorization: Bearer $CRON_SECRET" "https://uselembra.com.br/api/cron/email?dry-run=true&diagnostic=1"
+   ```
+2. Interpretar: **scannedUsers** = 0 → ninguém com `email_enabled = true`; **scannedUsers > 0** e **candidates** = 0 → todos **outsideWindow** (ver **debug.outsideWindow** e **debug.skipReasons**).
+3. Para um usuário de teste (UUID em `CRON_TEST_USER_ID` na Vercel):
+   ```bash
+   curl -s -H "Authorization: Bearer $CRON_SECRET" "https://uselembra.com.br/api/cron/email?diagnostic=1&userId=<UUID>"
+   ```
+   Ver **debug.debugUser** (reasonIfNot, windowStart, windowEnd, localNowHHMM).
+4. Fixture: rodar `npx tsx scripts/seed-cron-test-fixtures.ts` com CRON_TEST_USER_ID + SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL (ver docs/CRON_SETUP.md).
+
 ---
 
 ## 6) Smoke de produção — Push (complementar)

@@ -16,7 +16,7 @@ async function gotoTodayReady(page: Page, options?: { showOnboarding?: boolean }
     await page.evaluate(() => localStorage.setItem("onboarding_v2_seen", "1"));
     await page.reload();
   }
-  await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
   await expect(page.getByText("Carregando...")).toHaveCount(0);
 }
 
@@ -33,7 +33,8 @@ async function addBirthday(page: Page, options?: { name?: string; notes?: string
   const tag = options?.tag ?? "e2e";
 
   await gotoTodayReady(page);
-  await page.getByRole("link", { name: /Adicionar.*aniversário/ }).first().click();
+  await page.getByRole("button", { name: /Adicionar.*aniversário/ }).first().click();
+  await page.getByRole("dialog").getByRole("link", { name: "Adicionar pessoa" }).click();
 
   await page.getByPlaceholder("Ex.: Ana Silva").fill(name);
   await page.locator("form select").nth(0).selectOption(day);
@@ -90,7 +91,8 @@ test.describe("MVP smoke flows", () => {
     ].join("\n");
 
     await gotoTodayReady(page);
-    await page.getByRole("button", { name: "Importar CSV" }).first().click();
+    await page.getByRole("button", { name: /Adicionar aniversário/ }).first().click();
+    await page.getByRole("button", { name: "Importar CSV" }).click();
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "playwright-import.csv",
@@ -104,6 +106,22 @@ test.describe("MVP smoke flows", () => {
     await page.getByRole("button", { name: /^Importar$/ }).click();
     await expect(page.getByText("Carregando...")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: /CSV Válido/ })).toBeVisible();
+  });
+
+  test("Entrada rápida em /today: abrir fluxo Adicionar aniversário, colar linhas e importar", async ({ page }) => {
+    await gotoTodayReady(page);
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
+    await page.getByRole("button", { name: /Adicionar aniversário/ }).first().click();
+    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
+    await page.getByRole("button", { name: "Colar vários de uma vez" }).click();
+    const quickEntry = page.locator("#quick-birthday-textarea");
+    await expect(quickEntry).toBeVisible({ timeout: 5000 });
+
+    await quickEntry.fill("Maria 12/03\nJoão 18/06\nAna 7/9");
+    await page.getByRole("button", { name: "Importar aniversários" }).click();
+    await expect(page.getByText("Carregando...")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toHaveCount(0);
+    await expect(page.getByText("Maria").first()).toBeVisible();
   });
 
   test("Persistencia apos reload", async ({ page }) => {
@@ -182,35 +200,72 @@ test.describe("MVP smoke flows", () => {
   });
 });
 
+test.describe("Rota /login (versão canônica)", () => {
+  test("/login exibe versão canônica: sentinela, heading, CTA, blocos de confiança, sem link Diagnóstico", async ({
+    page
+  }) => {
+    await page.goto("/login");
+    await expect(page).toHaveURL(/\/login/);
+
+    // Sentinela: prova de que o build é o canônico
+    const loginSection = page.locator('[data-login-canonical="full"]');
+    await expect(loginSection).toBeVisible();
+
+    // Heading principal
+    await expect(page.getByRole("heading", { name: "Sincronize seus aniversários", level: 1 })).toBeVisible();
+    await expect(page.locator('[data-login-heading="main"]')).toBeVisible();
+
+    // Links legais sempre presentes (escopo: dentro do painel de login, não do footer)
+    await expect(loginSection.getByRole("link", { name: "Privacidade" })).toBeVisible();
+    await expect(loginSection.getByRole("link", { name: "Termos" })).toBeVisible();
+
+    // Em build de produção o link Diagnóstico não deve aparecer
+    await expect(page.getByRole("link", { name: "Diagnóstico" })).toHaveCount(0);
+
+    // Quando Supabase está configurado: CTA Google e blocos de confiança
+    const cta = page.getByRole("button", { name: "Continuar com Google" });
+    if ((await cta.count()) > 0) {
+      await expect(cta).toBeVisible();
+      await expect(page.locator('[data-login-cta="google"]')).toBeVisible();
+      await expect(page.locator('[data-login-disclosure="shared"]')).toBeVisible();
+      await expect(page.locator('[data-login-privacy="reassurance"]')).toBeVisible();
+      await expect(page.getByText("O que será compartilhado")).toBeVisible();
+      await expect(page.getByText("O que NÃO acessamos")).toBeVisible();
+    }
+  });
+});
+
 test.describe("Onboarding gate (logado)", () => {
   const authPath = join(process.cwd(), "test-results", ".auth", "user.json");
   const hasAuth = existsSync(authPath);
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json).");
 
-  test("logado: wizard step Alertas com Continuar e Voltar, Continuar avança", async ({ page }) => {
+  test("logado: wizard step People depois Alertas, Continuar avança", async ({ page }) => {
     await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
+    await page.getByRole("button", { name: /Continuar|Pular por agora/ }).first().click();
     await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Continuar" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Voltar" })).toBeVisible();
     await page.getByRole("button", { name: "Continuar" }).click();
-    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dicas rápidas" })).toBeVisible();
   });
 });
 
 test.describe("Onboarding wizard (guest)", () => {
-  test("guest: /today?onboarding=1 mostra wizard, Continuar sem conta, step Alertas, fechar (X) e não reaparece após reload", async ({ page }) => {
+  test("guest: /today?onboarding=1 mostra wizard, Continuar sem conta, step Adicionar aniversários, fechar (X) e não reaparece após reload", async ({ page }) => {
     await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
     await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toBeVisible();
     await page.getByRole("button", { name: "Continuar sem conta" }).click();
-    await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Continuar" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Continuar|Pular por agora/ })).toBeVisible();
     await page.getByRole("button", { name: "Fechar onboarding" }).click();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
     await page.reload();

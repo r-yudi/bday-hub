@@ -47,8 +47,8 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
 
   useEffect(() => {
     if (!showWizard || !obStep) return;
-    if (obStep === "alerts") setStep(2);
-    else if (obStep === "people") setStep(3);
+    if (obStep === "alerts") setStep(3);
+    else if (obStep === "people") setStep(2);
     else if (obStep === "tips") setStep(4);
   }, [showWizard, obStep]);
 
@@ -245,6 +245,70 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
         {step === 2 && (
           <>
             <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
+              Adicionar aniversários
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Comece adicionando algumas pessoas importantes.
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Com 5 aniversários na lista, você já começa a ver o Lembra funcionando.
+            </p>
+            <div className="ui-panel-soft mt-4 px-4 py-3">
+              <p className="text-sm font-medium text-text">
+                {peopleCount} de 5 aniversários adicionados.
+              </p>
+              {peopleCount < 5 && (
+                <p className="mt-0.5 text-xs text-muted">
+                  Faltam {5 - peopleCount} para completar sua lista inicial.
+                </p>
+              )}
+            </div>
+            {peopleCount >= 5 && (
+              <p className="mt-2 text-sm text-text">
+                Perfeito. Agora o Lembra já consegue te avisar quando alguém importante fizer aniversário.
+              </p>
+            )}
+            <p className="mt-4 text-xs font-medium text-muted">
+              Sugestões para começar:
+            </p>
+            <p className="mt-1.5 text-sm text-muted">
+              Pense em alguém próximo — parceiro(a), melhor amigo, mãe ou pai.
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              {peopleCount >= 5 ? (
+                <button
+                  ref={primaryActionRef as RefObject<HTMLButtonElement>}
+                  type="button"
+                  onClick={goToStep3}
+                  className="ui-cta-primary inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
+                  Continuar
+                </button>
+              ) : (
+                <>
+                  <Link
+                    ref={primaryActionRef as RefObject<HTMLAnchorElement>}
+                    href={`/person?returnTo=${encodeURIComponent("/today?onboarding=1&obStep=people")}`}
+                    className="ui-cta-primary inline-flex h-11 w-full items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  >
+                    Adicionar pessoa
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={goToStep3}
+                    className="ui-cta-secondary inline-flex h-11 w-full items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  >
+                    Pular por agora
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
               Alertas
             </h2>
             <p className="mt-2 text-sm text-muted">
@@ -267,69 +331,18 @@ export function OnboardingGate({ peopleCount, mounted }: OnboardingGateProps) {
               <button
                 ref={primaryActionRef as RefObject<HTMLButtonElement>}
                 type="button"
-                onClick={goToStep3}
+                onClick={goToStep4}
                 className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
                 Continuar
               </button>
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={() => setStep(2)}
                 className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
               >
                 Voltar
               </button>
-            </div>
-          </>
-        )}
-
-        {step === 3 && (
-          <>
-            <h2 id="onboarding-wizard-title" className="pr-8 text-lg font-semibold tracking-tight text-text">
-              Adicionar aniversários
-            </h2>
-            <p className="mt-2 text-sm text-muted">
-              Adicione algumas pessoas importantes.
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              Com 5 aniversários cadastrados você já começa a ver o Lembra funcionando no dia a dia.
-            </p>
-            <p className="mt-3 text-xs text-muted">
-              {peopleCount} de 5 pessoas cadastradas.
-            </p>
-            {peopleCount >= 5 && (
-              <p className="mt-2 text-sm text-text">
-                Perfeito. Agora o Lembra já consegue te avisar quando alguém importante fizer aniversário.
-              </p>
-            )}
-            <div className="mt-6 flex flex-wrap gap-3">
-              {peopleCount >= 5 ? (
-                <button
-                  ref={primaryActionRef as RefObject<HTMLButtonElement>}
-                  type="button"
-                  onClick={goToStep4}
-                  className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-                >
-                  Continuar
-                </button>
-              ) : (
-                <>
-                  <Link
-                    ref={primaryActionRef as RefObject<HTMLAnchorElement>}
-                    href={`/person?returnTo=${encodeURIComponent("/today?onboarding=1&obStep=people")}`}
-                    className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-                  >
-                    Adicionar pessoa
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={goToStep4}
-                    className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
-                  >
-                    Pular por agora
-                  </button>
-                </>
-              )}
             </div>
           </>
         )}

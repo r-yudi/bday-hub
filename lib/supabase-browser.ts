@@ -1,9 +1,25 @@
-﻿import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 
 let browserClient: SupabaseClient | null = null;
 
 export function isSupabaseConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
+/**
+ * Base URL used for auth redirects (OAuth redirectTo).
+ * In production, set NEXT_PUBLIC_SITE_URL to your canonical app URL (e.g. https://uselembra.com.br)
+ * so the user is always sent back to that domain after login, not to a preview or localhost.
+ * The domain shown during the OAuth step on Google's consent screen is Supabase's callback domain,
+ * not this URL; see docs/GOOGLE_OAUTH_TRUST.md.
+ */
+export function getAuthRedirectBaseUrl(): string {
+  if (typeof window === "undefined") return "";
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
+  if (fromEnv && fromEnv.startsWith("http")) {
+    return fromEnv.replace(/\/+$/, "");
+  }
+  return window.location.origin;
 }
 
 export function getSupabaseBrowserClient() {
