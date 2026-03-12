@@ -37,6 +37,8 @@ export type SyncResult = {
   message?: string;
 };
 
+// ---------- Helpers (normalize, row conversion) ----------
+
 function normalizePerson(person: BirthdayPerson): BirthdayPerson {
   const now = Date.now();
   const categories = birthdayCategoriesFromAny(person);
@@ -108,10 +110,48 @@ function personToRow(person: BirthdayPerson, userId: string): BirthdaysRow {
   };
 }
 
-async function getCurrentAuthUserId() {
+// ---------- Remote: auth gate (single place for "who is writing") ----------
+
+/**
+ * Returns the authenticated user id for remote operations.
+ * Use for read paths where "no user = fallback to local" is desired.
+ */
+async function getCurrentAuthUserId(): Promise<string | null> {
   const { session } = await getSafeBrowserSession();
   return session?.user?.id ?? null;
 }
+
+/**
+ * Fails fast if not authenticated. Use only for remote WRITE paths.
+ * Ensures every remote write uses the same session-derived user_id (RLS safety).
+ */
+async function requireAuthenticatedUserId(): Promise<string> {
+  const userId = await getCurrentAuthUserId();
+  if (!userId) {
+    throw new Error("Escrita remota em birthdays exige usuário autenticado.");
+  }
+  return userId;
+}
+
+// ---------- Remote: single write path (all inserts/upserts go through here) ----------
+
+/**
+ * Única função que escreve na tabela `birthdays` no Supabase.
+ * Obtém user_id da sessão, monta rows com user_id, faz upsert.
+ * Não chamar em efeitos de login ou carregamento de página.
+ */
+async function writeRemoteBirthdays(people: BirthdayPerson[]): Promise<void> {
+  if (people.length === 0) return;
+  const userId = await requireAuthenticatedUserId();
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return;
+
+  const rows = people.map((p) => personToRow(p, userId));
+  const { error } = await supabase.from("birthdays").upsert(rows, { onConflict: "id" });
+  if (error) throw new Error(error.message);
+}
+
+// ---------- Remote: read + delete ----------
 
 async function listRemoteBirthdays(userId: string): Promise<BirthdayPerson[]> {
   const supabase = getSupabaseBrowserClient();
@@ -129,22 +169,15 @@ async function listRemoteBirthdays(userId: string): Promise<BirthdayPerson[]> {
   return ((data ?? []) as BirthdaysRow[]).map(rowToPerson);
 }
 
-async function upsertRemoteBirthdays(userId: string, people: BirthdayPerson[]): Promise<void> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) return;
-  if (people.length === 0) return;
-
-  const rows = people.map((person) => personToRow(person, userId));
-  const { error } = await supabase.from("birthdays").upsert(rows, { onConflict: "id" });
-  if (error) throw new Error(error.message);
-}
-
 async function deleteRemoteBirthday(id: string): Promise<void> {
+  await requireAuthenticatedUserId();
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return;
   const { error } = await supabase.from("birthdays").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
+
+// ---------- Merge (for explicit sync only) ----------
 
 function mergePeople(localPeople: BirthdayPerson[], remotePeople: BirthdayPerson[]): BirthdayPerson[] {
   const map = new Map<string, BirthdayPerson>();
@@ -170,13 +203,10 @@ function mergePeople(localPeople: BirthdayPerson[], remotePeople: BirthdayPerson
   return Array.from(map.values());
 }
 
-async function isLoggedInForRemote() {
-  const userId = await getCurrentAuthUserId();
-  return userId;
-}
+// ---------- Public API (guest/local-first: read remote only when logged in) ----------
 
 export async function listBirthdays(): Promise<BirthdayPerson[]> {
-  const userId = await isLoggedInForRemote();
+  const userId = await getCurrentAuthUserId();
   if (!userId) return listLocalPeople();
   return listRemoteBirthdays(userId);
 }
@@ -192,7 +222,7 @@ export async function listUpcoming(days = 7) {
 }
 
 export async function getBirthdayById(id: string): Promise<BirthdayPerson | null> {
-  const userId = await isLoggedInForRemote();
+  const userId = await getCurrentAuthUserId();
   if (!userId) return getLocalPersonById(id);
   const people = await listRemoteBirthdays(userId);
   return people.find((person) => person.id === id) ?? null;
@@ -200,19 +230,19 @@ export async function getBirthdayById(id: string): Promise<BirthdayPerson | null
 
 export async function upsertBirthday(person: BirthdayPerson): Promise<void> {
   const normalized = normalizePerson(person);
-  const userId = await isLoggedInForRemote();
+  const userId = await getCurrentAuthUserId();
 
   if (!userId) {
     await upsertLocalPerson(normalized);
     return;
   }
 
-  await upsertRemoteBirthdays(userId, [normalized]);
+  await writeRemoteBirthdays([normalized]);
   await upsertLocalPerson(normalized);
 }
 
 export async function deleteBirthday(id: string): Promise<void> {
-  const userId = await isLoggedInForRemote();
+  const userId = await getCurrentAuthUserId();
   if (!userId) {
     await deleteLocalPerson(id);
     return;
@@ -224,13 +254,13 @@ export async function deleteBirthday(id: string): Promise<void> {
 
 export async function importCsv(rows: BirthdayPerson[]): Promise<void> {
   const normalized = rows.map(normalizePerson);
-  const userId = await isLoggedInForRemote();
+  const userId = await getCurrentAuthUserId();
   if (!userId) {
     await upsertManyLocalPeople(normalized);
     return;
   }
 
-  await upsertRemoteBirthdays(userId, normalized);
+  await writeRemoteBirthdays(normalized);
   await upsertManyLocalPeople(normalized);
 }
 
@@ -238,29 +268,36 @@ export const listTodayBirthdays = listToday;
 export const listUpcomingBirthdays = listUpcoming;
 export const importCsvBirthdays = importCsv;
 
+// ---------- Sync explícito (NÃO chamar em onAuthStateChange nem em load de página) ----------
+
+/**
+ * Sincroniza local + remoto e persiste o merge no remoto e no local.
+ * Ação explícita apenas (ex.: botão "Sincronizar"). Não usar em efeitos de autenticação.
+ */
 export async function syncBirthdaysAfterSignIn(): Promise<SyncResult> {
-  const userId = await isLoggedInForRemote();
+  const userId = await getCurrentAuthUserId();
   if (!userId) {
     return { ok: false, syncedCount: 0, message: "Usuário não autenticado." };
   }
 
   const [localPeople, remotePeople] = await Promise.all([listLocalPeople(), listRemoteBirthdays(userId)]);
   const merged = mergePeople(localPeople, remotePeople);
-  await upsertRemoteBirthdays(userId, merged);
+  await writeRemoteBirthdays(merged);
   await upsertManyLocalPeople(merged);
 
   return { ok: true, syncedCount: merged.length };
 }
+
+// ---------- Debug (usa write path centralizado) ----------
 
 export async function debugTestBirthdaysTable() {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) {
     return { ok: false, message: "Cliente Supabase indisponível." };
   }
-  const { session, errorMessage } = await getSafeBrowserSession();
-  const userId = session?.user?.id;
+  const userId = await getCurrentAuthUserId();
   if (!userId) {
-    return { ok: false, message: errorMessage || "Sem sessão ativa." };
+    return { ok: false, message: "Sem sessão ativa." };
   }
 
   const countRes = await supabase.from("birthdays").select("id", { count: "exact", head: true });
@@ -268,24 +305,20 @@ export async function debugTestBirthdaysTable() {
     return { ok: false, message: countRes.error.message };
   }
 
-      const now = Date.now();
-      const dummyId = crypto.randomUUID();
-      const dummy: BirthdayPerson = {
+  const dummyId = crypto.randomUUID();
+  const dummy: BirthdayPerson = {
     id: dummyId,
     name: "__debug_birthdays__",
     day: 1,
-        month: 1,
-        source: "manual",
-        categories: ["debug"],
-        tags: ["debug"],
-        createdAt: now,
-        updatedAt: now
-      };
-  await upsertRemoteBirthdays(userId, [dummy]);
-  const del = await supabase.from("birthdays").delete().eq("id", dummyId);
-  if (del.error) {
-    return { ok: false, message: del.error.message };
-  }
+    month: 1,
+    source: "manual",
+    categories: ["debug"],
+    tags: ["debug"],
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  await writeRemoteBirthdays([dummy]);
+  await deleteRemoteBirthday(dummyId);
 
   return { ok: true, count: countRes.count ?? 0 };
 }

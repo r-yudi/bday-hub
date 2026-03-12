@@ -106,7 +106,7 @@ export function clearOnboardingV2Seen(): void {
 export function buildAddBirthdayToast(totalCount: number): OnboardingToast {
   if (totalCount >= 5) {
     return {
-      title: "Setup completo! Agora é só comemorar 🎉",
+      title: "Lista pronta! Agora é só comemorar 🎉",
       subtitle: "Seu Lembra está pronto para lembrar os aniversários por você.",
       tone: "success"
     };
@@ -115,7 +115,7 @@ export function buildAddBirthdayToast(totalCount: number): OnboardingToast {
   const remaining = Math.max(0, 5 - totalCount);
   return {
     title: "+1 aniversário adicionado 🎉",
-    subtitle: `Faltam ${remaining} para completar seu setup`,
+    subtitle: `Faltam ${remaining} para completar sua lista inicial`,
     tone: "info"
   };
 }

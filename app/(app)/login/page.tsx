@@ -1,3 +1,7 @@
+/**
+ * Rota canônica de /login — única fonte de verdade para a URL /login.
+ * Não criar outra page.tsx ou rota para /login. UI em @/components/LoginPageClient.
+ */
 import type { Metadata } from "next";
 import { LoginPageClient } from "@/components/LoginPageClient";
 

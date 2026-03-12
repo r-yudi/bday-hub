@@ -35,7 +35,7 @@
   - fallback local quando não logado
 - UX:
   - light-only (pre-launch); ver [docs/THEME.md](docs/THEME.md)
-  - onboarding leve e toasts
+  - onboarding leve e toasts; ordem do wizard: passo 1 Login → passo 2 Adicionar aniversários → passo 3 Alertas (notificação) → passo 4 Dicas (pedido de notificação só após valor percebido)
   - banner PWA contextual
   - links de privacidade/termos no footer interno
 - Categorias:
@@ -133,6 +133,7 @@
 ### `/today`
 - Lista de aniversários de hoje
 - CTA adicionar, importar CSV, lembretes best-effort
+- **Entrada rápida (empty state):** bloco "Colar vários de uma vez" com textarea; formato aceito: uma linha por pessoa, **Nome DD/MM** (dia/mês com 1 ou 2 dígitos); feedback de importados/inválidos e detalhe de linhas ignoradas; persistência via `importCsvBirthdays` (sem alterar schema/CSV)
 - onboarding e feedbacks de cópia
 
 ### `/upcoming`
@@ -190,8 +191,12 @@
   - cron a cada 15 minutos (`/api/cron/email`).
   - proteção por `CRON_SECRET` (header `x-cron-secret` ou Bearer).
 - Dedupe/idempotência:
-  - controle por `user_settings.last_daily_email_sent_on`.
-  - claim condicional antes do envio para reduzir duplicidade em execuções concorrentes.
+  - tabela `daily_email_dispatch` com UNIQUE(user_id, date_key); insert-first; claim de pending antigo (stale) antes do envio.
+- Diagnóstico (apenas com CRON_SECRET):
+  - `diagnostic=1` ou header `X-Debug: 1` — resposta inclui objeto `debug` com breakdown (scannedUsers, outsideWindow, candidates, skipReasons, etc.).
+  - `dry-run=true` — mesma lógica de elegibilidade e breakdown; **nenhum envio, nenhuma escrita** em dispatch (100% read-only).
+  - Filtro por usuário de teste: query `userId=` ou header `X-Debug-UserId` só é aceito quando o UUID está em `CRON_TEST_USER_ID` (env, lista separada por vírgula).
+- Fixture para teste em produção: script interno `scripts/seed-cron-test-fixtures.ts` (ver docs/CRON_SETUP.md).
 
 ## 8) Segurança e privacidade
 - RLS em tabelas de usuário (`birthdays`, `user_settings`, `user_categories`)
