@@ -1,3 +1,8 @@
+/**
+ * Visual regression: captura de screenshots para comparação.
+ * Nota: falhas em desktop/mobile (ex.: .hero-radialcut-section, /campaign) são preexistentes
+ * e fora do escopo de alterações de entrada rápida e timing de notificação.
+ */
 import { mkdirSync } from "node:fs";
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 

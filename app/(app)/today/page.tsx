@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { ImportCsv } from "@/components/ImportCsv";
+import { useSearchParams } from "next/navigation";
+import { AddBirthdayEntryModal } from "@/components/AddBirthdayEntryModal";
 import { PersonCard } from "@/components/PersonCard";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
@@ -10,16 +11,24 @@ import { AppToast } from "@/components/AppToast";
 import { Chip } from "@/components/ui/Chip";
 import { getTodayPeople, getUpcomingPeople, formatRelativeLabel } from "@/lib/dates";
 import { deleteBirthday, importCsvBirthdays, listBirthdays } from "@/lib/birthdaysRepo";
-import { buildAddBirthdayToast, consumeBirthdayAddedToast, type OnboardingToast } from "@/lib/onboarding-ui";
+import { buildAddBirthdayToast, consumeBirthdayAddedToast, queueBirthdayAddedToast, type OnboardingToast } from "@/lib/onboarding-ui";
+import type { BirthdayPersonInput } from "@/lib/quickBirthdayParser";
 import type { BirthdayPerson } from "@/lib/types";
 
-export default function TodayPage() {
+function TodayPageContent() {
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [people, setPeople] = useState<BirthdayPerson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showImport, setShowImport] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addModalInitialView, setAddModalInitialView] = useState<"menu" | "quick" | "csv" | null>(null);
   const [toast, setToast] = useState<OnboardingToast | null>(null);
+
+  const returnTo =
+    searchParams.get("onboarding") === "1"
+      ? "/today?onboarding=1&obStep=people"
+      : "/today";
 
   async function loadData() {
     setLoading(true);
@@ -71,12 +80,41 @@ export default function TodayPage() {
   async function handleImport(imported: BirthdayPerson[]) {
     await importCsvBirthdays(imported);
     await loadData();
-    setShowImport(false);
+    closeAddModal();
+  }
+
+  async function handleQuickImport(valid: BirthdayPersonInput[]) {
+    if (valid.length === 0) return;
+    const now = Date.now();
+    const people: BirthdayPerson[] = valid.map((row, idx) => ({
+      id: crypto.randomUUID(),
+      name: row.name,
+      day: row.day,
+      month: row.month,
+      source: "manual",
+      categories: [],
+      tags: [],
+      createdAt: now + idx,
+      updatedAt: now + idx
+    }));
+    await importCsvBirthdays(people);
+    await loadData();
+    queueBirthdayAddedToast();
   }
 
   async function handleDelete(id: string) {
     await deleteBirthday(id);
     await loadData();
+  }
+
+  function onOpenAddModal(view: "menu" | "quick" | "csv") {
+    setAddModalInitialView(view);
+    setShowAddModal(true);
+  }
+
+  function closeAddModal() {
+    setShowAddModal(false);
+    setAddModalInitialView(null);
   }
 
   if (error) {
@@ -98,7 +136,7 @@ export default function TodayPage() {
 
   return (
     <>
-      <div className="ui-container space-y-9 lg:space-y-12">
+      <div className="ui-container space-y-9 lg:space-y-12" data-page-canonical="today">
         <section className="ui-section ui-panel p-6 sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="ui-section-header">
@@ -109,18 +147,12 @@ export default function TodayPage() {
               </p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
-              <Link
-                href="/person"
-                className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
-              >
-                Adicionar aniversário
-              </Link>
               <button
                 type="button"
-                onClick={() => setShowImport((v) => !v)}
-                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+                onClick={() => setShowAddModal(true)}
+                className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
               >
-                {showImport ? "Fechar CSV" : "Importar CSV"}
+                + Adicionar aniversário
               </button>
             </div>
           </div>
@@ -128,16 +160,16 @@ export default function TodayPage() {
 
         {!loading && mounted && (
           <Suspense fallback={null}>
-            <OnboardingGate peopleCount={people.length} mounted={mounted} />
+            <OnboardingGate
+              peopleCount={people.length}
+              mounted={mounted}
+              onOpenAddModal={onOpenAddModal}
+            />
           </Suspense>
         )}
 
-        {!loading && <OnboardingBanner count={people.length} mounted={mounted} />}
-
-        {showImport && (
-          <section className="ui-section">
-            <ImportCsv onImport={handleImport} />
-          </section>
+        {!loading && (
+          <OnboardingBanner count={people.length} mounted={mounted} returnTo={returnTo} />
         )}
 
         {loading ? (
@@ -150,26 +182,22 @@ export default function TodayPage() {
               <div className="ui-empty-icon" aria-hidden>
                 🎂
               </div>
-              <h2 className="ui-empty-title">Adicione seu primeiro aniversário</h2>
+              <h2 className="ui-empty-title">Nenhum aniversário hoje</h2>
               <p className="ui-empty-subtitle">
-                Cadastre pessoas e veja quem faz aniversário hoje e nos próximos dias.
+                Adicione aniversários para começar.
               </p>
               <div className="ui-empty-actions">
-                <Link
-                  href="/person"
-                  aria-label="Adicionar primeiro aniversário"
-                  className="btn-primary-brand ui-cta-primary order-first inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-                >
-                  Adicionar primeiro aniversário
-                </Link>
                 <button
                   type="button"
-                  onClick={() => setShowImport(true)}
-                  className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
+                  onClick={() => setShowAddModal(true)}
+                  className="btn-primary-brand ui-cta-primary order-first inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                 >
-                  Importar CSV
+                  Adicionar aniversário
                 </button>
               </div>
+              <p className="mt-3 text-center text-sm text-muted">
+                ou cole vários de uma vez
+              </p>
             </div>
           </section>
         ) : (
@@ -194,12 +222,13 @@ export default function TodayPage() {
                     >
                       Ver pessoas
                     </Link>
-                    <Link
-                      href="/person"
+                    <button
+                      type="button"
+                      onClick={() => setShowAddModal(true)}
                       className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
                     >
                       Adicionar aniversário
-                    </Link>
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -222,12 +251,13 @@ export default function TodayPage() {
                   <p className="text-sm text-muted">
                     Nada nos próximos dias. Adicione algumas pessoas para o Lembra começar a te ajudar.
                   </p>
-                  <Link
-                    href="/person"
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(true)}
                     className="ui-cta-primary mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
                   >
-                    Adicionar pessoa
-                  </Link>
+                    Adicionar aniversário
+                  </button>
                 </div>
               ) : (
                 <div className="ui-list rounded-2xl border border-border/80 bg-surface2/30 divide-y divide-border/60">
@@ -257,25 +287,42 @@ export default function TodayPage() {
             </section>
 
             <section className="ui-section flex flex-wrap gap-2">
-              <Link
-                href="/person"
-                className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-              >
-                Adicionar aniversário
-              </Link>
               <button
                 type="button"
-                onClick={() => setShowImport(true)}
-                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+                onClick={() => setShowAddModal(true)}
+                className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
-                Importar CSV
+                + Adicionar aniversário
               </button>
             </section>
           </>
         )}
       </div>
 
+      <AddBirthdayEntryModal
+        open={showAddModal}
+        onClose={closeAddModal}
+        returnTo={returnTo}
+        onQuickImport={handleQuickImport}
+        onCsvImport={handleImport}
+        initialView={addModalInitialView ?? undefined}
+      />
+
       <AppToast toast={toast} onClose={() => setToast(null)} />
     </>
+  );
+}
+
+export default function TodayPage() {
+  return (
+    <Suspense fallback={
+      <div className="ui-container space-y-6">
+        <section className="ui-section ui-panel-soft rounded-2xl border p-8">
+          <p className="text-sm text-muted">Carregando...</p>
+        </section>
+      </div>
+    }>
+      <TodayPageContent />
+    </Suspense>
   );
 }

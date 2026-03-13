@@ -1,15 +1,16 @@
-﻿"use client";
+"use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import {
   clearSupabaseLocalSession,
+  getAuthRedirectBaseUrl,
   getSafeBrowserSession,
   getSupabaseBrowserClient,
   isInvalidRefreshTokenError,
   isSupabaseConfigured
 } from "@/lib/supabase-browser";
-import { syncBirthdaysAfterSignIn, type SyncStatus } from "@/lib/birthdaysRepo";
+import type { SyncStatus } from "@/lib/birthdaysRepo";
 
 type AuthContextValue = {
   configured: boolean;
@@ -98,55 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [configured]);
 
-  useEffect(() => {
-    if (!configured) return;
-    const userId = session?.user?.id;
-    if (!userId) {
-      setSyncStatus("idle");
-      setSyncMessage(null);
-      return;
-    }
-
-    let active = true;
-    setSyncStatus("syncing");
-    setSyncMessage("Atualizando sua lista...");
-
-    void syncBirthdaysAfterSignIn()
-      .then((result) => {
-        if (!active) return;
-        if (!result.ok) {
-          setSyncStatus("error");
-          setSyncMessage(result.message || "Não foi possível atualizar agora");
-          return;
-        }
-        setSyncStatus("synced");
-        setSyncMessage(`Lista atualizada (${result.syncedCount})`);
-        window.setTimeout(() => {
-          if (!active) return;
-          setSyncStatus("idle");
-          setSyncMessage(null);
-        }, 2500);
-      })
-      .catch((error: unknown) => {
-        if (!active) return;
-        const invalidToken = isInvalidRefreshTokenError(error);
-        if (invalidToken) {
-          void clearSupabaseLocalSession();
-          setSession(null);
-          setSessionNotice("Sessão expirada, entre novamente.");
-          setSyncStatus("idle");
-          setSyncMessage(null);
-          return;
-        }
-        setSyncStatus("error");
-        setSyncMessage(error instanceof Error ? error.message : "Não foi possível atualizar agora");
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [configured, session?.user?.id]);
-
   const value = useMemo<AuthContextValue>(
     () => ({
       configured,
@@ -169,7 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { error: "Cliente Supabase indisponível." };
         }
 
-        const redirectTo = `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo || "/today")}`;
+        const base = getAuthRedirectBaseUrl();
+        const redirectTo = `${base}/auth/callback?returnTo=${encodeURIComponent(returnTo || "/today")}`;
         try {
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",

@@ -77,6 +77,10 @@
 - Não usar `service_role` no client.
 - RLS deve permanecer owner-only nas tabelas de usuário.
 
+## Publicação (verdade absoluta)
+- Ao finalizar uma feature: **commit → push → deploy → verificação em produção**. Nunca parar em "build passou".
+- Sempre validar em produção (domínio canônico) após o deploy.
+
 ## Testes e validação (obrigatório em mudanças relevantes)
 - Rodar antes de finalizar:
   - `npm test`

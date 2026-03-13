@@ -46,43 +46,54 @@
 - Sem header ou secret inválido → **401** (JSON `{ "ok": false, "message": "unauthorized" }`)
 - Com `x-cron-secret` ou `Authorization: Bearer <CRON_SECRET>` → **200** (JSON `{ "ok": true, ... }`)
 
-## Debug (X-Debug: 1)
+## Diagnóstico (diagnostic=1 ou X-Debug: 1)
 
-Com o header **`X-Debug: 1`** (e secret válido), a resposta inclui um objeto **`debug`** com:
+Com **`?diagnostic=1`** ou header **`X-Debug: 1`** (e secret válido), a resposta inclui um objeto **`debug`** com:
 
-- **serverNowIso** — instante do servidor em ISO (UTC)
-- **serverNowUtc** — instante em UTC (string legível)
-- **scannedUsers** — quantos usuários têm `email_enabled = true`
-- **candidates** — quantos estão na janela de 15 min do `email_time` no timezone do usuário
-- **insertsAttempted** — tentativas de insert em `daily_email_dispatch`
-- **dispatchRowsWritten** — linhas efetivamente gravadas
-- **lastError** — último erro (sem dados sensíveis), se houver
-
-Exemplo de chamada (curl):
-
-```bash
-curl -s -H "Authorization: Bearer $CRON_SECRET" -H "X-Debug: 1" "https://uselembra.com.br/api/cron/email"
-```
-
-## Testar um usuário (userId)
-
-Com **X-Debug: 1** e query **`?userId=<uuid>`** (UUID do usuário em `auth.users` / `user_settings`), o endpoint:
-
-1. Busca esse usuário em `user_settings` (sem filtrar por `email_enabled`)
-2. Avalia se ele é candidato (janela de 15 min no timezone dele)
-3. Retorna em **`debug.userDebug`**:
-   - **email_enabled**, **email_time**, **timezone**
-   - **localNow**, **localNowHHMM** — data/hora local no fuso do usuário
-   - **emailTimeParsed** — minutos do dia do `email_time`
-   - **windowStart**, **windowEnd** — janela [start, end) em HH:MM
-   - **isCandidate** — se está na janela
-   - **reasonIfNot** — motivo se não for candidato
-4. Se **isCandidate** for true, roda o fluxo (insert + skip/send) e inclui **userOutcome** e contagens em **debug**.
+- **serverNowIso**, **serverNowUtc** — instante do servidor (UTC)
+- **scannedUsers** — quantos usuários têm `email_enabled = true` (ou 1 se filtrado por test user)
+- **outsideWindow** — quantos saíram por estarem fora da janela de 15 min
+- **candidates** — quantos entraram na janela
+- **insertsAttempted**, **dispatchRowsWritten**, **lastError**
+- **skipReasons** — por userId e motivo (ex.: outside_window)
+- **debugUser** (quando há um único usuário) — **email_enabled**, **email_time**, **timezone**, **windowStart**, **windowEnd**, **localNowHHMM**, **isCandidate**, **reasonIfNot**
 
 Exemplo:
 
 ```bash
-curl -s -H "Authorization: Bearer $CRON_SECRET" -H "X-Debug: 1" "https://uselembra.com.br/api/cron/email?userId=SEU_USER_UUID"
+curl -s -H "Authorization: Bearer $CRON_SECRET" "https://uselembra.com.br/api/cron/email?diagnostic=1"
 ```
 
-Use para validar por que um usuário com `email_enabled=true` e `email_time` próximo do horário atual não está entrando como candidato (ex.: timezone errado, horário fora da janela de 15 min).
+## Dry-run (100% read-only)
+
+Com **`?dry-run=true`** (e secret válido), o endpoint executa a mesma lógica de elegibilidade e retorna o breakdown, mas **não envia email**, **não grava** em `daily_email_dispatch` e **não altera** nenhum status. Use para validar contagens (scannedUsers, outsideWindow, candidates, etc.) sem side effects.
+
+```bash
+curl -s -H "Authorization: Bearer $CRON_SECRET" "https://uselembra.com.br/api/cron/email?dry-run=true&diagnostic=1"
+```
+
+## Testar um usuário (userId)
+
+O filtro por usuário (**query `?userId=<uuid>`** ou header **X-Debug-UserId**) só é aceito quando o UUID está na variável de ambiente **`CRON_TEST_USER_ID`** (em produção, configurada na Vercel). Valores: um UUID ou vários separados por vírgula.
+
+Com **diagnostic=1** (ou X-Debug: 1) e **userId** permitido:
+
+1. O endpoint busca esse usuário em `user_settings` e avalia se está na janela.
+2. Retorna em **`debug.debugUser`**: **email_enabled**, **email_time**, **timezone**, **windowStart**, **windowEnd**, **localNowHHMM**, **isCandidate**, **reasonIfNot**.
+3. Se **isCandidate** e não for dry-run, roda o fluxo (insert + skip/send).
+
+Exemplo (substitua pelo UUID do usuário de teste configurado em CRON_TEST_USER_ID):
+
+```bash
+curl -s -H "Authorization: Bearer $CRON_SECRET" "https://uselembra.com.br/api/cron/email?diagnostic=1&userId=SEU_USER_UUID"
+```
+
+## Fixture para teste em produção
+
+Script interno para criar aniversários de teste (hoje, amanhã, D+2 … D+7) e ativar email para um usuário de teste:
+
+```bash
+CRON_TEST_USER_ID=<uuid> SUPABASE_SERVICE_ROLE_KEY=... NEXT_PUBLIC_SUPABASE_URL=... npx tsx scripts/seed-cron-test-fixtures.ts
+```
+
+O usuário deve já existir em `auth.users` (ex.: criado ao fazer login no app). O script faz upsert em `user_settings` (email_enabled=true, email_time=09:00, timezone=America/Sao_Paulo) e insere/atualiza birthdays com nomes "Teste Hoje", "Teste Amanhã", "Teste D+2", etc.

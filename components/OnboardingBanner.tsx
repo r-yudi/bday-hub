@@ -8,9 +8,10 @@ const DISMISS_KEY = "onboarding_banner_dismissed_v1";
 type OnboardingBannerProps = {
   count: number;
   mounted: boolean;
+  returnTo?: string;
 };
 
-export function OnboardingBanner({ count, mounted }: OnboardingBannerProps) {
+export function OnboardingBanner({ count, mounted, returnTo = "/today" }: OnboardingBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export function OnboardingBanner({ count, mounted }: OnboardingBannerProps) {
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Link
-            href="/person"
+            href={`/person?returnTo=${encodeURIComponent(returnTo)}`}
             className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
           >
             Adicionar pessoa

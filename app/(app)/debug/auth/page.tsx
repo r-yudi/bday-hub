@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { AuthDebugPanel } from "@/components/AuthDebugPanel";
+import { AuthPreflightPanel } from "@/components/AuthPreflightPanel";
 
 export default function DebugAuthPage() {
   if (process.env.NODE_ENV !== "development") {
@@ -17,6 +18,7 @@ export default function DebugAuthPage() {
       </section>
 
       <AuthDebugPanel />
+      <AuthPreflightPanel />
     </div>
   );
 }

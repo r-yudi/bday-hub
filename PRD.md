@@ -28,7 +28,8 @@
 - Endpoint de saúde `/healthz` para smoke test.
 
 ### UX e retenção já implementados
-- Onboarding leve com progresso (5 aniversários) + feedback visual.
+- Onboarding leve com progresso (5 aniversários) + feedback visual. Ordem do wizard: primeiro "Adicionar aniversários" (valor), depois "Alertas" (pedido de notificação), para que o usuário perceba valor antes de ver a etapa de permissões. No passo "Adicionar aniversários" o usuário tem: **Adicionar pessoa** (link para `/person`) e **Colar vários de uma vez** (abre o modal na view quick); o **modal de adição** (AddBirthdayEntryModal) é o ponto único de criação a partir de `/today` (menu com Adicionar pessoa, Colar vários, Importar CSV). Banner de progresso "Complete sua lista" preserva `returnTo` ao enviar para `/person`, mantendo o retorno ao onboarding quando aplicável.
+- Entrada rápida em lote no empty state de `/today`: colar várias linhas no formato **Nome DD/MM** (uma por linha); parser estrito; feedback por linha (importados / inválidos) e lista de linhas ignoradas; mesma persistência que o CSV (`importCsvBirthdays`).
 - Toasts discretos ao adicionar aniversários.
 - PWA install banner contextual (compacto, com dismiss e instruções).
 - Tema **light-only (pre-launch)**: dark mode desabilitado em runtime; detalhes em [docs/THEME.md](docs/THEME.md).
@@ -90,6 +91,7 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 - CRUD de aniversários
 - Gestão MVP em `/manage` com abas de aniversários/categorias, busca/filtros e ações de editar/excluir
 - Importação CSV com preview e validação
+- Entrada rápida em lote no empty state de `/today` (formato Nome DD/MM, uma linha por pessoa)
 - Templates de mensagem + copiar
 - Links rápidos (WhatsApp / Instagram / outro)
 - Notificação best-effort ao abrir o app
@@ -98,16 +100,16 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 - Sync de aniversários com Supabase quando logado
 - Categorias predefinidas e custom (guest + Supabase)
 - Light-only (pre-launch) e refinamentos de UX/PWA (landing-first)
+- **Email diário agendado** para usuários logados (cron `/api/cron/email`, configuração em `/today`; ver SPEC 7.1)
 
 ### 5.2 Restrições mantidas
 - Sem backend próprio (usa Supabase diretamente)
-- Sem push/email/cron neste baseline
 - Sem ano de nascimento
 - Sem social graph interno
 
 ## 6) Fora de escopo (por enquanto)
 - Google Contacts import
-- Notificações confiáveis em background (push/email/cron)
+- Notificações confiáveis em background além do email diário (push complementar já existe; expansão futura)
 - Revogação granular de link de share com painel completo
 - Dedupe/merge avançado na importação CSV
 - Gestão avançada (ex.: bulk actions complexas em `/manage`)
