@@ -5,7 +5,8 @@
  * in any IANA timezone — no external dependencies.
  */
 
-const FALLBACK_TZ = "America/Sao_Paulo";
+/** Fallback when user timezone is missing or invalid (cron, digest, dateKey). */
+export const FALLBACK_TZ = "America/Sao_Paulo";
 
 /**
  * Returns the calendar date key (YYYY-MM-DD) for `date` in the given
