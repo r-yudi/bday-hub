@@ -62,6 +62,16 @@ Registro de decisões estruturais e de escopo. Fonte: processo PIPELINE e discus
 
 ---
 
+## Horário de envio e timezone (notificações V1)
+
+- **Regra única:** O horário de envio é o horário escolhido pelo usuário (**email_time** em `user_settings`) interpretado no **timezone** salvo em `user_settings.timezone`. Ex.: 09:00 com timezone America/Sao_Paulo = 09:00 em Brasília. O cron usa o instante UTC atual, converte para o timezone do usuário (via `Intl` / `getDatePartsInTimeZone`) e verifica se está na janela [email_time, email_time + 15 min). Não se usa horário do servidor como regra de negócio.
+- **Push e email:** Compartilham a mesma janela de envio (mesmo `email_time` e mesmo `timezone`); não há lógica temporal separada por canal.
+- **Fallback de timezone:** Se `user_settings.timezone` estiver ausente ou inválido (vazio ou IANA inexistente), usa-se **America/Sao_Paulo** (constante `FALLBACK_TZ` em `lib/timezone.ts`). O mesmo fallback é usado em `getDateKey`, `getDatePartsInTimeZone` e no handler do cron para consistência.
+- **Implementação:** Constante `FALLBACK_TZ` exportada e usada em `lib/timezone.ts`, `lib/server/dailyReminderDigest.ts`, `lib/server/dailyEmailCronLogic.ts` e `app/api/cron/email/route.ts`. Regra documentada em SPEC.md (7.1) e aqui.
+- **Quando receber o lembrete (reminder_timing):** Preferência em `user_settings.reminder_timing`: **day_of** (padrão) = digest com aniversários de hoje no timezone do usuário; **day_before** = digest com aniversários de amanhã (lembrete um dia antes do aniversário). Push e email usam o mesmo digest; a data alvo é sempre calculada com o timezone do usuário. Configuração em Configurações (Email diário) e no onboarding.
+
+---
+
 ## Hero Experimental Lab (/campaign)
 - **Decisão:** Rota isolada `/campaign` para testar ruptura visual Series A sem alterar a landing atual. Full-bleed 100vh; AppShell em `/campaign` renderiza apenas `children` (sem TopNav/main wrapper).
 - **Copy fixa:** Headline "Quem se importa, aparece."; sub "O Lembra te encontra no dia. Você só celebra."; CTA "Me avisar no dia"; link "Já tenho conta".

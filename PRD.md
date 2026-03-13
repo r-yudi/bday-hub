@@ -100,7 +100,7 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 - Sync de aniversários com Supabase quando logado
 - Categorias predefinidas e custom (guest + Supabase)
 - Light-only (pre-launch) e refinamentos de UX/PWA (landing-first)
-- **Email diário agendado** para usuários logados (cron `/api/cron/email`, configuração em `/today`; ver SPEC 7.1)
+- **Email diário agendado** para usuários logados (cron `/api/cron/email`, configuração em `/today`; ver SPEC 7.1); opção **reminder_timing**: no dia do aniversário (day_of) ou no dia anterior (day_before)
 
 ### 5.2 Restrições mantidas
 - Sem backend próprio (usa Supabase diretamente)

@@ -15,7 +15,7 @@ import {
   type BirthdayRow,
   type DispatchRow
 } from "@/lib/server/dailyEmailCronLogic";
-import { getDateKey } from "@/lib/timezone";
+import { FALLBACK_TZ, getDateKey } from "@/lib/timezone";
 import { getDatePartsInTimeZone } from "@/lib/server/dailyReminderDigest";
 
 const CRON_INTERVAL_MINUTES = 15;
@@ -63,7 +63,7 @@ function buildDebugUser(
   outcomeOrSkip?: ProcessOutcome | { skipReason: string },
   options?: { forced?: boolean }
 ): DebugUser {
-  const tz = (row.timezone || "America/Sao_Paulo").trim();
+  const tz = (row.timezone || FALLBACK_TZ).trim();
   const emailTime = (row.email_time || "09:00").trim();
   const parts = getDatePartsInTimeZone(tz, now);
   const dateKey = getDateKey(now, tz);
@@ -127,7 +127,10 @@ function getAllowedTestUserIds(): string[] {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-function buildCronDeps(supabase: ReturnType<typeof getSupabaseAdminClient>): DailyEmailCronDeps {
+function buildCronDeps(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  now: Date
+): DailyEmailCronDeps {
   const table = () => supabase.from("daily_email_dispatch" as "user_settings");
   return {
     async insertDispatch(userId: string, dateKey: string) {
@@ -147,8 +150,8 @@ function buildCronDeps(supabase: ReturnType<typeof getSupabaseAdminClient>): Dai
         .maybeSingle();
       return data as DispatchRow | null;
     },
-    async claimStalePending(id: string, now: Date) {
-      const cutoff = new Date(now.getTime() - STALE_PENDING_MS).toISOString();
+    async claimStalePending(id: string, nowDate: Date) {
+      const cutoff = new Date(nowDate.getTime() - STALE_PENDING_MS).toISOString();
       const res = await (table() as ReturnType<typeof supabase.from>)
         .update({ status: "pending" } as never)
         .eq("id", id)
@@ -175,7 +178,16 @@ function buildCronDeps(supabase: ReturnType<typeof getSupabaseAdminClient>): Dai
       const { data } = await supabase.auth.admin.getUserById(userId);
       return data.user?.email ?? null;
     },
-    sendReminderEmail
+    sendReminderEmail,
+    async pushRunner(userId: string) {
+      const result = await runPushForUser({
+        supabase,
+        userId,
+        now,
+        sendPush: sendPushNotification
+      });
+      return { sent: result.attempted && "sent" in result && result.sent === true };
+    }
   };
 }
 
@@ -204,7 +216,7 @@ export async function GET(request: Request) {
   if (diagnostic && effectiveTestUserId) {
     const { data: userRow, error: userError } = await supabase
       .from("user_settings")
-      .select("user_id,email_enabled,email_time,timezone,push_enabled")
+      .select("user_id,email_enabled,email_time,timezone,reminder_timing,push_enabled")
       .eq("user_id", effectiveTestUserId)
       .maybeSingle();
     if (userError) {
@@ -236,7 +248,7 @@ export async function GET(request: Request) {
       );
     }
     const row = userRow as UserSettingsReminderRow;
-    const tzForReset = (row.timezone || "America/Sao_Paulo").trim();
+    const tzForReset = (row.timezone || FALLBACK_TZ).trim();
     const computedDateKey = getDateKey(now, tzForReset);
     let resetAttempted = false;
     let resetDeletedCount = 0;
@@ -259,7 +271,7 @@ export async function GET(request: Request) {
     let lastError: string | undefined;
     let alreadyDispatchedCount = 0;
     if (treatAsCandidate && !dryRun) {
-      const deps = buildCronDeps(supabase);
+      const deps = buildCronDeps(supabase, now);
       insertsAttempted = 1;
       outcome = await processOneCandidate(deps, row, now);
       if (outcome.outcome === "sent") dispatchRowsWritten = 1;
@@ -320,7 +332,7 @@ export async function GET(request: Request) {
     });
   }
 
-  const deps = buildCronDeps(supabase);
+  const deps = buildCronDeps(supabase, now);
   const summary = {
     scannedUsers: 0,
     outsideWindow: 0,
@@ -344,7 +356,7 @@ export async function GET(request: Request) {
   if (effectiveTestUserId) {
     const { data: userRow, error: userError } = await supabase
       .from("user_settings")
-      .select("user_id,email_enabled,email_time,timezone,push_enabled")
+      .select("user_id,email_enabled,email_time,timezone,reminder_timing,push_enabled")
       .eq("user_id", effectiveTestUserId)
       .maybeSingle();
     if (userError) {
@@ -354,8 +366,8 @@ export async function GET(request: Request) {
   } else {
     const { data: settingsRows, error: settingsError } = await supabase
       .from("user_settings")
-      .select("user_id,email_enabled,email_time,timezone,push_enabled")
-      .eq("email_enabled", true);
+      .select("user_id,email_enabled,email_time,timezone,reminder_timing,push_enabled")
+      .or("email_enabled.eq.true,push_enabled.eq.true");
     if (settingsError) {
       return NextResponse.json({ ok: false, message: settingsError.message }, { status: 500 });
     }
@@ -365,7 +377,7 @@ export async function GET(request: Request) {
 
   if (!dryRun && diagnostic && effectiveTestUserId && xReset && rows.length > 0) {
     const row0 = rows[0];
-    const tz0 = (row0.timezone || "America/Sao_Paulo").trim();
+    const tz0 = (row0.timezone || FALLBACK_TZ).trim();
     const dateKey0 = getDateKey(now, tz0);
     resetAttempted = true;
     const { data: deleted, error: delError } = await supabase
@@ -381,7 +393,7 @@ export async function GET(request: Request) {
 
   const tableDispatch = () => supabase.from("daily_email_dispatch" as "user_settings");
   for (const row of rows) {
-    const timezone = (row.timezone || "America/Sao_Paulo").trim();
+    const timezone = (row.timezone || FALLBACK_TZ).trim();
     const emailTime = (row.email_time || "09:00").trim();
     const isInWindow = shouldSendForNow(emailTime, timezone, now);
     const treatAsCandidate = isInWindow;
@@ -454,16 +466,6 @@ export async function GET(request: Request) {
         summary.failed += 1;
         summary.lastError = outcome.reason ?? "unknown";
     }
-
-    if (row.push_enabled) {
-      await runPushForUser({
-        supabase,
-        userId: row.user_id,
-        now,
-        outcome,
-        sendPush: sendPushNotification
-      });
-    }
   }
 
   const showDebug = diagnostic;
@@ -488,7 +490,7 @@ export async function GET(request: Request) {
     if (rows.length === 1) {
       const row0 = rows[0];
       const candidateDebug = getCandidateDebug(row0, now);
-      const tz0 = (row0.timezone || "America/Sao_Paulo").trim();
+      const tz0 = (row0.timezone || FALLBACK_TZ).trim();
       const parts0 = getDatePartsInTimeZone(tz0, now);
       const dateKey0 = getDateKey(now, tz0);
       const { day, month } = dateKeyToDayMonth(dateKey0);

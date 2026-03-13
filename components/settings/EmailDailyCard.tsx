@@ -9,7 +9,7 @@ import {
   saveEmailReminderSettings,
   isValidTimezone
 } from "@/lib/notificationSettingsRepo";
-import { DEFAULT_EMAIL_REMINDER_SETTINGS, type EmailReminderSettings, type LastEmailDispatch } from "@/lib/types";
+import { DEFAULT_EMAIL_REMINDER_SETTINGS, type EmailReminderSettings, type LastEmailDispatch, type ReminderTiming } from "@/lib/types";
 import { parseTimeHHmm, formatTimeHHmm } from "./timeUtils";
 
 type EmailDailyCardProps = { variant?: "default" | "compact" };
@@ -71,6 +71,25 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
     };
   }, [showHow]);
 
+  async function handleReminderTimingChange(value: ReminderTiming) {
+    if (!user) return;
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const saved = await saveEmailReminderSettings({ reminderTiming: value });
+      if (saved) {
+        setEmailSettings(saved);
+        setSuccess("Preferência salva.");
+        setTimeout(() => setSuccess(null), 3000);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleToggle() {
     if (!user) return;
     setSaving(true);
@@ -85,7 +104,8 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
       const saved = await saveEmailReminderSettings({
         emailEnabled: nextEnabled,
         emailTime: emailTimeDraft,
-        timezone: timezoneToSave
+        timezone: timezoneToSave,
+        reminderTiming: emailSettings?.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming
       });
       if (saved) {
         setEmailSettings(saved);
@@ -244,6 +264,21 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
             })()}
             {!compact && (
               <>
+                <label className="text-xs text-muted" id="daily-email-timing-label">
+                  Lembrete
+                </label>
+                <select
+                  id="daily-email-timing"
+                  aria-labelledby="daily-email-timing-label"
+                  value={emailSettings?.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming}
+                  disabled={saving}
+                  onChange={(e) => void handleReminderTimingChange(e.target.value as ReminderTiming)}
+                  className="ui-focus-surface h-10 rounded-xl border px-2.5 text-sm focus-visible:outline-none"
+                  aria-label="Quando receber o lembrete"
+                >
+                  <option value="day_of">No dia do aniversário</option>
+                  <option value="day_before">No dia anterior</option>
+                </select>
                 <label className="text-xs text-muted" htmlFor="daily-email-timezone">
                   Fuso
                 </label>

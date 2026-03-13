@@ -197,6 +197,14 @@
   - `dry-run=true` — mesma lógica de elegibilidade e breakdown; **nenhum envio, nenhuma escrita** em dispatch (100% read-only).
   - Filtro por usuário de teste: query `userId=` ou header `X-Debug-UserId` só é aceito quando o UUID está em `CRON_TEST_USER_ID` (env, lista separada por vírgula).
 - Fixture para teste em produção: script interno `scripts/seed-cron-test-fixtures.ts` (ver docs/CRON_SETUP.md).
+- **Horário e timezone (regra única):**
+  - Horário de envio = horário escolhido pelo usuário (**email_time** em `user_settings`) interpretado no **timezone** salvo em `user_settings.timezone`. Ex.: 09:00 em America/Sao_Paulo = 09:00 em Brasília.
+  - Push e email compartilham a **mesma janela de envio** (mesmo `email_time` e mesmo `timezone`); o cron usa o instante UTC atual, converte para o timezone do usuário e verifica se está em [email_time, email_time + 15 min).
+  - Não se usa horário do servidor como regra de negócio; a referência é sempre "agora" em UTC convertido para o timezone do usuário.
+  - **Fallback de timezone:** se `user_settings.timezone` estiver ausente ou inválido (ex.: string vazia ou IANA inexistente), usa-se **America/Sao_Paulo** (constante `FALLBACK_TZ` em `lib/timezone.ts`). O mesmo fallback é usado em `getDateKey` e em `getDatePartsInTimeZone` para garantir consistência.
+- **Quando receber o lembrete (reminder_timing):**
+  - **day_of** (padrão): o digest considera aniversários de **hoje** no timezone do usuário (comportamento clássico).
+  - **day_before**: o digest considera aniversários de **amanhã** no timezone do usuário; o usuário recebe o lembrete um dia antes do aniversário, no horário configurado. Push e email usam o mesmo digest; a data alvo é sempre calculada com o timezone do usuário.
 
 ## 8) Segurança e privacidade
 - RLS em tabelas de usuário (`birthdays`, `user_settings`, `user_categories`)

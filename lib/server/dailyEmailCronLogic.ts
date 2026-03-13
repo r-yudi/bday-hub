@@ -3,7 +3,7 @@
  * Exported for use in route and unit tests (mocked deps).
  */
 
-import { addDaysToDateKey, getDateKey } from "@/lib/timezone";
+import { addDaysToDateKey, FALLBACK_TZ, getDateKey } from "@/lib/timezone";
 import { buildDailyReminderEmail, getDatePartsInTimeZone } from "@/lib/server/dailyReminderDigest";
 
 export const STALE_PENDING_MS = 2 * 60 * 60 * 1000;
@@ -14,6 +14,7 @@ export type UserSettingsReminderRow = {
   email_enabled: boolean;
   email_time: string | null;
   timezone: string | null;
+  reminder_timing?: string | null;
   push_enabled?: boolean;
 };
 
@@ -99,7 +100,7 @@ export function getCandidateDebug(
   now: Date,
   cronIntervalMinutes = 15
 ): CandidateDebug {
-  const timezone = (row.timezone || "America/Sao_Paulo").trim();
+  const timezone = (row.timezone || FALLBACK_TZ).trim();
   const emailTime = (row.email_time || "09:00").trim();
   const parts = getDatePartsInTimeZone(timezone, now);
   const currentMinutes = toMinutes(parts.hhmm);
@@ -113,10 +114,11 @@ export function getCandidateDebug(
   const windowEnd =
     windowEndM !== null ? formatM(windowEndM) : "invalid";
 
+  const wantsReminder = row.email_enabled || row.push_enabled;
   let isCandidate = false;
   let reasonIfNot: string | undefined;
-  if (!row.email_enabled) {
-    reasonIfNot = "email_enabled is false";
+  if (!wantsReminder) {
+    reasonIfNot = "email_enabled and push_enabled are false";
   } else if (targetMinutes === null) {
     reasonIfNot = `email_time "${emailTime}" could not be parsed (expected HH:MM)`;
   } else if (currentMinutes === null) {
@@ -169,6 +171,8 @@ export type DailyEmailCronDeps = {
   getBirthdays: (userId: string, day: number, month: number) => Promise<BirthdayRow[] | { error: string }>;
   getUserEmail: (userId: string) => Promise<string | null>;
   sendReminderEmail: (input: { to: string; subject: string; html: string; text: string }) => Promise<{ ok: true } | { ok: false; reason?: string; detail?: string }>;
+  /** Optional: try push first; when present and push is delivered, email is skipped (fallback policy). */
+  pushRunner?: (userId: string, now: Date) => Promise<{ sent: boolean }>;
 };
 
 export type ProcessOneCandidateOptions = {
@@ -186,7 +190,7 @@ export async function processOneCandidate(
   now: Date,
   options?: ProcessOneCandidateOptions
 ): Promise<ProcessOutcome> {
-  const timezone = row.timezone || "America/Sao_Paulo";
+  const timezone = row.timezone || FALLBACK_TZ;
   const emailTime = row.email_time || "09:00";
   const dateKey = getDateKey(now, timezone);
 
@@ -214,7 +218,11 @@ export async function processOneCandidate(
 
   if (!dispatchId) return { outcome: "failed", reason: "no-dispatch-id" };
 
-  const { day, month } = dateKeyToDayMonth(dateKey);
+  const isDayBefore = row.reminder_timing === "day_before";
+  const primaryTargetKey = isDayBefore ? addDaysToDateKey(dateKey, 1) : dateKey;
+  const primaryMode: "today" | "tomorrow" = isDayBefore ? "tomorrow" : "today";
+
+  const { day, month } = dateKeyToDayMonth(primaryTargetKey);
   const birthdaysResult = await deps.getBirthdays(row.user_id, day, month);
   if (!Array.isArray(birthdaysResult)) {
     await deps.updateDispatch(dispatchId, { status: "error", error_message: truncateError(birthdaysResult.error) });
@@ -222,8 +230,16 @@ export async function processOneCandidate(
   }
 
   let birthdays = birthdaysResult;
-  let digestIsoDate = dateKey;
-  let mode: "today" | "tomorrow" | "week" = "today";
+  let digestIsoDate = primaryTargetKey;
+  let mode: "today" | "tomorrow" | "week" = primaryMode;
+
+  if (birthdays.length === 0 && isDayBefore) {
+    await deps.updateDispatch(dispatchId, {
+      status: "skipped",
+      ...(options?.debugNoBirthdaysMessage && { error_message: options.debugNoBirthdaysMessage })
+    });
+    return { outcome: "skipped", reason: "no_birthday", ...(recoveredStale && { recoveredStale: true }) };
+  }
 
   if (birthdays.length === 0) {
     const tomorrowDateKey = addDaysToDateKey(dateKey, 1);
@@ -262,6 +278,20 @@ export async function processOneCandidate(
   if (!to || !isValidEmail(to)) {
     await deps.updateDispatch(dispatchId, { status: "error", error_message: "invalid-or-missing-email" });
     return { outcome: "skipped", reason: "invalid_email" };
+  }
+
+  // Push-first policy: if push_enabled and pushRunner present, try push; if delivered, do not send email.
+  if (row.push_enabled && deps.pushRunner) {
+    const pushResult = await deps.pushRunner(row.user_id, now);
+    if (pushResult.sent) {
+      await deps.updateDispatch(dispatchId, { status: "sent", sent_at: now.toISOString() });
+      return { outcome: "sent", ...(recoveredStale && { recoveredStale: true }) };
+    }
+    // Push failed and user has no email fallback
+    if (!row.email_enabled) {
+      await deps.updateDispatch(dispatchId, { status: "skipped", error_message: "push_failed_no_email_fallback" });
+      return { outcome: "skipped", reason: "no_birthday", ...(recoveredStale && { recoveredStale: true }) };
+    }
   }
 
   const digest = buildDailyReminderEmail(birthdays, digestIsoDate, mode);

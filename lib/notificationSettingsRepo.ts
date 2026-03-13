@@ -5,7 +5,8 @@ import {
   DEFAULT_EMAIL_REMINDER_SETTINGS,
   type EmailReminderSettings,
   type LastEmailDispatch,
-  type PushSettings
+  type PushSettings,
+  type ReminderTiming
 } from "@/lib/types";
 
 export function isValidTimezone(tz: string): boolean {
@@ -23,6 +24,7 @@ type UserSettingsRow = {
   email_enabled?: boolean | null;
   email_time?: string | null;
   timezone?: string | null;
+  reminder_timing?: string | null;
   last_daily_email_sent_on?: string | null;
   push_enabled?: boolean | null;
 };
@@ -32,11 +34,17 @@ function normalizeEmailTime(value?: string | null) {
   return /^\d{2}:\d{2}$/.test(value) ? value : DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime;
 }
 
+function normalizeReminderTiming(value?: string | null): ReminderTiming {
+  if (value === "day_of" || value === "day_before") return value;
+  return DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming;
+}
+
 function normalizeSettings(row?: UserSettingsRow | null): EmailReminderSettings {
   return {
     emailEnabled: Boolean(row?.email_enabled ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailEnabled),
     emailTime: normalizeEmailTime(row?.email_time),
     timezone: row?.timezone || DEFAULT_EMAIL_REMINDER_SETTINGS.timezone,
+    reminderTiming: normalizeReminderTiming(row?.reminder_timing),
     lastDailyEmailSentOn: row?.last_daily_email_sent_on ?? null
   };
 }
@@ -61,7 +69,7 @@ export async function getEmailReminderSettings(): Promise<EmailReminderSettings 
 
   const { data, error } = await supabase
     .from("user_settings")
-    .select("user_id,email_enabled,email_time,timezone,last_daily_email_sent_on,push_enabled")
+    .select("user_id,email_enabled,email_time,timezone,reminder_timing,last_daily_email_sent_on,push_enabled")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -88,7 +96,8 @@ export async function saveEmailReminderSettings(partial: Partial<EmailReminderSe
     ...partial,
     emailTime:
       partial.emailTime !== undefined ? normalizeEmailTime(partial.emailTime) : (current.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime),
-    timezone: partial.timezone !== undefined ? partial.timezone : (current.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone)
+    timezone: partial.timezone !== undefined ? partial.timezone : (current.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone),
+    reminderTiming: partial.reminderTiming !== undefined ? normalizeReminderTiming(partial.reminderTiming) : (current.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming)
   };
 
   // Always persist full email state so upsert never leaves email_time/timezone to DB default (avoids reset to 09:00 when only toggling enabled)
@@ -106,6 +115,7 @@ export function buildEmailReminderPayload(
   if (partial.emailEnabled !== undefined) payload.email_enabled = partial.emailEnabled;
   if (partial.emailTime !== undefined) payload.email_time = normalizeEmailTime(partial.emailTime);
   if (partial.timezone !== undefined) payload.timezone = partial.timezone;
+  if (partial.reminderTiming !== undefined) payload.reminder_timing = partial.reminderTiming;
   return payload;
 }
 
@@ -115,7 +125,8 @@ function buildEmailReminderPayloadFromFull(settings: EmailReminderSettings, user
     user_id: userId,
     email_enabled: settings.emailEnabled,
     email_time: normalizeEmailTime(settings.emailTime),
-    timezone: settings.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone
+    timezone: settings.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone,
+    reminder_timing: settings.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming
   };
 }
 

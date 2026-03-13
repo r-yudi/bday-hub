@@ -56,6 +56,27 @@ test("shouldSendNow: window crossing midnight (23:50 -> 00:05)", () => {
   assert.equal(shouldSendNow(new Date("2026-03-10T03:06:00Z"), TZ, "23:50", 15), false);
 });
 
+test("shouldSendNow: Europe/London 09:00 local => in window (January = GMT, 09:00 UTC = 09:00 London)", () => {
+  const tzLondon = "Europe/London";
+  const now = new Date("2026-01-15T09:00:00Z");
+  assert.equal(shouldSendNow(now, tzLondon, "09:00", 15), true);
+  assert.equal(shouldSendNow(now, tzLondon, "09:15", 15), false);
+});
+
+test("getCandidateDebug: push_only user in window => isCandidate true", () => {
+  const pushOnlyRow: UserSettingsReminderRow = {
+    user_id: "user-push-only",
+    email_enabled: false,
+    push_enabled: true,
+    email_time: "09:00",
+    timezone: "America/Sao_Paulo"
+  };
+  const now = new Date("2026-03-10T12:00:00Z");
+  const debug = getCandidateDebug(pushOnlyRow, now);
+  assert.equal(debug.isCandidate, true);
+  assert.equal(debug.timezone, "America/Sao_Paulo");
+});
+
 test("dateKeyToDayMonth parses YYYY-MM-DD", () => {
   assert.deepEqual(dateKeyToDayMonth("2026-03-10"), { day: 10, month: 3 });
 });
@@ -193,6 +214,35 @@ test("today wins: when today has birthdays only one getBirthdays (today) and sen
   assert.equal(getBirthdaysCalls[0].month, 3);
   assert.ok(sentSubject.includes("Hoje") || sentSubject.includes("Alice"));
   assert.ok(!sentSubject.includes("Amanhã"));
+});
+
+test("reminder_timing day_before: digest uses tomorrow's birthdays and mode tomorrow", async () => {
+  const rowDayBefore: UserSettingsReminderRow = { ...ROW, reminder_timing: "day_before" };
+  let getBirthdaysCalls: Array<{ day: number; month: number }> = [];
+  let sentSubject = "";
+  const deps: DailyEmailCronDeps = {
+    insertDispatch: async () => ({ id: "id-1" }),
+    getExistingDispatch: async () => null,
+    claimStalePending: async () => false,
+    updateDispatch: async () => {},
+    getBirthdays: async (_userId, day, month) => {
+      getBirthdaysCalls.push({ day, month });
+      if (day === 11 && month === 3) return [{ name: "Bob", day: 11, month: 3 }];
+      return [];
+    },
+    getUserEmail: async () => "u@example.com",
+    sendReminderEmail: async (input) => {
+      sentSubject = input.subject;
+      return { ok: true };
+    }
+  };
+  const outcome = await processOneCandidate(deps, rowDayBefore, NOW);
+  assert.equal(outcome.outcome, "sent");
+  assert.equal(getBirthdaysCalls.length, 1);
+  assert.equal(getBirthdaysCalls[0].day, 11);
+  assert.equal(getBirthdaysCalls[0].month, 3);
+  assert.ok(sentSubject.includes("Amanhã"));
+  assert.ok(sentSubject.includes("Bob"));
 });
 
 test("tomorrow sends when today empty: subject and hero are tomorrow copy", async () => {
