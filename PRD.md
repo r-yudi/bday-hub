@@ -35,7 +35,7 @@
 - Tema **light-only (pre-launch)**: dark mode desabilitado em runtime; detalhes em [docs/THEME.md](docs/THEME.md).
 - Contrato visual **landing-first** via utilitários `ui-*` e tokens; referência em [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 - Cartões com ações de copiar mensagem/link e feedback visual.
-- Campo **`notes`** no modelo: na UI do cadastro aparece como **Sobre essa pessoa** (apelidos, preferências, como falar com a pessoa). No **dia do aniversário**, o cartão em `/today` mostra uma **mensagem sugerida** somente leitura (`lib/suggestedBirthdayMessage.ts`): sem texto → `Feliz aniversário! 🎉`; com texto → primeira linha de `notes` + `, feliz aniversário!! 🎉`. Em **próximos dias** (`/upcoming`), a cópia principal continua usando os templates com nome já existentes.
+- Campo **`notes`** na UI **Sobre essa pessoa** (referência para o usuário; não entra na mensagem automática). Campo opcional **`nickname`** na UI **Como chamar** (saudação curta). No **dia do aniversário**, o cartão em `/today` mostra **mensagem sugerida** (`getTodaySuggestedMessage`): vocativo = `nickname` válido ou primeiro nome de `name`; uma entre **3 frases fixas** em código; se não houver vocativo → `Feliz aniversário! 🎉`. **Próximos dias** (`/upcoming`): cópia principal segue templates com nome existentes.
 - Footer global com links para privacidade e termos nas páginas internas.
 
 ### Dados e sincronização (atual)

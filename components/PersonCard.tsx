@@ -10,8 +10,8 @@ import { Templates, getMessageTemplates } from "@/components/Templates";
 import { dedupeCategoryNames } from "@/lib/categories";
 import { getTodaySuggestedMessage } from "@/lib/suggestedBirthdayMessage";
 
-const PERSONAL_MESSAGE_HINT =
-  "Quer deixar a mensagem mais pessoal? Adicione algo sobre essa pessoa.";
+const NICKNAME_HINT =
+  "Quer uma saudação mais natural na mensagem? Preencha Como chamar ao editar a pessoa.";
 
 type PersonCardProps = {
   person: BirthdayPerson;
@@ -25,8 +25,8 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   const links = person.links ?? {};
   const isBirthdayToday = relativeDays === undefined || relativeDays === 0;
   const suggestedTodayMessage = useMemo(
-    () => (isBirthdayToday ? getTodaySuggestedMessage({ notes: person.notes }) : ""),
-    [isBirthdayToday, person.notes]
+    () => (isBirthdayToday ? getTodaySuggestedMessage({ id: person.id, name: person.name, nickname: person.nickname }) : ""),
+    [isBirthdayToday, person.id, person.name, person.nickname]
   );
   const categories = useMemo(
     () => dedupeCategoryNames([...(person.categories ?? []), ...(person.tags ?? []), person.category]),
@@ -44,7 +44,9 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   }
 
   async function copyPrimaryMessage() {
-    const primaryMessage = isBirthdayToday ? getTodaySuggestedMessage({ notes: person.notes }) : getMessageTemplates(person)[0];
+    const primaryMessage = isBirthdayToday
+      ? getTodaySuggestedMessage({ id: person.id, name: person.name, nickname: person.nickname })
+      : getMessageTemplates(person)[0];
     try {
       await navigator.clipboard.writeText(primaryMessage);
       setMessageCopied(true);
@@ -117,7 +119,13 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
           >
             {suggestedTodayMessage}
           </p>
-          {!person.notes?.trim() && <p className="text-xs text-muted">{PERSONAL_MESSAGE_HINT}</p>}
+          {!person.nickname?.trim() && <p className="text-xs text-muted">{NICKNAME_HINT}</p>}
+          {person.notes?.trim() && (
+            <p className="text-xs text-muted">
+              <span className="font-medium text-text/80">Sobre essa pessoa: </span>
+              {normalizeNfc(person.notes)}
+            </p>
+          )}
         </div>
       )}
 
@@ -184,9 +192,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         </div>
       )}
 
-      {person.notes?.trim() && !isBirthdayToday && (
-        <p className="mt-3 text-sm text-muted">{normalizeNfc(person.notes)}</p>
-      )}
+      {person.notes?.trim() && !isBirthdayToday && <p className="mt-3 text-sm text-muted">{normalizeNfc(person.notes)}</p>}
 
       <div className="mt-4">
         <Templates person={person} />

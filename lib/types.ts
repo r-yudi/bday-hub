@@ -15,6 +15,8 @@ export type BirthdayPerson = {
   categories?: string[];
   category?: string;
   tags: string[];
+  /** Como chamar na mensagem sugerida (opcional). */
+  nickname?: string;
   notes?: string;
   links?: PersonLinks;
   createdAt: number;

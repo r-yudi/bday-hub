@@ -94,7 +94,7 @@
   - `id`, `name`, `day`, `month`, `source`
   - `categories?: string[]` (preferencial)
   - `tags: string[]` (compatibilidade)
-  - `notes?` (persistido como `notes`; na UI: **Sobre essa pessoa**), `links?`, `createdAt`, `updatedAt`
+  - `nickname?` (UI: **Como chamar**; mensagem sugerida no dia), `notes?` (UI: **Sobre essa pessoa**; só referência, não compõe a sugestão), `links?`, `createdAt`, `updatedAt`
 - `AppSettings`:
   - `notificationEnabled`, `notificationTime`, `lastNotifiedDate?`
 
@@ -102,6 +102,7 @@
 - `birthdays`
   - inclui `user_id`
   - usa `categories text[]` (schema atual)
+  - coluna opcional `nickname` (text) para “Como chamar” / mensagem sugerida
   - RLS owner-only
 - `user_settings`
   - PK em `user_id`
@@ -132,7 +133,7 @@
 
 ### `/today`
 - Lista de aniversários de hoje
-- Cartão do dia: **Mensagem sugerida** (preview + Copiar + Editar para `/person`); lógica mínima em `getTodaySuggestedMessage` (sem `notes` → frase fixa; com `notes` → primeira linha + sufixo fixo). Hint discreto se `notes` vazio.
+- Cartão do dia: **Mensagem sugerida** (preview + Copiar + Editar); `getTodaySuggestedMessage` usa `nickname` ou primeiro nome + 1 de 3 frases fixas; `notes` não compõem a sugestão (podem aparecer como referência no card). Hint se `nickname` vazio.
 - CTA adicionar, importar CSV, lembretes best-effort
 - **Entrada rápida (empty state):** bloco "Colar vários de uma vez" com textarea; formato aceito: uma linha por pessoa, **Nome DD/MM** (dia/mês com 1 ou 2 dígitos); feedback de importados/inválidos e detalhe de linhas ignoradas; persistência via `importCsvBirthdays` (sem alterar schema/CSV)
 - onboarding e feedbacks de cópia
@@ -143,7 +144,7 @@
 
 ### `/person`
 - Form de cadastro/edição
-- Campo **Sobre essa pessoa** (`notes`): placeholder com exemplos; hint leve quando vazio.
+- Campo **Como chamar** (`nickname`, opcional) e **Sobre essa pessoa** (`notes`): placeholders e hints; `notes` não alimenta a mensagem sugerida.
 - categorias (multi-select leve + criação rápida)
 
 ### `/manage`

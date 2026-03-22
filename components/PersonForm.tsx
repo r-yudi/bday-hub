@@ -43,6 +43,7 @@ function RequiredMark() {
 
 export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps) {
   const [name, setName] = useState(initialPerson?.name ?? "");
+  const [nickname, setNickname] = useState(initialPerson?.nickname ?? "");
   const [day, setDay] = useState<number>(initialPerson?.day ?? 1);
   const [month, setMonth] = useState<number>(initialPerson?.month ?? 1);
   const [notes, setNotes] = useState(initialPerson?.notes ?? "");
@@ -58,6 +59,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
   useEffect(() => {
     setName(initialPerson?.name ?? "");
+    setNickname(initialPerson?.nickname ?? "");
     setDay(initialPerson?.day ?? 1);
     setMonth(initialPerson?.month ?? 1);
     setNotes(initialPerson?.notes ?? "");
@@ -163,6 +165,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
       source,
       categories: normalizedCategories,
       tags: normalizedCategories,
+      nickname: normalizeNfc(nickname.trim()) || undefined,
       notes: normalizeNfc(notes.trim()) || undefined,
       links: {
         whatsapp: whatsapp.trim() || undefined,
@@ -207,7 +210,20 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
             <HelpDot title="Use o nome como você prefere ver nos lembretes." />
           </FieldLabel>
           <TextInput id="person-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Ana Silva" />
-          <FieldHelper>Esse nome aparece nos lembretes e nas mensagens prontas.</FieldHelper>
+          <FieldHelper>Aparece na lista e nos lembretes. Na mensagem sugerida do dia, usamos Como chamar (se houver) ou o primeiro nome.</FieldHelper>
+        </FieldGroup>
+
+        <FieldGroup>
+          <FieldLabel htmlFor="person-nickname" className="flex items-center gap-1.5">
+            <span>Como chamar</span>
+            <HelpDot title="Saudação na mensagem sugerida no aniversário (ex.: apelido ou tratamento). Se vazio, usamos o primeiro nome do campo Nome." />
+          </FieldLabel>
+          <TextInput
+            id="person-nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="Ex: Ju, titia, Dr. Paulo"
+          />
         </FieldGroup>
 
         <div className="grid grid-cols-2 gap-3">
@@ -365,7 +381,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         <FieldGroup>
           <FieldLabel htmlFor="person-notes" className="flex items-center gap-1.5">
             <span>Sobre essa pessoa</span>
-            <HelpDot title="Apelidos, preferências, como costuma falar com a pessoa — ajuda a sugerir uma mensagem no dia do aniversário." />
+            <HelpDot title="Só para sua referência: preferências, tom, detalhes. Não entra automaticamente na mensagem sugerida." />
           </FieldLabel>
           <TextArea
             id="person-notes"
@@ -375,7 +391,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
           />
           {!notes.trim() && (
             <p className="text-xs text-muted">
-              Quer deixar a mensagem mais pessoal? Adicione algo sobre essa pessoa.
+              Opcional. Lembrete para você ao parabenizar; use Como chamar para a saudação na mensagem sugerida.
             </p>
           )}
         </FieldGroup>

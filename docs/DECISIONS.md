@@ -189,3 +189,14 @@ Ordem sugerida para corrigir a publicação:
 - **Regra única (`getTodaySuggestedMessage`):** `notes` vazio após trim → `Feliz aniversário! 🎉`. Com conteúdo → primeira linha (split `\r?\n`) + `, feliz aniversário!! 🎉`. Permitido `normalizeNfc` no texto. **Proibido na V1:** parsing por vírgula, truncagem inteligente, regex de emoji, NLP, heurísticas extras.
 - **Próximos dias:** Mantém templates existentes com nome (`getMessageTemplates`); não aplica `getTodaySuggestedMessage`.
 - **Dependências:** nenhuma nova.
+
+---
+
+## 2026-03-22 — Mensagem sugerida V2 (Como chamar + templates)
+
+- **Problema da V1:** usar `notes` na saudação gerava texto de “ficha + parabéns”.
+- **Modelo:** Campo opcional `nickname` (UI **Como chamar**), sync guest + Supabase (`birthdays.nickname`). `notes` permanece **Sobre essa pessoa** e **não** entra na mensagem sugerida automaticamente.
+- **`getTodaySuggestedMessage`:** vocativo = `nickname` trimado (máx. 48 caracteres) ou primeiro token de `name`; senão fallback `Feliz aniversário! 🎉`. Corpo = exatamente **uma** de **3** strings fixas em código; variação por `id` (`charCode` sum % 3). Sem NLP, sem uso de `notes`, sem regex de apelido.
+- **UI card (dia):** preview + Copiar + Editar; referência opcional de `notes` abaixo; hint se sem `nickname`.
+- **Migration:** `supabase/migrations/20260322120000_add_nickname_to_birthdays.sql`.
+- **CSV/import do nickname:** fora do escopo desta rodada.

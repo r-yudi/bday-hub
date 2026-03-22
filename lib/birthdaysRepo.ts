@@ -22,6 +22,7 @@ type BirthdaysRow = {
   source?: string | null;
   tags?: string[] | string | null;
   notes?: string | null;
+  nickname?: string | null;
   whatsapp?: string | null;
   instagram?: string | null;
   other_link?: string | null;
@@ -79,6 +80,7 @@ function rowToPerson(row: BirthdaysRow): BirthdayPerson {
     source: row.source === "csv" || row.source === "shared" ? row.source : "manual",
     categories,
     tags: categories,
+    nickname: row.nickname?.trim() || undefined,
     notes: row.notes ?? undefined,
     links: {
       whatsapp: row.whatsapp ?? undefined,
@@ -102,6 +104,7 @@ function personToRow(person: BirthdayPerson, userId: string): BirthdaysRow {
     source: normalized.source,
     tags: normalized.categories ?? normalized.tags ?? [],
     notes: normalized.notes ?? null,
+    nickname: normalized.nickname?.trim() ? normalized.nickname.trim() : null,
     whatsapp: normalized.links?.whatsapp ?? null,
     instagram: normalized.links?.instagram ?? null,
     other_link: normalized.links?.other ?? null,
@@ -159,7 +162,7 @@ async function listRemoteBirthdays(userId: string): Promise<BirthdayPerson[]> {
 
   const { data, error } = await supabase
     .from("birthdays")
-    .select("id,user_id,name,day,month,categories,tags,source,notes,whatsapp,instagram,other_link,created_at,updated_at")
+    .select("id,user_id,name,day,month,categories,tags,source,notes,nickname,whatsapp,instagram,other_link,created_at,updated_at")
     .eq("user_id", userId)
     .order("month", { ascending: true })
     .order("day", { ascending: true })

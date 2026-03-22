@@ -70,11 +70,12 @@ test.describe("MVP smoke flows", () => {
     const updatedName = `${created.name} Editado`;
     await page.getByPlaceholder("Ex.: Ana Silva").fill(updatedName);
     await page.getByPlaceholder("Ex: chama de Ju, ama café, sempre mando áudio").fill("Nota editada via e2e");
+    await page.getByPlaceholder("Ex: Ju, titia, Dr. Paulo").fill("JuE2E");
     await page.getByRole("button", { name: "Salvar" }).click();
 
     await expect(page).toHaveURL(/\/today$/);
     await expect(page.getByRole("heading", { name: updatedName })).toBeVisible();
-    await expect(page.getByText("Nota editada via e2e, feliz aniversário!! 🎉")).toBeVisible();
+    await expect(page.getByText(/JuE2E, (feliz aniversário|parabéns)/)).toBeVisible();
 
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Excluir" }).first().click();
@@ -131,7 +132,8 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByText("Carregando...")).toHaveCount(0);
 
     await expect(page.getByRole("heading", { name: created.name })).toBeVisible();
-    await expect(page.getByText("Persistir apos reload, feliz aniversário!! 🎉")).toBeVisible();
+    const card = page.locator("article.ui-panel").filter({ has: page.getByRole("heading", { name: created.name }) });
+    await expect(card.locator('p[aria-live="polite"]')).toContainText(/Persist, (feliz aniversário|parabéns)/);
   });
 
   test("/share/[token] -> Adicionar a lista", async ({ page }) => {
@@ -172,7 +174,7 @@ test.describe("MVP smoke flows", () => {
 
   test("TopNav: navegar para Pessoas", async ({ page }) => {
     await page.goto("/today");
-    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
     await page.getByRole("link", { name: "Pessoas" }).click();
     await expect(page).toHaveURL(/\/people$/);
     await expect(page.getByRole("link", { name: "Adicionar" }).first()).toBeVisible();
@@ -180,7 +182,7 @@ test.describe("MVP smoke flows", () => {
 
   test("TopNav: navegar para Configurações", async ({ page }) => {
     await page.goto("/today");
-    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
     await page.getByRole("link", { name: "Configurações" }).click();
     await expect(page).toHaveURL(/\/settings$/);
     await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
@@ -273,7 +275,7 @@ test.describe("Onboarding gate (logado)", () => {
     await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
-    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
     await page.getByRole("button", { name: /Continuar|Pular por agora/ }).first().click();
     await expect(page.getByRole("heading", { name: "Alertas" })).toBeVisible();
@@ -289,7 +291,7 @@ test.describe("Onboarding wizard (guest)", () => {
     await page.goto("/today");
     await page.evaluate(() => localStorage.removeItem("onboarding_v2_seen"));
     await page.goto("/today?onboarding=1");
-    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toBeVisible();
     await page.getByRole("button", { name: "Continuar sem conta" }).click();
     await expect(page.getByRole("heading", { name: "Adicionar aniversários" })).toBeVisible();
@@ -297,7 +299,7 @@ test.describe("Onboarding wizard (guest)", () => {
     await page.getByRole("button", { name: "Fechar onboarding" }).click();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
     await page.reload();
-    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
     await expect(page.getByText("Sincronize em todos os dispositivos")).toHaveCount(0);
   });
 });
