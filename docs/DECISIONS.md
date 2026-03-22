@@ -200,3 +200,12 @@ Ordem sugerida para corrigir a publicação:
 - **UI card (dia):** preview + Copiar + Editar; referência opcional de `notes` abaixo; hint se sem `nickname`.
 - **Migration:** `supabase/migrations/20260322120000_add_nickname_to_birthdays.sql`.
 - **CSV/import do nickname:** fora do escopo desta rodada.
+
+---
+
+## 2026-03-22 — UX /person e card: cópia no preview + WhatsApp/Instagram simplificados
+
+- **Mensagem sugerida (dia):** o bloco de preview é acionável (mesma ação que **Copiar**); botão **Copiar** e toast/estado “Mensagem copiada ✓” mantidos; microcopy curta orientando toque/clique.
+- **Formulário:** WhatsApp = só dígitos/formato livre no input → persistência `https://wa.me/{n}` (10/11 dígitos recebem prefixo `55`); Instagram = `@` ou usuário → `https://instagram.com/{user}`. Se o valor já for URL `http(s)`, **não** reescrever (legado e CSV).
+- **Tooltips:** copy curta e acolhedora; `HelpDot` como `button type="button"` para foco/hover nativos e área de toque mínima.
+- **Código:** `lib/personLinks.ts` + testes em `tests/unit/personLinks.test.ts`.

@@ -94,7 +94,7 @@ Pessoas que mantêm relações em múltiplos contextos (família, amigos, trabal
 - Importação CSV com preview e validação
 - Entrada rápida em lote no empty state de `/today` (formato Nome DD/MM, uma linha por pessoa)
 - Templates de mensagem + copiar
-- Links rápidos (WhatsApp / Instagram / outro)
+- Links rápidos (WhatsApp / Instagram / outro): no formulário, WhatsApp como número e Instagram como @/usuário (o app monta as URLs); valores já salvos como URL completa continuam válidos
 - Notificação best-effort ao abrir o app
 - Compartilhamento client-only (`/share/[token]`) sem ano
 - Login Google com Supabase + sessão persistente

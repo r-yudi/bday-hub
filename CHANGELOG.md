@@ -14,6 +14,10 @@ Formato adotado:
 
 ### Added
 - **Mensagem sugerida V2 (mais humana):** campo opcional `nickname` (UI **Como chamar**), persistido guest + Supabase (`birthdays.nickname`, migration `20260322120000_add_nickname_to_birthdays.sql`). `getTodaySuggestedMessage` usa `nickname` ou primeiro nome de `name` + uma de 3 frases fixas; `notes` (**Sobre essa pessoa**) não compõe a sugestão (referência no card). Dia do aniversário: preview, **Copiar**, hint se sem nickname; `/upcoming` inalterado nos templates com nome.
+- **`lib/personLinks.ts`:** normalização de WhatsApp (número → `wa.me`) e Instagram (@/usuário → `instagram.com/...`) no save; leitura para edição a partir de URL legada; URLs `http(s)` existentes não são reescritas.
+
+### Changed
+- **UX formulário /person + card do dia:** preview da mensagem sugerida é clicável para copiar (mantém botão Copiar e feedback “Mensagem copiada ✓”); microcopy “Clique ou toque na mensagem para copiar.”; WhatsApp/Instagram pedem só número e @/usuário; tooltips do form com copy curta; `HelpDot` como `button` com área de toque melhor.
 
 ### Changed
 - **Landing UI inside the app:** páginas internas como extensão da landing (ritmo editorial: mais whitespace, hierarquia eyebrow + h1 serif + subtítulo, superfícies “paper” sem sombras pesadas). Novos utilitários em `globals.css`: `ui-container`, `ui-section`, `ui-section-header`, `ui-eyebrow`, `ui-stack-lg`/`ui-stack-md`, `ui-feature-block`, `ui-empty-hero`, `ui-list`/`ui-list-item`. Ajuste de `ui-panel`/`ui-panel-soft`/`ui-page-hero`/`ui-prose-panel` (borda sutil, sombra mínima). Aplicado em `/today`, `/manage`, `/share`, `/share/[token]`, `/login`, `/upcoming`, `/person`. TopNav com menos densidade; seletor de tema removido. Referência em `docs/REBRAND_LANDING_FIRST_REPORT.md`. Light-only (pre-launch): dark desabilitado em runtime; docs `docs/THEME.md`, `docs/DESIGN_SYSTEM.md`. Polish: badge BUILD removido, banner PWA CTA com `ui-cta-primary`, spec `e2e/screenshots-polish.spec.ts`. Documentação base atualizada (README Design/UI e Quality gates, docs canônicos).

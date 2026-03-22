@@ -113,12 +113,15 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
       {isBirthdayToday && (
         <div className="mt-4 space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted">Mensagem sugerida</p>
-          <p
-            className="ui-surface ui-border-subtle rounded-xl border px-3 py-2 text-sm text-text shadow-sm"
-            aria-live="polite"
+          <button
+            type="button"
+            onClick={() => void copyPrimaryMessage()}
+            className="ui-surface ui-border-subtle w-full rounded-xl border px-3 py-2 text-left text-sm text-text shadow-sm transition-colors hover:border-primary/35 hover:bg-surface2/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 active:scale-[0.99]"
+            aria-label={`Copiar mensagem: ${suggestedTodayMessage}`}
           >
-            {suggestedTodayMessage}
-          </p>
+            <span aria-live="polite">{suggestedTodayMessage}</span>
+          </button>
+          <p className="text-xs text-muted">Clique ou toque na mensagem para copiar.</p>
           {!person.nickname?.trim() && <p className="text-xs text-muted">{NICKNAME_HINT}</p>}
           {person.notes?.trim() && (
             <p className="text-xs text-muted">

@@ -133,7 +133,7 @@ test.describe("MVP smoke flows", () => {
 
     await expect(page.getByRole("heading", { name: created.name })).toBeVisible();
     const card = page.locator("article.ui-panel").filter({ has: page.getByRole("heading", { name: created.name }) });
-    await expect(card.locator('p[aria-live="polite"]')).toContainText(/Persist, (feliz aniversário|parabéns)/);
+    await expect(card.getByText(/Persist, (feliz aniversário|parabéns)/)).toBeVisible();
   });
 
   test("/share/[token] -> Adicionar a lista", async ({ page }) => {

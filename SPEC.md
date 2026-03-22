@@ -94,7 +94,7 @@
   - `id`, `name`, `day`, `month`, `source`
   - `categories?: string[]` (preferencial)
   - `tags: string[]` (compatibilidade)
-  - `nickname?` (UI: **Como chamar**; mensagem sugerida no dia), `notes?` (UI: **Sobre essa pessoa**; só referência, não compõe a sugestão), `links?`, `createdAt`, `updatedAt`
+  - `nickname?` (UI: **Como chamar**; mensagem sugerida no dia), `notes?` (UI: **Sobre essa pessoa**; só referência, não compõe a sugestão), `links?` (`whatsapp`/`instagram` persistidos como URL; entrada no form como número e @/usuário — ver `lib/personLinks.ts`; URLs legadas intactas), `createdAt`, `updatedAt`
 - `AppSettings`:
   - `notificationEnabled`, `notificationTime`, `lastNotifiedDate?`
 
@@ -133,7 +133,7 @@
 
 ### `/today`
 - Lista de aniversários de hoje
-- Cartão do dia: **Mensagem sugerida** (preview + Copiar + Editar); `getTodaySuggestedMessage` usa `nickname` ou primeiro nome + 1 de 3 frases fixas; `notes` não compõem a sugestão (podem aparecer como referência no card). Hint se `nickname` vazio.
+- Cartão do dia: **Mensagem sugerida** (preview clicável para copiar + Copiar + Editar); `getTodaySuggestedMessage` usa `nickname` ou primeiro nome + 1 de 3 frases fixas; `notes` não compõem a sugestão (podem aparecer como referência no card). Hint se `nickname` vazio; microcopy curta para copiar ao toque/clique.
 - CTA adicionar, importar CSV, lembretes best-effort
 - **Entrada rápida (empty state):** bloco "Colar vários de uma vez" com textarea; formato aceito: uma linha por pessoa, **Nome DD/MM** (dia/mês com 1 ou 2 dígitos); feedback de importados/inválidos e detalhe de linhas ignoradas; persistência via `importCsvBirthdays` (sem alterar schema/CSV)
 - onboarding e feedbacks de cópia
@@ -145,6 +145,8 @@
 ### `/person`
 - Form de cadastro/edição
 - Campo **Como chamar** (`nickname`, opcional) e **Sobre essa pessoa** (`notes`): placeholders e hints; `notes` não alimenta a mensagem sugerida.
+- **WhatsApp / Instagram:** labels e placeholders pedem número e @/usuário; persistência via `persistWhatsappLink` / `persistInstagramLink`; edição exibe valor amigável com `formatWhatsappForInput` / `formatInstagramForInput` quando a origem é URL.
+- Tooltips do form: copy curta; controles de ajuda como botão para tooltip nativo acessível.
 - categorias (multi-select leve + criação rápida)
 
 ### `/manage`

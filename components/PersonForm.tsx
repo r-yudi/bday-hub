@@ -15,6 +15,7 @@ import {
 import { listCategories, seedDefaultCategories, upsertCategory } from "@/lib/categoriesRepo";
 import { listBirthdays } from "@/lib/birthdaysRepo";
 import { isValidDayMonth } from "@/lib/dates";
+import { formatInstagramForInput, formatWhatsappForInput, persistInstagramLink, persistWhatsappLink } from "@/lib/personLinks";
 import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 import { Alert } from "@/components/ui/Alert";
@@ -47,8 +48,8 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   const [day, setDay] = useState<number>(initialPerson?.day ?? 1);
   const [month, setMonth] = useState<number>(initialPerson?.month ?? 1);
   const [notes, setNotes] = useState(initialPerson?.notes ?? "");
-  const [whatsapp, setWhatsapp] = useState(initialPerson?.links?.whatsapp ?? "");
-  const [instagram, setInstagram] = useState(initialPerson?.links?.instagram ?? "");
+  const [whatsapp, setWhatsapp] = useState(() => formatWhatsappForInput(initialPerson?.links?.whatsapp));
+  const [instagram, setInstagram] = useState(() => formatInstagramForInput(initialPerson?.links?.instagram));
   const [otherLink, setOtherLink] = useState(initialPerson?.links?.other ?? "");
   const [categories, setCategories] = useState<string[]>(initialCategoriesFromPerson(initialPerson));
   const [categoryInput, setCategoryInput] = useState("");
@@ -63,8 +64,8 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
     setDay(initialPerson?.day ?? 1);
     setMonth(initialPerson?.month ?? 1);
     setNotes(initialPerson?.notes ?? "");
-    setWhatsapp(initialPerson?.links?.whatsapp ?? "");
-    setInstagram(initialPerson?.links?.instagram ?? "");
+    setWhatsapp(formatWhatsappForInput(initialPerson?.links?.whatsapp));
+    setInstagram(formatInstagramForInput(initialPerson?.links?.instagram));
     setOtherLink(initialPerson?.links?.other ?? "");
     setCategories(initialCategoriesFromPerson(initialPerson));
     setCategoryInput("");
@@ -168,8 +169,8 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
       nickname: normalizeNfc(nickname.trim()) || undefined,
       notes: normalizeNfc(notes.trim()) || undefined,
       links: {
-        whatsapp: whatsapp.trim() || undefined,
-        instagram: instagram.trim() || undefined,
+        whatsapp: persistWhatsappLink(whatsapp),
+        instagram: persistInstagramLink(instagram),
         other: otherLink.trim() || undefined
       },
       createdAt: initialPerson?.createdAt ?? now,
@@ -186,13 +187,14 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
   function HelpDot({ title }: { title: string }) {
     return (
-      <span
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-border bg-surface2 text-[10px] font-semibold leading-none text-muted"
+      <button
+        type="button"
+        className="inline-flex h-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-border bg-surface2 text-[10px] font-semibold leading-none text-muted hover:bg-surface2/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
         title={title}
         aria-label={title}
       >
         ?
-      </span>
+      </button>
     );
   }
 
@@ -207,16 +209,16 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
           <FieldLabel htmlFor="person-name" className="flex items-center gap-1.5">
             <span>Nome</span>
             <RequiredMark />
-            <HelpDot title="Use o nome como você prefere ver nos lembretes." />
+            <HelpDot title="Nome completo ou do jeito que você quer ver na lista." />
           </FieldLabel>
           <TextInput id="person-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Ana Silva" />
-          <FieldHelper>Aparece na lista e nos lembretes. Na mensagem sugerida do dia, usamos Como chamar (se houver) ou o primeiro nome.</FieldHelper>
+          <FieldHelper>Na mensagem do dia usamos Como chamar, se tiver, senão o primeiro nome.</FieldHelper>
         </FieldGroup>
 
         <FieldGroup>
           <FieldLabel htmlFor="person-nickname" className="flex items-center gap-1.5">
             <span>Como chamar</span>
-            <HelpDot title="Saudação na mensagem sugerida no aniversário (ex.: apelido ou tratamento). Se vazio, usamos o primeiro nome do campo Nome." />
+            <HelpDot title="É o jeito que você chama essa pessoa." />
           </FieldLabel>
           <TextInput
             id="person-nickname"
@@ -259,7 +261,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         <FieldGroup>
           <FieldLabel htmlFor="person-category-input" className="flex items-center gap-1.5">
             <span>Categorias</span>
-            <HelpDot title="Categorias ajudam a organizar sua lista (ex.: Família, Amigos, Trabalho)." />
+            <HelpDot title="Serve para organizar sua lista." />
           </FieldLabel>
           <FieldHelper>
             Opcional. Ex.: Família, Amigos, Trabalho.{" "}
@@ -356,24 +358,37 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldGroup>
             <FieldLabel htmlFor="person-whatsapp" className="flex items-center gap-1.5">
-              <span>WhatsApp (link)</span>
-              <HelpDot title="Opcional. Cole um link para abrir conversa ou perfil." />
+              <span>WhatsApp</span>
+              <HelpDot title="Só o número. A gente monta o link." />
             </FieldLabel>
-            <TextInput id="person-whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="https://wa.me/..." />
+            <TextInput
+              id="person-whatsapp"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+              placeholder="Ex.: 11 98765-4321"
+              inputMode="tel"
+              autoComplete="tel"
+            />
           </FieldGroup>
           <FieldGroup>
             <FieldLabel htmlFor="person-instagram" className="flex items-center gap-1.5">
-              <span>Instagram (link)</span>
-              <HelpDot title="Opcional. Pode ser perfil ou link direto." />
+              <span>Instagram</span>
+              <HelpDot title="Só o @ ou o nome de usuário." />
             </FieldLabel>
-            <TextInput id="person-instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/..." />
+            <TextInput
+              id="person-instagram"
+              value={instagram}
+              onChange={(e) => setInstagram(e.target.value)}
+              placeholder="Ex.: @ana ou ana"
+              autoComplete="username"
+            />
           </FieldGroup>
         </div>
 
         <FieldGroup>
           <FieldLabel htmlFor="person-other" className="flex items-center gap-1.5">
             <span>Outro link (opcional)</span>
-            <HelpDot title="Você pode salvar qualquer link útil: perfil, site, presente, etc." />
+            <HelpDot title="Um link que você usa para falar com essa pessoa." />
           </FieldLabel>
           <TextInput id="person-other" value={otherLink} onChange={(e) => setOtherLink(e.target.value)} placeholder="https://..." />
         </FieldGroup>
@@ -381,7 +396,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         <FieldGroup>
           <FieldLabel htmlFor="person-notes" className="flex items-center gap-1.5">
             <span>Sobre essa pessoa</span>
-            <HelpDot title="Só para sua referência: preferências, tom, detalhes. Não entra automaticamente na mensagem sugerida." />
+            <HelpDot title="Só para você lembrar. Não entra na mensagem automática." />
           </FieldLabel>
           <TextArea
             id="person-notes"
