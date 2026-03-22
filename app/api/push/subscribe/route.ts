@@ -52,7 +52,9 @@ export async function POST(request: Request) {
     );
   }
   if (ins.error) {
-    return NextResponse.json({ ok: false, message: ins.error }, { status: 500 });
+    const err = ins.error as { code?: string; message?: string };
+    console.error("[push/subscribe] insert failed", err.code ?? "unknown", err.message ?? "");
+    return NextResponse.json({ ok: false, message: "server-error" }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }
