@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import {
   buildCategoryIndex,
   dedupeCategoryNames,
@@ -33,6 +33,57 @@ type PersonFormProps = {
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
+type PersonFormHelpKey = "name" | "nickname" | "categories" | "whatsapp" | "instagram" | "other" | "notes";
+
+function FieldHelpRow({
+  htmlFor,
+  label,
+  helpKey,
+  openHelp,
+  setOpenHelp,
+  children
+}: {
+  htmlFor: string;
+  label: ReactNode;
+  helpKey: PersonFormHelpKey;
+  openHelp: PersonFormHelpKey | null;
+  setOpenHelp: Dispatch<SetStateAction<PersonFormHelpKey | null>>;
+  children: ReactNode;
+}) {
+  const panelId = `pf-help-${helpKey}`;
+  const triggerId = `${panelId}-btn`;
+  const isOpen = openHelp === helpKey;
+  return (
+    <div className="flex w-full flex-col gap-1.5">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <FieldLabel htmlFor={htmlFor} className="mb-0 flex flex-wrap items-center gap-1.5">
+          {label}
+        </FieldLabel>
+        <button
+          type="button"
+          id={triggerId}
+          className="inline-flex h-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-border bg-surface2 text-[10px] font-semibold leading-none text-muted hover:bg-surface2/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          aria-label="Mostrar ou ocultar dica sobre este campo"
+          onClick={() => setOpenHelp((current) => (current === helpKey ? null : helpKey))}
+        >
+          ?
+        </button>
+      </div>
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={triggerId}
+        hidden={!isOpen}
+        className="rounded-lg border border-border/80 bg-surface2/90 px-3 py-2 text-xs leading-snug text-text"
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function initialCategoriesFromPerson(person?: BirthdayPerson | null) {
   if (!person) return [];
   return extractCategoriesFromPerson(person);
@@ -55,6 +106,7 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   const [categoryInput, setCategoryInput] = useState("");
   const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+  const [openHelp, setOpenHelp] = useState<PersonFormHelpKey | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -70,8 +122,18 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
     setCategories(initialCategoriesFromPerson(initialPerson));
     setCategoryInput("");
     setShowAllSuggestions(false);
+    setOpenHelp(null);
     setError(null);
   }, [initialPerson]);
+
+  useEffect(() => {
+    if (openHelp === null) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenHelp(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [openHelp]);
 
   const isEdit = Boolean(initialPerson);
   const source = initialPerson?.source ?? "manual";
@@ -185,19 +247,6 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
     }
   }
 
-  function HelpDot({ title }: { title: string }) {
-    return (
-      <button
-        type="button"
-        className="inline-flex h-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-border bg-surface2 text-[10px] font-semibold leading-none text-muted hover:bg-surface2/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
-        title={title}
-        aria-label={title}
-      >
-        ?
-      </button>
-    );
-  }
-
   return (
     <Card variant="elevated" className="p-5 sm:p-6">
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -206,20 +255,34 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         </Alert>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-name" className="flex items-center gap-1.5">
-            <span>Nome</span>
-            <RequiredMark />
-            <HelpDot title="Nome completo ou do jeito que você quer ver na lista." />
-          </FieldLabel>
+          <FieldHelpRow
+            htmlFor="person-name"
+            helpKey="name"
+            openHelp={openHelp}
+            setOpenHelp={setOpenHelp}
+            label={
+              <>
+                <span>Nome</span>
+                <RequiredMark />
+              </>
+            }
+          >
+            Nome completo ou do jeito que você quer ver na lista.
+          </FieldHelpRow>
           <TextInput id="person-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Ana Silva" />
           <FieldHelper>Na mensagem do dia usamos Como chamar, se tiver, senão o primeiro nome.</FieldHelper>
         </FieldGroup>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-nickname" className="flex items-center gap-1.5">
-            <span>Como chamar</span>
-            <HelpDot title="É o jeito que você chama essa pessoa." />
-          </FieldLabel>
+          <FieldHelpRow
+            htmlFor="person-nickname"
+            helpKey="nickname"
+            openHelp={openHelp}
+            setOpenHelp={setOpenHelp}
+            label={<span>Como chamar</span>}
+          >
+            É o jeito que você chama essa pessoa.
+          </FieldHelpRow>
           <TextInput
             id="person-nickname"
             value={nickname}
@@ -259,10 +322,15 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         </div>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-category-input" className="flex items-center gap-1.5">
-            <span>Categorias</span>
-            <HelpDot title="Serve para organizar sua lista." />
-          </FieldLabel>
+          <FieldHelpRow
+            htmlFor="person-category-input"
+            helpKey="categories"
+            openHelp={openHelp}
+            setOpenHelp={setOpenHelp}
+            label={<span>Categorias</span>}
+          >
+            Serve para organizar sua lista.
+          </FieldHelpRow>
           <FieldHelper>
             Opcional. Ex.: Família, Amigos, Trabalho.{" "}
             <Link href="/people?tab=categories" className="ui-link-tertiary">
@@ -357,10 +425,15 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
         <div className="grid gap-3 sm:grid-cols-2">
           <FieldGroup>
-            <FieldLabel htmlFor="person-whatsapp" className="flex items-center gap-1.5">
-              <span>WhatsApp</span>
-              <HelpDot title="Só o número. A gente monta o link." />
-            </FieldLabel>
+            <FieldHelpRow
+              htmlFor="person-whatsapp"
+              helpKey="whatsapp"
+              openHelp={openHelp}
+              setOpenHelp={setOpenHelp}
+              label={<span>WhatsApp</span>}
+            >
+              Só o número. A gente monta o link.
+            </FieldHelpRow>
             <TextInput
               id="person-whatsapp"
               value={whatsapp}
@@ -371,10 +444,15 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
             />
           </FieldGroup>
           <FieldGroup>
-            <FieldLabel htmlFor="person-instagram" className="flex items-center gap-1.5">
-              <span>Instagram</span>
-              <HelpDot title="Só o @ ou o nome de usuário." />
-            </FieldLabel>
+            <FieldHelpRow
+              htmlFor="person-instagram"
+              helpKey="instagram"
+              openHelp={openHelp}
+              setOpenHelp={setOpenHelp}
+              label={<span>Instagram</span>}
+            >
+              Só o @ ou o nome de usuário.
+            </FieldHelpRow>
             <TextInput
               id="person-instagram"
               value={instagram}
@@ -386,18 +464,28 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
         </div>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-other" className="flex items-center gap-1.5">
-            <span>Outro link (opcional)</span>
-            <HelpDot title="Um link que você usa para falar com essa pessoa." />
-          </FieldLabel>
+          <FieldHelpRow
+            htmlFor="person-other"
+            helpKey="other"
+            openHelp={openHelp}
+            setOpenHelp={setOpenHelp}
+            label={<span>Outro link (opcional)</span>}
+          >
+            Um link que você usa para falar com essa pessoa.
+          </FieldHelpRow>
           <TextInput id="person-other" value={otherLink} onChange={(e) => setOtherLink(e.target.value)} placeholder="https://..." />
         </FieldGroup>
 
         <FieldGroup>
-          <FieldLabel htmlFor="person-notes" className="flex items-center gap-1.5">
-            <span>Sobre essa pessoa</span>
-            <HelpDot title="Só para você lembrar. Não entra na mensagem automática." />
-          </FieldLabel>
+          <FieldHelpRow
+            htmlFor="person-notes"
+            helpKey="notes"
+            openHelp={openHelp}
+            setOpenHelp={setOpenHelp}
+            label={<span>Sobre essa pessoa</span>}
+          >
+            Só para você lembrar. Não entra na mensagem automática.
+          </FieldHelpRow>
           <TextArea
             id="person-notes"
             value={notes}

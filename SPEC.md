@@ -146,7 +146,7 @@
 - Form de cadastro/edição
 - Campo **Como chamar** (`nickname`, opcional) e **Sobre essa pessoa** (`notes`): placeholders e hints; `notes` não alimenta a mensagem sugerida.
 - **WhatsApp / Instagram:** labels e placeholders pedem número e @/usuário; persistência via `persistWhatsappLink` / `persistInstagramLink`; edição exibe valor amigável com `formatWhatsappForInput` / `formatInstagramForInput` quando a origem é URL.
-- Tooltips do form: copy curta; controles de ajuda como botão para tooltip nativo acessível.
+- Ajuda do form: botão **?** por campo abre/fecha painel curto com a dica (touch e desktop; `aria-expanded`/`aria-controls`; não depende de `title`/hover para o conteúdo).
 - categorias (multi-select leve + criação rápida)
 
 ### `/manage`

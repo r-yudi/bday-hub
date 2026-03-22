@@ -207,5 +207,5 @@ Ordem sugerida para corrigir a publicação:
 
 - **Mensagem sugerida (dia):** o bloco de preview é acionável (mesma ação que **Copiar**); botão **Copiar** e toast/estado “Mensagem copiada ✓” mantidos; microcopy curta orientando toque/clique.
 - **Formulário:** WhatsApp = só dígitos/formato livre no input → persistência `https://wa.me/{n}` (10/11 dígitos recebem prefixo `55`); Instagram = `@` ou usuário → `https://instagram.com/{user}`. Se o valor já for URL `http(s)`, **não** reescrever (legado e CSV).
-- **Tooltips:** copy curta e acolhedora; `HelpDot` como `button type="button"` para foco/hover nativos e área de toque mínima.
+- **Ajuda contextual (PersonForm):** em mobile, `title`/hover não mostram texto de forma confiável no toque. Padrão adotado: botão **?** (`type="button"`) que **abre e fecha** um painel curto com a dica (`aria-expanded`, `aria-controls`, `role="region"`; **Escape** fecha; no máximo um painel aberto). Não depende de tooltip nativo para o conteúdo importante.
 - **Código:** `lib/personLinks.ts` + testes em `tests/unit/personLinks.test.ts`.
