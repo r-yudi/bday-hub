@@ -179,3 +179,13 @@ Ordem sugerida para corrigir a publicação:
 - **Regra:** Páginas críticas do produto podem ter sentinela; páginas comuns (ex.: legais, debug, landing) não precisam. Não adicionar sentinelas a todas as rotas.
 - **Validação manual no browser:** Abrir a URL da página, DevTools → Console, executar `document.querySelector('[data-page-canonical="<rota>"]')` (ex.: `"today"`, `"person"`, `"people"`, `"login"`). Deve retornar um elemento; `null` indica build/cache/deploy incorreto ou página antiga.
 - **Smoke test:** Em `e2e/smoke.spec.ts`, o describe "Páginas críticas (sentinelas)" valida: /today (sentinela + heading "Hoje"), /person (sentinela + heading "Adicionar pessoa" ou "Editar pessoa"), /people (sentinela + heading "Pessoas"). O describe "Rota /login" valida sentinela login + composição canônica. Não validar microcopy além do heading principal; manter testes estáveis.
+
+---
+
+## 2026-03-21 — Mensagem sugerida V1 ("Sobre essa pessoa")
+
+- **UI:** O campo persistido `notes` passa a ser apresentado como **Sobre essa pessoa** (label + placeholder com exemplos). Sem mudança de schema ou CSV.
+- **Dia do aniversário:** Em `PersonCard` quando `relativeDays` é omitido ou `0`, exibir preview somente leitura da mensagem, botão **Copiar** (mesmo texto), **Editar** via `/person`, hint discreto se `notes` vazio. **Sem** textarea fixa no card.
+- **Regra única (`getTodaySuggestedMessage`):** `notes` vazio após trim → `Feliz aniversário! 🎉`. Com conteúdo → primeira linha (split `\r?\n`) + `, feliz aniversário!! 🎉`. Permitido `normalizeNfc` no texto. **Proibido na V1:** parsing por vírgula, truncagem inteligente, regex de emoji, NLP, heurísticas extras.
+- **Próximos dias:** Mantém templates existentes com nome (`getMessageTemplates`); não aplica `getTodaySuggestedMessage`.
+- **Dependências:** nenhuma nova.

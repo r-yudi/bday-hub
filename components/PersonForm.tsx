@@ -364,10 +364,20 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
         <FieldGroup>
           <FieldLabel htmlFor="person-notes" className="flex items-center gap-1.5">
-            <span>Observações</span>
-            <HelpDot title="Anote preferências, detalhes de presente ou mensagens." />
+            <span>Sobre essa pessoa</span>
+            <HelpDot title="Apelidos, preferências, como costuma falar com a pessoa — ajuda a sugerir uma mensagem no dia do aniversário." />
           </FieldLabel>
-          <TextArea id="person-notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observações" />
+          <TextArea
+            id="person-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Ex: chama de Ju, ama café, sempre mando áudio"
+          />
+          {!notes.trim() && (
+            <p className="text-xs text-muted">
+              Quer deixar a mensagem mais pessoal? Adicione algo sobre essa pessoa.
+            </p>
+          )}
         </FieldGroup>
 
         {error && <Alert variant="danger">{error}</Alert>}

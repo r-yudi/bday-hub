@@ -41,7 +41,7 @@ async function addBirthday(page: Page, options?: { name?: string; notes?: string
   await page.locator("form select").nth(1).selectOption(month);
   await page.getByPlaceholder("Digite e pressione Enter").fill(tag);
   await page.getByPlaceholder("Digite e pressione Enter").press("Enter");
-  await page.getByPlaceholder("Observações").fill(notes);
+  await page.getByPlaceholder("Ex: chama de Ju, ama café, sempre mando áudio").fill(notes);
   await page.getByRole("button", { name: "Salvar" }).click();
 
   await expect(page).toHaveURL(/\/today$/);
@@ -69,12 +69,12 @@ test.describe("MVP smoke flows", () => {
 
     const updatedName = `${created.name} Editado`;
     await page.getByPlaceholder("Ex.: Ana Silva").fill(updatedName);
-    await page.getByPlaceholder("Observações").fill("Nota editada via e2e");
+    await page.getByPlaceholder("Ex: chama de Ju, ama café, sempre mando áudio").fill("Nota editada via e2e");
     await page.getByRole("button", { name: "Salvar" }).click();
 
     await expect(page).toHaveURL(/\/today$/);
     await expect(page.getByRole("heading", { name: updatedName })).toBeVisible();
-    await expect(page.getByText("Nota editada via e2e")).toBeVisible();
+    await expect(page.getByText("Nota editada via e2e, feliz aniversário!! 🎉")).toBeVisible();
 
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Excluir" }).first().click();
@@ -131,7 +131,7 @@ test.describe("MVP smoke flows", () => {
     await expect(page.getByText("Carregando...")).toHaveCount(0);
 
     await expect(page.getByRole("heading", { name: created.name })).toBeVisible();
-    await expect(page.getByText("Persistir apos reload")).toBeVisible();
+    await expect(page.getByText("Persistir apos reload, feliz aniversário!! 🎉")).toBeVisible();
   });
 
   test("/share/[token] -> Adicionar a lista", async ({ page }) => {
@@ -207,7 +207,8 @@ test.describe("Rota /login (versão canônica)", () => {
     await page.goto("/login");
     await expect(page).toHaveURL(/\/login/);
 
-    // Sentinela: prova de que o build é o canônico
+    // Sentinela canônica da página + prova de build completo
+    await expect(page.locator('[data-page-canonical="login"]')).toBeVisible();
     const loginSection = page.locator('[data-login-canonical="full"]');
     await expect(loginSection).toBeVisible();
 
@@ -232,6 +233,33 @@ test.describe("Rota /login (versão canônica)", () => {
       await expect(page.getByText("O que será compartilhado")).toBeVisible();
       await expect(page.getByText("O que NÃO acessamos")).toBeVisible();
     }
+  });
+});
+
+test.describe("Páginas críticas (sentinelas)", () => {
+  test("/today exibe sentinela e heading principal", async ({ page }) => {
+    await page.goto("/today");
+    await page.evaluate(() => localStorage.setItem("onboarding_v2_seen", "1"));
+    await page.reload();
+    await expect(page).toHaveURL(/\/today/);
+    await expect(page.locator('[data-page-canonical="today"]')).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hoje", level: 1 })).toBeVisible();
+  });
+
+  test("/person exibe sentinela e heading principal", async ({ page }) => {
+    await page.goto("/person");
+    await expect(page).toHaveURL(/\/person/);
+    await expect(page.locator('[data-page-canonical="person"]')).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Adicionar pessoa|Editar pessoa/, level: 1 })
+    ).toBeVisible();
+  });
+
+  test("/people exibe sentinela e heading principal", async ({ page }) => {
+    await page.goto("/people");
+    await expect(page).toHaveURL(/\/people/);
+    await expect(page.locator('[data-page-canonical="people"]')).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pessoas", level: 1 })).toBeVisible();
   });
 });
 

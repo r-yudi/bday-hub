@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -138,8 +138,8 @@ export default function StyleguidePage() {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel htmlFor="sg-notes">Observações</FieldLabel>
-              <TextArea id="sg-notes" placeholder="Notas sobre preferências de mensagem" />
+              <FieldLabel htmlFor="sg-notes">Sobre essa pessoa</FieldLabel>
+              <TextArea id="sg-notes" placeholder="Ex: chama de Ju, ama café, sempre mando áudio" />
             </FieldGroup>
 
             <FieldGroup>

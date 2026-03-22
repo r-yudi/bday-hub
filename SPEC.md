@@ -80,7 +80,7 @@
   - `birthdaysRepo.ts` (repo local/Supabase)
   - `categoriesRepo.ts`
   - `supabase-browser.ts`
-  - `csv.ts`, `csv-file.ts`, `dates.ts`, `share.ts`, `theme.ts`
+  - `csv.ts`, `csv-file.ts`, `dates.ts`, `share.ts`, `suggestedBirthdayMessage.ts`, `theme.ts`
 - `/supabase/migrations`
   - migrations de theme, categories e ajustes de schema/RLS
 - `/docs/sql`
@@ -94,7 +94,7 @@
   - `id`, `name`, `day`, `month`, `source`
   - `categories?: string[]` (preferencial)
   - `tags: string[]` (compatibilidade)
-  - `notes?`, `links?`, `createdAt`, `updatedAt`
+  - `notes?` (persistido como `notes`; na UI: **Sobre essa pessoa**), `links?`, `createdAt`, `updatedAt`
 - `AppSettings`:
   - `notificationEnabled`, `notificationTime`, `lastNotifiedDate?`
 
@@ -132,15 +132,18 @@
 
 ### `/today`
 - Lista de aniversários de hoje
+- Cartão do dia: **Mensagem sugerida** (preview + Copiar + Editar para `/person`); lógica mínima em `getTodaySuggestedMessage` (sem `notes` → frase fixa; com `notes` → primeira linha + sufixo fixo). Hint discreto se `notes` vazio.
 - CTA adicionar, importar CSV, lembretes best-effort
 - **Entrada rápida (empty state):** bloco "Colar vários de uma vez" com textarea; formato aceito: uma linha por pessoa, **Nome DD/MM** (dia/mês com 1 ou 2 dígitos); feedback de importados/inválidos e detalhe de linhas ignoradas; persistência via `importCsvBirthdays` (sem alterar schema/CSV)
 - onboarding e feedbacks de cópia
 
 ### `/upcoming`
 - Lista próximos 7 dias
+- Cartões: cópia principal de mensagem segue **templates com nome** existentes (sem a regra de `getTodaySuggestedMessage`).
 
 ### `/person`
 - Form de cadastro/edição
+- Campo **Sobre essa pessoa** (`notes`): placeholder com exemplos; hint leve quando vazio.
 - categorias (multi-select leve + criação rápida)
 
 ### `/manage`

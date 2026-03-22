@@ -8,6 +8,10 @@ import { normalizeNfc } from "@/lib/text";
 import type { BirthdayPerson } from "@/lib/types";
 import { Templates, getMessageTemplates } from "@/components/Templates";
 import { dedupeCategoryNames } from "@/lib/categories";
+import { getTodaySuggestedMessage } from "@/lib/suggestedBirthdayMessage";
+
+const PERSONAL_MESSAGE_HINT =
+  "Quer deixar a mensagem mais pessoal? Adicione algo sobre essa pessoa.";
 
 type PersonCardProps = {
   person: BirthdayPerson;
@@ -19,6 +23,11 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   const [messageCopied, setMessageCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const links = person.links ?? {};
+  const isBirthdayToday = relativeDays === undefined || relativeDays === 0;
+  const suggestedTodayMessage = useMemo(
+    () => (isBirthdayToday ? getTodaySuggestedMessage({ notes: person.notes }) : ""),
+    [isBirthdayToday, person.notes]
+  );
   const categories = useMemo(
     () => dedupeCategoryNames([...(person.categories ?? []), ...(person.tags ?? []), person.category]),
     [person.categories, person.tags, person.category]
@@ -35,7 +44,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
   }
 
   async function copyPrimaryMessage() {
-    const primaryMessage = getMessageTemplates(person)[0];
+    const primaryMessage = isBirthdayToday ? getTodaySuggestedMessage({ notes: person.notes }) : getMessageTemplates(person)[0];
     try {
       await navigator.clipboard.writeText(primaryMessage);
       setMessageCopied(true);
@@ -99,13 +108,27 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         </div>
       </div>
 
+      {isBirthdayToday && (
+        <div className="mt-4 space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">Mensagem sugerida</p>
+          <p
+            className="ui-surface ui-border-subtle rounded-xl border px-3 py-2 text-sm text-text shadow-sm"
+            aria-live="polite"
+          >
+            {suggestedTodayMessage}
+          </p>
+          {!person.notes?.trim() && <p className="text-xs text-muted">{PERSONAL_MESSAGE_HINT}</p>}
+        </div>
+      )}
+
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => void copyPrimaryMessage()}
           className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
+          aria-label={isBirthdayToday ? "Copiar mensagem sugerida" : "Copiar mensagem"}
         >
-          Copiar mensagem
+          {isBirthdayToday ? "Copiar" : "Copiar mensagem"}
         </button>
 
         <button
@@ -161,7 +184,9 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         </div>
       )}
 
-      {person.notes && <p className="mt-3 text-sm text-muted">{normalizeNfc(person.notes)}</p>}
+      {person.notes?.trim() && !isBirthdayToday && (
+        <p className="mt-3 text-sm text-muted">{normalizeNfc(person.notes)}</p>
+      )}
 
       <div className="mt-4">
         <Templates person={person} />

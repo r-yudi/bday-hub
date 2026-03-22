@@ -12,6 +12,9 @@ Formato adotado:
 
 ## [Unreleased]
 
+### Added
+- **Sobre essa pessoa + mensagem sugerida (V1):** UI renomeia `notes` para "Sobre essa pessoa"; `getTodaySuggestedMessage` em `lib/suggestedBirthdayMessage.ts` (sem notes → `Feliz aniversário! 🎉`; com notes → primeira linha + `, feliz aniversário!! 🎉`). No dia do aniversário, `PersonCard` mostra preview somente leitura, **Copiar** e hint se vazio; `/upcoming` mantém templates com nome.
+
 ### Changed
 - **Landing UI inside the app:** páginas internas como extensão da landing (ritmo editorial: mais whitespace, hierarquia eyebrow + h1 serif + subtítulo, superfícies “paper” sem sombras pesadas). Novos utilitários em `globals.css`: `ui-container`, `ui-section`, `ui-section-header`, `ui-eyebrow`, `ui-stack-lg`/`ui-stack-md`, `ui-feature-block`, `ui-empty-hero`, `ui-list`/`ui-list-item`. Ajuste de `ui-panel`/`ui-panel-soft`/`ui-page-hero`/`ui-prose-panel` (borda sutil, sombra mínima). Aplicado em `/today`, `/manage`, `/share`, `/share/[token]`, `/login`, `/upcoming`, `/person`. TopNav com menos densidade; seletor de tema removido. Referência em `docs/REBRAND_LANDING_FIRST_REPORT.md`. Light-only (pre-launch): dark desabilitado em runtime; docs `docs/THEME.md`, `docs/DESIGN_SYSTEM.md`. Polish: badge BUILD removido, banner PWA CTA com `ui-cta-primary`, spec `e2e/screenshots-polish.spec.ts`. Documentação base atualizada (README Design/UI e Quality gates, docs canônicos).
 
