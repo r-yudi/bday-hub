@@ -142,7 +142,7 @@ test.describe("MVP smoke flows", () => {
 
     const todayRoot = page.locator('[data-page-canonical="today"]');
     await expect(todayRoot.getByRole("heading", { name: created.name })).toBeVisible();
-    await expect(todayRoot.getByRole("button", { name: "Copiar msg" })).toBeVisible();
+    await expect(todayRoot.getByRole("button", { name: "Dar parabéns" })).toBeVisible();
   });
 
   test("/share/[token] -> Adicionar a lista", async ({ page }) => {

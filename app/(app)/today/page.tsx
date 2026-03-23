@@ -216,7 +216,7 @@ function TodayPageContent() {
                     ) : (
                       <ul className="ui-list m-0 mt-4 list-none p-0">
                         {todayPeople.map((person) => (
-                          <TodayListItem key={person.id} person={person} />
+                          <TodayListItem key={person.id} person={person} onToast={setToast} />
                         ))}
                       </ul>
                     )}
