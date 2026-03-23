@@ -55,11 +55,19 @@ function sortPeople(people: BirthdayPerson[]) {
   });
 }
 
+function sourceLabel(source: SourceType) {
+  if (source === "manual") return "Manual";
+  if (source === "csv") return "CSV";
+  return "Por link";
+}
+
 function PeoplePageFallback() {
   return (
-    <div className="ui-app-shell">
-      <section className="ui-section ui-panel-soft rounded-2xl border p-8">
-        <p className="text-sm text-muted">Carregando...</p>
+    <div className="ui-container">
+      <section className="ui-section">
+        <div className="ui-panel mx-auto w-full max-w-4xl p-8">
+          <p className="text-sm text-muted">Carregando...</p>
+        </div>
       </section>
     </div>
   );
@@ -169,53 +177,61 @@ function PeoplePageContent() {
   const categoryOptions = useMemo(() => ["all", ...categories], [categories]);
 
   return (
-    <div className="ui-container space-y-8">
-      <section className="ui-section ui-panel p-6 sm:p-8">
-        <div className="ui-section-header">
-          <p className="ui-eyebrow text-muted">Painel</p>
-          <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">Pessoas</h1>
-          <p className="ui-subtitle-editorial text-sm sm:text-[15px] max-w-[72ch]">
-            Encontre, edite e organize seus aniversários.
-          </p>
-        </div>
+    <div className="ui-container" data-page-canonical="people">
+      <section className="ui-section">
+        <div className="ui-panel mx-auto w-full max-w-4xl p-6 sm:p-8">
+          <header className="ui-section-header">
+            <p className="ui-eyebrow">Sua lista</p>
+            <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">Pessoas</h1>
+            <p className="ui-subtitle-editorial text-sm sm:text-[15px] max-w-[72ch]">
+              Busque pelo nome, etiqueta ou observação. Filtros só mudam o que você vê — nada é apagado.
+            </p>
+          </header>
 
-        <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Seções">
-          <Link
-            href="/people"
-            role="tab"
-            aria-selected={tab === "birthdays"}
-            aria-current={tab === "birthdays" ? "page" : undefined}
-            className={[
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-              tab === "birthdays"
-                ? "bg-accent text-white"
-                : "border border-border bg-surface text-muted hover:bg-surface2 hover:text-text"
-            ].join(" ")}
-          >
-            Aniversários
-          </Link>
-          <Link
-            href="/people?tab=categories"
-            role="tab"
-            aria-selected={tab === "categories"}
-            aria-current={tab === "categories" ? "page" : undefined}
-            className={[
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-              tab === "categories"
-                ? "bg-accent text-white"
-                : "border border-border bg-surface text-muted hover:bg-surface2 hover:text-text"
-            ].join(" ")}
-          >
-            Categorias
-          </Link>
-        </div>
+          {error && (
+            <div className="mt-6">
+              <Alert variant="danger">{error}</Alert>
+            </div>
+          )}
+          {notice && (
+            <div className="mt-6">
+              <Alert variant="success">{notice}</Alert>
+            </div>
+          )}
+
+          <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Seções">
+            <Link
+              href="/people"
+              role="tab"
+              aria-selected={tab === "birthdays"}
+              aria-current={tab === "birthdays" ? "page" : undefined}
+              className={[
+                "rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35",
+                tab === "birthdays" ? "people-tab-link--active" : "people-tab-link--inactive"
+              ].join(" ")}
+            >
+              Aniversários
+            </Link>
+            <Link
+              href="/people?tab=categories"
+              role="tab"
+              aria-selected={tab === "categories"}
+              aria-current={tab === "categories" ? "page" : undefined}
+              className={[
+                "rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35",
+                tab === "categories" ? "people-tab-link--active" : "people-tab-link--inactive"
+              ].join(" ")}
+            >
+              Categorias
+            </Link>
+          </div>
 
         {tab === "birthdays" && (
         <>
-        <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <input
             type="search"
-            placeholder="Buscar por nome, categoria, observação..."
+            placeholder="Nome, categoria ou observação…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="ui-focus-surface h-10 flex-1 rounded-xl border border-border bg-surface px-3 text-sm text-text placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
@@ -245,11 +261,11 @@ function PeoplePageContent() {
           </div>
         </div>
 
-        <details className="ui-disclosure mt-4 rounded-xl border border-border/80 bg-surface/50 px-4 py-3">
-          <summary className="ui-disclosure-summary cursor-pointer font-medium text-muted">
-            Filtros
+        <details className="ui-disclosure mt-4 rounded-xl border border-border/80 bg-surface/40 px-4 py-3">
+          <summary className="ui-disclosure-summary cursor-pointer font-medium text-text">
+            Refinar lista
           </summary>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <label className="block text-xs text-muted">
               Categoria
               <select
@@ -299,14 +315,140 @@ function PeoplePageContent() {
         )}
 
         {tab === "categories" && (
-          <div className="mt-6">
-            <CategoriesManager
-              people={people}
-              categories={categories}
-              onRefresh={loadData}
-            />
+          <div className="mt-8">
+            <CategoriesManager people={people} categories={categories} onRefresh={loadData} />
           </div>
         )}
+
+        {tab === "birthdays" &&
+          (loading ? (
+            <div className="ui-stack-lg mt-8">
+              <p className="text-sm text-muted">Carregando...</p>
+            </div>
+          ) : people.length === 0 ? (
+            <div className="ui-stack-lg mt-8">
+              <div className="ui-empty-hero">
+                <div className="ui-empty-icon" aria-hidden>
+                  👤
+                </div>
+                <h2 className="ui-empty-title">Nenhuma pessoa cadastrada</h2>
+                <p className="ui-empty-subtitle">
+                  Comece com um cadastro ou traga vários de uma vez por CSV.
+                </p>
+                <div className="ui-empty-actions">
+                  <Link
+                    href="/person"
+                    className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium focus-visible:outline-none"
+                  >
+                    Adicionar
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowImport(true)}
+                    className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
+                  >
+                    Importar CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : filteredPeople.length === 0 ? (
+            <div className="ui-stack-lg mt-8">
+              <div className="ui-empty-hero">
+                <div className="ui-empty-icon" aria-hidden>
+                  🔍
+                </div>
+                <h2 className="ui-empty-title">Nenhum resultado</h2>
+                <p className="ui-empty-subtitle">Ninguém corresponde a essa combinação. Limpe os filtros ou busque de outro jeito.</p>
+                <div className="ui-empty-actions">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("");
+                      setCategoryFilter("all");
+                      setSourceFilter("all");
+                      setMonthFilter("all");
+                    }}
+                    className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <section className="ui-stack-lg mt-8" aria-label="Lista de aniversários">
+              <div className="border-b border-border/55 pb-4">
+                <p className="text-sm text-muted">
+                  <span className="font-medium text-text">{filteredPeople.length}</span>
+                  {" · "}
+                  {people.length === 1 ? "1 pessoa na lista" : `${people.length} pessoas na lista`}
+                </p>
+                <p className="mt-1 text-xs text-muted">Seleção em lote virá em uma próxima versão.</p>
+              </div>
+              <div className="ui-list overflow-hidden rounded-2xl border border-border/60">
+                {filteredPeople.map((person) => {
+                  const personCategories = getPersonCategories(person);
+                  const deleting = busyKey === `delete:${person.id}`;
+                  return (
+                    <div key={person.id} className="ui-list-item">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0 space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="truncate text-base font-semibold tracking-tight text-text">
+                              {normalizeNfc(person.name)}
+                            </h3>
+                            <Chip as="span" variant="subtle" className="ui-chip">
+                              {formatDate(person.day, person.month)}
+                            </Chip>
+                            <Chip as="span" variant="accent" className="ui-chip">
+                              {sourceLabel(person.source)}
+                            </Chip>
+                          </div>
+                          {personCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {personCategories.map((category) => (
+                                <Chip key={`${person.id}:${category}`} as="span" variant="warning" className="ui-chip">
+                                  {category}
+                                </Chip>
+                              ))}
+                            </div>
+                          )}
+                          {person.notes && <p className="text-sm text-muted">{person.notes}</p>}
+                        </div>
+                        <div className="flex shrink-0 flex-wrap gap-2">
+                          <Link
+                            href={`/person?id=${encodeURIComponent(person.id)}`}
+                            className="ui-cta-secondary inline-flex h-9 items-center justify-center rounded-lg border px-3 text-sm font-medium focus-visible:outline-none"
+                          >
+                            Editar
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => copyShareLink(person)}
+                            title="Compartilhar por link: envie um link para alguém adicionar este aniversário à própria lista. O link mostra apenas nome e dia/mês (sem ano)."
+                            className="ui-cta-secondary inline-flex h-9 items-center justify-center rounded-lg border px-3 text-sm font-medium focus-visible:outline-none"
+                          >
+                            Compartilhar
+                          </button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            loading={deleting}
+                            className="h-9 border border-danger/25 text-danger hover:bg-danger/10"
+                            onClick={() => void handleDelete(person)}
+                          >
+                            Excluir
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
       </section>
 
       {showImportContactsModal && (
@@ -321,19 +463,20 @@ function PeoplePageContent() {
               Importar contatos
             </h2>
             <p className="mt-2 text-sm text-muted">
-              Encontre aniversários automaticamente nos seus contatos.
+              Hoje dá para importar por CSV. Outras fontes (como agenda Google) ainda não estão ligadas ao app.
             </p>
             <div className="mt-6 flex flex-col gap-2">
               <button
                 type="button"
-                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium"
-                onClick={() => setShowImportContactsModal(false)}
+                disabled
+                className="ui-cta-secondary inline-flex h-10 cursor-not-allowed items-center justify-center rounded-xl border border-border/60 px-4 py-2 text-sm font-medium opacity-55"
+                title="Em breve"
               >
-                Importar do Google
+                Google (em breve)
               </button>
               <button
                 type="button"
-                className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium"
+                className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium"
                 onClick={() => {
                   setShowImportContactsModal(false);
                   setShowImport(true);
@@ -355,132 +498,18 @@ function PeoplePageContent() {
 
       {showImport && (
         <section className="ui-section">
-          <ImportCsv onImport={handleImport} />
+          <div className="ui-panel mx-auto w-full max-w-4xl p-6 sm:p-8">
+            <header className="ui-section-header mb-8">
+              <p className="ui-eyebrow">Importação</p>
+              <h2 className="ui-title-editorial text-2xl sm:text-[1.65rem]">Arquivo CSV</h2>
+              <p className="ui-subtitle-editorial max-w-[68ch] text-sm">
+                Envie um .csv com cabeçalho válido. Você vê a prévia e confirma antes de salvar.
+              </p>
+            </header>
+            <ImportCsv embedded onImport={handleImport} />
+          </div>
         </section>
       )}
-
-      {error && <Alert variant="danger">{error}</Alert>}
-      {notice && <Alert variant="success">{notice}</Alert>}
-
-      {tab === "birthdays" && (loading ? (
-        <section className="ui-section ui-panel-soft rounded-2xl border p-8">
-          <p className="text-sm text-muted">Carregando...</p>
-        </section>
-      ) : people.length === 0 ? (
-        <section className="ui-section">
-          <div className="ui-empty-hero">
-            <div className="ui-empty-icon" aria-hidden>
-              👤
-            </div>
-            <h2 className="ui-empty-title">Nenhuma pessoa cadastrada</h2>
-            <p className="ui-empty-subtitle">
-              Adicione aniversários manualmente ou importe um CSV para começar.
-            </p>
-            <div className="ui-empty-actions">
-              <Link href="/person" className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium">
-                Adicionar
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowImport(true)}
-                className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium"
-              >
-                Importar CSV
-              </button>
-            </div>
-          </div>
-        </section>
-      ) : filteredPeople.length === 0 ? (
-        <section className="ui-section">
-          <div className="ui-empty-hero">
-            <div className="ui-empty-icon" aria-hidden>
-              🔍
-            </div>
-            <h2 className="ui-empty-title">Nenhum resultado</h2>
-            <p className="ui-empty-subtitle">
-              Ajuste a busca ou os filtros para encontrar aniversários.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setCategoryFilter("all");
-                setSourceFilter("all");
-                setMonthFilter("all");
-              }}
-              className="ui-cta-secondary inline-flex h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium"
-            >
-              Limpar filtros
-            </button>
-          </div>
-        </section>
-      ) : (
-        <section className="ui-section" aria-label="Lista de aniversários">
-          <p className="mb-2 text-sm text-muted">
-            {filteredPeople.length} de {people.length} pessoa(s).
-          </p>
-          <p className="mb-3 text-xs text-muted">Toque e segure para selecionar (em breve).</p>
-          <div className="ui-list">
-            {filteredPeople.map((person) => {
-              const personCategories = getPersonCategories(person);
-              const deleting = busyKey === `delete:${person.id}`;
-              return (
-                <div key={person.id} className="ui-list-item">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0 space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="truncate text-base font-semibold tracking-tight text-text">
-                          {normalizeNfc(person.name)}
-                        </h2>
-                        <Chip as="span" variant="subtle" className="ui-chip">
-                          {formatDate(person.day, person.month)}
-                        </Chip>
-                        <Chip as="span" variant="accent" className="ui-chip">
-                          {person.source}
-                        </Chip>
-                      </div>
-                      {personCategories.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {personCategories.map((category) => (
-                            <Chip key={`${person.id}:${category}`} as="span" variant="warning" className="ui-chip">
-                              {category}
-                            </Chip>
-                          ))}
-                        </div>
-                      )}
-                      {person.notes && <p className="text-sm text-muted">{person.notes}</p>}
-                    </div>
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <Link
-                        href={`/person?id=${encodeURIComponent(person.id)}`}
-                        className="ui-cta-secondary inline-flex h-9 items-center justify-center rounded-lg border px-3 text-sm font-medium"
-                      >
-                        Editar
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => copyShareLink(person)}
-                        title="Compartilhar por link: envie um link para alguém adicionar este aniversário à própria lista. O link mostra apenas nome e dia/mês (sem ano)."
-                        className="ui-focus-surface inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-text hover:bg-surface/80"
-                      >
-                        Compartilhar
-                      </button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        loading={deleting}
-                        onClick={() => void handleDelete(person)}
-                      >
-                        Excluir
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ) )}
     </div>
   );
 }

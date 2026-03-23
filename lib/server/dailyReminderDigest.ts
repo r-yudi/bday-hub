@@ -1,3 +1,5 @@
+import { FALLBACK_TZ } from "@/lib/timezone";
+
 type BirthdayLite = {
   name: string;
   day: number;
@@ -24,7 +26,7 @@ export function getDatePartsInTimeZone(timezone: string, now = new Date()) {
   try {
     parts = tryBuild(timezone);
   } catch {
-    parts = tryBuild("America/Sao_Paulo");
+    parts = tryBuild(FALLBACK_TZ);
   }
 
   const valueOf = (type: string) => parts.find((part) => part.type === type)?.value ?? "";

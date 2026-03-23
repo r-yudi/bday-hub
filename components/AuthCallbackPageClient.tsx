@@ -147,7 +147,7 @@ export function AuthCallbackPageClient({ returnTo }: { returnTo: string }) {
           <div className="mt-4 flex gap-2">
             <Link
               href={`/login?returnTo=${encodeURIComponent(returnTo || "/today")}`}
-              className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover"
+              className="ui-cta-primary rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover"
             >
               Voltar para login
             </Link>

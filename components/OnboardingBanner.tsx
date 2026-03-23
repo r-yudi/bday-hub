@@ -35,14 +35,15 @@ export function OnboardingBanner({ count, mounted, returnTo = "/today" }: Onboar
   if (!mounted || count >= 5 || dismissed) return null;
 
   return (
-    <div className="ui-panel-soft rounded-2xl border p-4">
+    <div className="ui-panel-soft rounded-2xl border border-border/70 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
-          <h2 className="font-semibold tracking-tight text-text">
-            Complete sua lista ({count} de 5)
+          <p className="ui-eyebrow text-[11px]">Sua lista</p>
+          <h2 className="mt-1 font-semibold tracking-tight text-text">
+            {count} de 5 pessoas
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Com 5 pessoas, o Lembra já começa a te lembrar na hora certa.
+            Com cinco cadastros, os lembretes fazem mais sentido — dá para dispensar este aviso quando quiser.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">

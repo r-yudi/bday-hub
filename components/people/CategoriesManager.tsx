@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
 import {
   PREDEFINED_CATEGORIES,
   dedupeCategoryNames,
   extractCategoriesFromPerson,
   normalizeCategory
 } from "@/lib/categories";
-import { deleteCategory, listCategories, upsertCategory } from "@/lib/categoriesRepo";
+import { deleteCategory, upsertCategory } from "@/lib/categoriesRepo";
 import type { BirthdayPerson } from "@/lib/types";
 
 type CategoriesManagerProps = {
@@ -34,6 +36,12 @@ function countCategoryUsage(category: string, people: BirthdayPerson[]): number 
   return people.filter((person) =>
     getPersonCategories(person).some((c) => normalizeCategory(c) === key)
   ).length;
+}
+
+function usageLabel(n: number) {
+  if (n === 0) return "Ninguém usa ainda";
+  if (n === 1) return "1 pessoa";
+  return `${n} pessoas`;
 }
 
 export function CategoriesManager({
@@ -81,16 +89,16 @@ export function CategoriesManager({
   }, [categories, typeFilter, usageFilter, sortBy, categoryUsage]);
 
   async function handleDelete(name: string) {
-    if (!window.confirm(`Excluir a categoria "${name}"? Quem usa continuará com a categoria até editar a pessoa.`)) return;
+    if (!window.confirm(`Excluir a categoria "${name}"? Quem já usa continua vendo a etiqueta até editar a pessoa.`)) return;
     setDeleting(name);
     setError(null);
     try {
       await deleteCategory(name);
-      setNotice(`Categoria "${name}" excluída.`);
+      setNotice(`Categoria "${name}" removida.`);
       onRefresh();
       setTimeout(() => setNotice(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao excluir.");
+      setError(err instanceof Error ? err.message : "Não foi possível excluir.");
     } finally {
       setDeleting(null);
     }
@@ -107,13 +115,13 @@ export function CategoriesManager({
     try {
       await upsertCategory(trimmed);
       if (normalizeCategory(trimmed) !== normalizeCategory(editing)) await deleteCategory(editing);
-      setNotice("Categoria atualizada.");
+      setNotice("Nome da categoria atualizado.");
       setEditing(null);
       setEditValue("");
       onRefresh();
       setTimeout(() => setNotice(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao salvar.");
+      setError(err instanceof Error ? err.message : "Não foi possível salvar.");
     }
   }
 
@@ -123,162 +131,176 @@ export function CategoriesManager({
     setError(null);
     try {
       await upsertCategory(name.trim());
-      setNotice("Categoria adicionada.");
+      setNotice("Categoria criada.");
       onRefresh();
       setTimeout(() => setNotice(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao adicionar.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar.");
     }
   }
 
   return (
-    <section className="ui-section space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold tracking-tight text-text">Categorias</h2>
-        <button
-          type="button"
-          onClick={handleAddCategory}
-          className="ui-cta-secondary inline-flex h-9 items-center justify-center rounded-xl border px-3 text-sm font-medium"
-        >
-          Adicionar categoria
-        </button>
+    <div className="space-y-6">
+      <header className="ui-section-header">
+        <p className="ui-eyebrow">Organização</p>
+        <h2 className="ui-title-editorial text-2xl sm:text-[1.65rem]">Categorias</h2>
+        <p className="ui-subtitle-editorial max-w-[72ch] text-sm">
+          Etiquetas para agrupar aniversários. As sugeridas pelo app não podem ser renomeadas; as suas você edita ou remove aqui.
+        </p>
+      </header>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted sm:max-w-[48ch]">
+          Categorias personalizadas vêm do cadastro ou do CSV.
+        </p>
+        <Button type="button" variant="primary" size="md" onClick={() => void handleAddCategory()}>
+          Nova categoria
+        </Button>
       </div>
 
-      {notice && <p className="text-sm text-success">{notice}</p>}
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {notice && (
+        <Alert variant="success" className="text-sm">
+          {notice}
+        </Alert>
+      )}
+      {error && (
+        <Alert variant="danger" className="text-sm">
+          {error}
+        </Alert>
+      )}
 
-      <details className="ui-disclosure mt-2 rounded-xl border border-border/80 bg-surface/50 px-4 py-3">
-        <summary className="ui-disclosure-summary cursor-pointer font-medium text-muted">
-          Filtros
+      <details className="ui-disclosure rounded-xl border border-border/80 bg-surface/40 px-4 py-3">
+        <summary className="ui-disclosure-summary cursor-pointer font-medium text-text">
+          Refinar lista
         </summary>
-        <div className="mt-3 flex flex-wrap gap-3">
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <span>Tipo</span>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <label className="block text-xs text-muted">
+            Tipo
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-              className="ui-focus-surface rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+              className="ui-focus-surface mt-1 block w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-text"
             >
               <option value="all">Todas</option>
-              <option value="padrao">Padrão</option>
-              <option value="custom">Personalizada</option>
+              <option value="padrao">Sugeridas</option>
+              <option value="custom">Suas</option>
             </select>
           </label>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <span>Uso</span>
+          <label className="block text-xs text-muted">
+            Uso
             <select
               value={usageFilter}
               onChange={(e) => setUsageFilter(e.target.value as UsageFilter)}
-              className="ui-focus-surface rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+              className="ui-focus-surface mt-1 block w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-text"
             >
               <option value="all">Todas</option>
-              <option value="usada">Usada</option>
-              <option value="nao_usada">Não usada</option>
+              <option value="usada">Em uso</option>
+              <option value="nao_usada">Sem uso</option>
             </select>
           </label>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <span>Ordenar</span>
+          <label className="block text-xs text-muted">
+            Ordenar por
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortBy)}
-              className="ui-focus-surface rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+              className="ui-focus-surface mt-1 block w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-text"
             >
               <option value="name">Nome</option>
-              <option value="usage">Uso</option>
+              <option value="usage">Quantidade de uso</option>
             </select>
           </label>
         </div>
       </details>
 
-      <div className="ui-list rounded-2xl border border-border/80 divide-y divide-border/60">
-        {filteredAndSorted.length === 0 ? (
-          <div className="rounded-2xl border border-border/80 bg-surface2/30 p-6 text-center text-sm text-muted">
-            Nenhuma categoria encontrada com os filtros atuais.
+      {filteredAndSorted.length === 0 ? (
+        <div className="ui-empty-hero py-10">
+          <div className="ui-empty-icon" aria-hidden>
+            🏷️
           </div>
-        ) : (
-          filteredAndSorted.map(({ name, isPredefined, usage }) => (
-            <div
-              key={name}
-              className="ui-list-item flex flex-wrap items-center justify-between gap-2 py-3"
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                {editing === name ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      type="text"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
-                      className="ui-focus-surface h-9 rounded-lg border border-border bg-surface px-2.5 text-sm"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSaveEdit}
-                      className="ui-cta-primary rounded-lg bg-accent px-3 py-1.5 text-sm text-white"
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setEditing(null); setEditValue(""); }}
-                      className="ui-cta-secondary rounded-lg border px-3 py-1.5 text-sm"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="font-medium text-text">{name}</span>
-                    <span
-                      className={
-                        isPredefined
-                          ? "rounded-full border border-border bg-surface2 px-2 py-0.5 text-xs text-muted"
-                          : "rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs text-primary"
-                      }
-                    >
-                      {isPredefined ? "Padrão" : "Personalizada"}
-                    </span>
-                    <span className="text-xs text-muted">{usage} uso(s)</span>
-                  </>
-                )}
-              </div>
-              {editing !== name && (
-                <div className="flex shrink-0 gap-2">
-                  {isPredefined ? (
-                    <>
-                      <button type="button" disabled title="Categoria padrão não pode ser alterada" className="cursor-not-allowed rounded-lg border border-border bg-surface2/50 px-2.5 py-1 text-sm text-muted">
-                        Editar
-                      </button>
-                      <button type="button" disabled title="Categoria padrão não pode ser alterada" className="cursor-not-allowed rounded-lg border border-border bg-surface2/50 px-2.5 py-1 text-sm text-muted">
-                        Excluir
-                      </button>
-                    </>
+          <h3 className="ui-empty-title text-lg">Nada com esses filtros</h3>
+          <p className="ui-empty-subtitle">Troque tipo, uso ou ordenação — ou limpe os filtros acima.</p>
+        </div>
+      ) : (
+        <ul className="ui-list overflow-hidden rounded-2xl border border-border/60" role="list">
+          {filteredAndSorted.map(({ name, isPredefined, usage }) => (
+            <li key={name} className="ui-list-item">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1 space-y-2">
+                  {editing === name ? (
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && void handleSaveEdit()}
+                        className="ui-focus-surface h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm text-text sm:max-w-xs"
+                        autoFocus
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="primary" size="sm" onClick={() => void handleSaveEdit()}>
+                          Salvar nome
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(null);
+                            setEditValue("");
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
                   ) : (
                     <>
-                      <button
-                        type="button"
-                        onClick={() => { setEditing(name); setEditValue(name); }}
-                        className="ui-focus-surface rounded-lg border border-border px-2.5 py-1 text-sm"
-                      >
-                        Editar
-                      </button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        loading={deleting === name}
-                        onClick={() => void handleDelete(name)}
-                      >
-                        Excluir
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-base font-semibold tracking-tight text-text">{name}</span>
+                        <Chip as="span" variant={isPredefined ? "subtle" : "accent"} className="ui-chip">
+                          {isPredefined ? "Sugerida" : "Sua"}
+                        </Chip>
+                      </div>
+                      <p className="text-sm text-muted">{usageLabel(usage)}</p>
+                      {isPredefined && (
+                        <p className="text-xs text-muted">Não editável — faz parte do conjunto base do Lembra.</p>
+                      )}
                     </>
                   )}
                 </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </section>
+                {editing !== name && (
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    {isPredefined ? null : (
+                      <>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(name);
+                            setEditValue(name);
+                          }}
+                        >
+                          Renomear
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          loading={deleting === name}
+                          className="border border-danger/30 text-danger hover:bg-danger/10"
+                          onClick={() => void handleDelete(name)}
+                        >
+                          Excluir
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

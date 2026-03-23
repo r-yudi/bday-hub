@@ -60,6 +60,7 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
           className="ui-panel rounded-2xl border p-5 sm:p-6"
           aria-label="Login"
           data-login-canonical="full"
+          data-page-canonical="login"
         >
           {/* LoginHeader */}
           <header className="LoginHeader">
@@ -88,7 +89,7 @@ export function LoginPageClient({ returnTo }: { returnTo: string }) {
                 onClick={() => void handleGoogleLogin()}
                 data-login-cta="google"
                 disabled={!initialized || submitting}
-                className="ui-focus-surface btn-primary-brand ui-cta-primary flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-accentHover hover:shadow-md disabled:cursor-not-allowed disabled:opacity-90 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="ui-focus-surface ui-cta-primary flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-accentHover hover:shadow-md disabled:cursor-not-allowed disabled:opacity-90 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 {submitting ? (
                   <>

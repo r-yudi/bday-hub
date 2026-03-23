@@ -1,24 +1,42 @@
-# Tema (light-only)
+# Tema (claro / escuro / sistema)
 
-## Estado atual: light-only (pre-launch)
+## Estado atual
 
-O app funciona **apenas em light mode**. O dark mode não pode ser ativado por storage, system nem UI.
+O app suporta **três modos de tema**:
 
-- **Objetivo:** Reduzir manutenção e risco de UI inconsistente no lançamento; estética alinhada à landing (cream/paper).
-- **Reativação futura:** Os tokens `.dark` permanecem em `app/styles/tokens.css` e em `app/globals.css`; apenas a classe `.dark` não é aplicada no `<html>`. Para reativar, reverter as mudanças em `lib/theme.ts` e `components/ThemeProvider.tsx` e restaurar o seletor de tema no TopNav.
+- **Claro** (`light`) — cream/paper, alinhado à landing.
+- **Escuro** (`dark`) — base near-black, superfícies quentes, acento laranja preservado (`app/styles/tokens.css`, bloco `.dark`).
+- **Sistema** (`system`) — segue `prefers-color-scheme` do SO/navegador.
 
-## Onde o light-only é aplicado
+A classe `.dark` é aplicada em `<html>` quando o tema resolvido é escuro.
 
-- **lib/theme.ts**
-  - `applyThemeToDocument(mode)` ignora o argumento e sempre: `root.classList.remove("dark")`, `root.dataset.theme = "light"`, `root.style.colorScheme = "light"`.
-  - `getStoredThemeMode()` retorna sempre `"light"` e remove a chave `lembra_theme` do localStorage.
-  - `getThemeBootScript()` (inline no layout): sempre aplica light; nunca adiciona `.dark`.
-- **components/ThemeProvider.tsx**
-  - Estado fixo `"light"`; `setThemeMode` só chama `applyThemeToDocument("light")` quando o modo passado é `"light"` (dark/system são no-op).
-  - Não há leitura de preferência remota nem de `prefers-color-scheme` para aplicar tema.
-- **components/TopNav.tsx**
-  - Não há seletor de tema (nem na landing nem nas rotas do app). O componente não renderiza o dropdown de tema.
+## Onde é aplicado
 
-## Tokens .dark
+- **`lib/theme.ts`**
+  - `getStoredThemeMode()` lê `localStorage` (`lembra_theme`); padrão **`system`** se ausente ou inválido.
+  - `resolveThemeMode(mode)` resolve `system` via `matchMedia('(prefers-color-scheme: dark)')`.
+  - `applyThemeToDocument(mode)` alterna `.dark` em `<html>`, define `data-theme` com o modo **lógico** (`light` | `dark` | `system`) e `color-scheme` com o modo **resolvido**.
+  - `getThemeBootScript()` — script inline no `RootLayout` antes do React para reduzir flash de tema.
+- **`components/ThemeProvider.tsx`**
+  - Hidrata a partir do storage; escuta mudanças de `prefers-color-scheme` quando o modo é `system`.
+  - Com usuário logado: carrega `user_settings.theme` (Supabase) após auth inicializada; ao alterar tema, persiste local + remoto.
+- **`components/ThemeModeControl.tsx` + `components/TopNav.tsx`**
+  - Controle segmentado **Claro / Escuro / Sistema** na barra superior (app e landing).
 
-As regras CSS que usam `.dark` (em `app/styles/tokens.css` e `app/globals.css`) **continuam no código** mas não têm efeito, pois a classe `.dark` nunca é aplicada no elemento raiz. Comentários "dark disabled pre-launch" indicam isso nos arquivos.
+## Persistência
+
+| Contexto        | Onde                                              |
+|-----------------|---------------------------------------------------|
+| Guest / local   | `localStorage` chave `lembra_theme`               |
+| Conta logada    | Mesmo storage + coluna `user_settings.theme` (sync) |
+
+Migração SQL: `supabase/migrations/20260224_add_theme_to_user_settings.sql` (default `system`).
+
+## Tailwind
+
+`tailwind.config.ts` usa `darkMode: "class"` — utilitários `dark:` dependem da classe `.dark` no ancestral (normalmente `<html>`).
+
+## Referências
+
+- [docs/DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
+- [docs/PRODUCT_UI_PHILOSOPHY.md](PRODUCT_UI_PHILOSOPHY.md)

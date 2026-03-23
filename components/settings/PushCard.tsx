@@ -242,7 +242,7 @@ export function PushCard({ variant = "default" }: PushCardProps) {
               disabled={saving}
               className={[
                 "mt-3 inline-flex h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium focus-visible:outline-none",
-                pushSettings?.pushEnabled ? "ui-cta-secondary border" : "btn-primary-brand ui-cta-primary bg-accent text-white"
+                pushSettings?.pushEnabled ? "ui-cta-secondary border" : "ui-cta-primary bg-accent text-white"
               ].join(" ")}
             >
               {saving ? "Salvando..." : pushSettings?.pushEnabled ? "Desativar push" : "Ativar push"}

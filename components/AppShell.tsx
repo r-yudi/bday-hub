@@ -26,13 +26,13 @@ function SessionGuardNotice() {
   if (!sessionNotice) return null;
 
   return (
-    <div className="mb-4 rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-text">
+    <div className="rounded-md border border-border/25 bg-surface2/10 px-3 py-2 text-sm leading-snug text-text/90">
       <div className="flex items-start justify-between gap-3">
-        <p>{sessionNotice}</p>
+        <p className="min-w-0 text-pretty">{sessionNotice}</p>
         <button
           type="button"
           onClick={dismissSessionNotice}
-          className="rounded-md px-2 py-0.5 text-xs text-muted hover:bg-warning/20"
+          className="ui-link-tertiary shrink-0 py-0.5 text-xs"
           aria-label="Fechar aviso de sessão"
         >
           Fechar
@@ -144,17 +144,19 @@ function PwaInstallBanner() {
   const showDesktopInstructions = platform === "desktop-chrome" || installEvent !== null;
 
   return (
-    <section className="ui-panel-soft mb-4 rounded-xl border px-3 py-2 shadow-sm sm:px-4 sm:py-2.5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <section className="rounded-md border border-border/22 bg-surface2/10 px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium leading-5 text-text">Instale o Lembra. para acessar seus aniversários mais rápido.</p>
+          <p className="text-sm font-normal leading-snug text-muted">
+            Instale o Lembra como app para abrir a lista direto da tela inicial.
+          </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => void handleInstallClick()}
-            className="ui-cta-primary inline-flex h-9 items-center justify-center px-4 py-2 text-sm font-medium leading-none focus-visible:outline-none"
+            className="ui-focus-surface inline-flex h-8 items-center justify-center rounded-md border border-border/45 bg-surface/85 px-3 text-sm font-medium text-text focus-visible:outline-none"
           >
             Instalar
           </button>
@@ -162,14 +164,14 @@ function PwaInstallBanner() {
             type="button"
             onClick={handleDismiss}
             aria-label="Dispensar sugestão de instalação"
-            className="ui-focus-surface inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border p-0 text-sm leading-none focus-visible:outline-none"
+            className="ui-focus-surface inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border/35 p-0 text-sm leading-none text-muted focus-visible:outline-none"
           >
             ×
           </button>
         </div>
       </div>
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+      <div className="mt-1 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setShowInstructions((value) => !value)}
@@ -181,14 +183,11 @@ function PwaInstallBanner() {
       </div>
 
       {showInstructions && (
-        <div className="ui-callout mt-2 px-3 py-2">
-          <div className="flex items-start gap-2 text-xs">
-            <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full border border-border/70 text-[10px] text-text">i</span>
-            <p className="leading-5">Instale para abrir mais rápido e acessar sua lista direto da tela inicial.</p>
-          </div>
+        <div className="mt-2 border-t border-border/18 pt-2.5 text-xs leading-relaxed text-muted">
+          <p>Instale para abrir mais rápido e acessar sua lista direto da tela inicial.</p>
 
-          <details className="ui-disclosure mt-2 px-3 py-2">
-            <summary className="ui-disclosure-summary">
+          <details className="ui-disclosure mt-2 border-0 bg-transparent px-0 py-0">
+            <summary className="ui-disclosure-summary text-xs">
               Como instalar
             </summary>
             <div className="mt-2 space-y-1 text-xs leading-5 text-muted">
@@ -229,20 +228,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell-wrap min-h-screen">
       <TopNav />
-      <main className={["app-shell-main mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6", isLoginPage ? "pt-4 sm:pt-5" : "pt-6"].join(" ")}>
-        {!isDebugRoute && <SessionGuardNotice />}
-        {!isLanding && (
-          <div className={isLoginPage ? "mx-auto w-full max-w-md" : undefined}>
-            <PwaInstallBanner />
+      <main className={["app-shell-main mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6", isLoginPage ? "pt-4 sm:pt-5" : "pt-4 sm:pt-5"].join(" ")}>
+        {!isDebugRoute && (
+          <div className="space-y-3">
+            <SessionGuardNotice />
+            {!isLanding && (
+              <div className={isLoginPage ? "mx-auto w-full max-w-md" : undefined}>
+                <PwaInstallBanner />
+              </div>
+            )}
           </div>
         )}
         {children}
 
         {showGlobalFooter && (
-          <footer className="ui-surface mt-10 rounded-2xl border px-4 py-4 text-center text-xs text-muted shadow-sm sm:text-right">
+          <footer className="mt-12 rounded-2xl border border-border/55 bg-surface2/25 px-4 py-4 text-center text-xs text-muted sm:text-right">
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-end sm:gap-4">
               <Link href="/privacy" className="ui-link-tertiary">
-                Política de Privacidade
+                Privacidade
               </Link>
               <Link href="/terms" className="ui-link-tertiary">
                 Termos

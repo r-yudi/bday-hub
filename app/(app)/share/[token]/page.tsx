@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Alert } from "@/components/ui/Alert";
 import { decodeShareToken } from "@/lib/share";
 import { formatDayMonth, isValidDayMonth } from "@/lib/dates";
 import { upsertBirthday } from "@/lib/birthdaysRepo";
@@ -59,78 +60,105 @@ export default function ShareTokenPage() {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
     } catch {
-      window.alert("Não foi possível copiar o link automaticamente.");
+      window.alert("Não foi possível copiar o link.");
     }
   }
 
   if (!validPayload) {
     return (
-      <div className="grid min-h-[65vh] place-items-center">
-        <div className="ui-panel-soft mx-auto w-full max-w-xl rounded-2xl border p-6 text-text">
-          <h1 className="text-lg font-semibold tracking-tight">Link inválido</h1>
-          <p className="mt-2 text-sm text-muted">Este link não pôde ser reconhecido. Pode estar incompleto ou incorreto.</p>
-          <Link href="/today" className="ui-cta-secondary mt-4 inline-flex items-center rounded-lg border px-3 py-2 text-sm focus-visible:outline-none">
-            Ir para o app
-          </Link>
-        </div>
+      <div className="ui-container" data-page-canonical="share-invite" data-share-token-state="invalid">
+        <section className="ui-section">
+          <div className="ui-panel mx-auto w-full max-w-md p-6 sm:p-8">
+            <div className="ui-empty-hero py-6">
+              <div className="ui-empty-icon" aria-hidden>
+                🔗
+              </div>
+              <h1 className="ui-empty-title text-xl sm:text-2xl">Este convite não abre</h1>
+              <p className="ui-empty-subtitle">
+                O endereço pode estar cortado, errado ou corrompido. Peça um novo link a quem enviou.
+              </p>
+              <div className="ui-empty-actions">
+                <Link
+                  href="/today"
+                  className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium focus-visible:outline-none"
+                >
+                  Ir para o app
+                </Link>
+                <Link href="/share" className="ui-link-tertiary text-sm font-medium">
+                  Criar um link no Lembra
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
 
   return (
-    <div className="ui-container grid min-h-[65vh] place-items-center py-4">
-      <div className="mx-auto w-full max-w-xl space-y-4">
-        <div className="ui-panel rounded-3xl border p-6 text-center sm:p-8">
-          <p className="ui-eyebrow text-muted">Lembra • Link compartilhado</p>
-          <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-text sm:text-[2.1rem]">{validPayload.name}</h1>
-          <p className="mt-2 text-sm text-muted">
-            Aniversário: <span className="font-medium text-text">{formatDayMonth(validPayload.day, validPayload.month)}</span>
-          </p>
+    <div className="ui-container" data-page-canonical="share-invite" data-share-token-state="valid">
+      <section className="ui-section">
+        <div className="ui-panel mx-auto w-full max-w-md p-6 sm:p-8">
+          <header className="ui-section-header text-left">
+            <p className="ui-eyebrow">Convite</p>
+            <h1 className="ui-title-editorial text-left text-3xl sm:text-[2.1rem]">{validPayload.name}</h1>
+            <p className="ui-subtitle-editorial text-left text-sm sm:text-[15px]">
+              Data do aniversário:{" "}
+              <span className="font-medium text-text">{formatDayMonth(validPayload.day, validPayload.month)}</span>
+              {" · "}
+              sem ano de nascimento neste link.
+            </p>
+          </header>
 
-          <div className="ui-surface ui-border-subtle mt-5 rounded-2xl border px-4 py-3 text-left text-sm text-muted">
+          <div className="ui-callout mt-6 rounded-xl border border-border/70 px-4 py-3 text-sm text-muted">
             <p>
-              <span className="font-medium text-text">Importante:</span> Este link compartilha apenas nome e dia/mês. Não inclui ano.
+              Só entram na sua lista o <span className="font-medium text-text">nome</span> e o{" "}
+              <span className="font-medium text-text">dia/mês</span>. Funciona sem login; com conta, pode sincronizar
+              depois.
             </p>
           </div>
 
-          <div className="mt-5 grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => void handleCopyLink()}
-              className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-4 py-2.5 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
-            >
-              Copiar link
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleAddToList()}
-              disabled={saving || saved}
-              aria-label={saved ? "Adicionado à minha lista" : "Adicionar à minha lista"}
-              className="ui-cta-secondary rounded-xl border px-4 py-2.5 text-sm font-medium focus-visible:outline-none disabled:opacity-70"
-            >
-              {saved ? "Adicionado à minha lista" : saving ? "Adicionando..." : "Adicionar à minha lista"}
-            </button>
-          </div>
-
-          <p aria-live="polite" className="mt-3 min-h-5 text-xs font-medium text-success">
-            {copied ? "Link copiado ✓" : ""}
-          </p>
-
-          {saved && (
-            <button
-              type="button"
-              onClick={() => router.push("/today")}
-              className="ui-focus-surface mt-2 rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
-            >
-              Ver minha lista
-            </button>
+          {!saved ? (
+            <div className="mt-8 space-y-3">
+              <button
+                type="button"
+                onClick={() => void handleAddToList()}
+                disabled={saving}
+                className="ui-cta-primary flex h-11 w-full items-center justify-center rounded-xl px-5 text-sm font-medium focus-visible:outline-none disabled:opacity-70"
+              >
+                {saving ? "Adicionando..." : "Adicionar à minha lista"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleCopyLink()}
+                className="ui-cta-secondary flex h-10 w-full items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
+              >
+                Copiar link
+              </button>
+              <p aria-live="polite" className="min-h-5 text-center text-xs text-success">
+                {copied ? "Link copiado." : ""}
+              </p>
+            </div>
+          ) : (
+            <div className="mt-8 space-y-5">
+              <Alert variant="success" className="text-sm">
+                <p className="font-medium text-text">Salvo na sua lista neste aparelho.</p>
+                <p className="mt-1 text-muted">Em Conta você pode entrar com Google para manter os mesmos dados em outros dispositivos.</p>
+              </Alert>
+              <button
+                type="button"
+                onClick={() => router.push("/today")}
+                className="ui-cta-primary flex h-11 w-full items-center justify-center rounded-xl px-5 text-sm font-medium focus-visible:outline-none"
+              >
+                Ver minha lista
+              </button>
+              <Link href="/people" className="ui-link-tertiary block text-center text-sm font-medium">
+                Ver em Pessoas
+              </Link>
+            </div>
           )}
         </div>
-
-        <p className="text-center text-xs text-muted">
-          O link mostra apenas nome e dia/mês (sem ano).
-        </p>
-      </div>
+      </section>
     </div>
   );
 }

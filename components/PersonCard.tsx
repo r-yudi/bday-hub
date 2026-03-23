@@ -136,7 +136,7 @@ export function PersonCard({ person, relativeDays, onDelete }: PersonCardProps) 
         <button
           type="button"
           onClick={() => void copyPrimaryMessage()}
-          className="btn-primary-brand ui-cta-primary rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
+          className="ui-cta-primary rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
           aria-label={isBirthdayToday ? "Copiar mensagem sugerida" : "Copiar mensagem"}
         >
           {isBirthdayToday ? "Copiar" : "Copiar mensagem"}

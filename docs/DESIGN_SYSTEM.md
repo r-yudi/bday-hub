@@ -12,7 +12,7 @@ Definir a fonte única do contrato visual para consistência entre landing e pá
 - Tokens primeiro: cores, sombras, raios e motion vêm de `app/styles/tokens.css`.
 - Clareza de hierarquia: uma ação principal por contexto; apoio visual previsível.
 - **Landing-first:** Páginas internas são extensão da landing (ritmo editorial, superfícies paper, sem sombras pesadas).
-- **Light-only (pre-launch):** Apenas tema claro é aplicado; dark mode desabilitado. Ver `docs/THEME.md`.
+- **Tema:** Claro, escuro ou sistema (`prefers-color-scheme`); tokens `.dark` ativos em runtime quando aplicável. Ver `docs/THEME.md`.
 - Acessibilidade: foco visível, contraste e reduced motion fazem parte do visual.
 - Empty states: título claro + contexto curto + CTA principal (+ opcional secundário).
 - Listas: separador sutil, hover leve; evitar cards dentro de cards.
@@ -32,7 +32,7 @@ Papéis principais:
 - **--radius-sm/md/lg/xl:** raios consistentes (10px, 14px, 18px, 24px).
 - **--ui-*** variantes para superfícies, bordas e foco (ver blocos em `globals.css`).
 
-Os tokens `.dark` existem no CSS mas **não são aplicados** em runtime (light-only).
+Os tokens `.dark` em `app/styles/tokens.css` aplicam-se quando `<html>` tem a classe `.dark` (ver `lib/theme.ts`).
 
 ## Globals e utilitários
 
@@ -116,7 +116,7 @@ Os tokens `.dark` existem no CSS mas **não são aplicados** em runtime (light-o
 - `components/LoginPageClient.tsx` — ui-container, ui-panel, ui-section-header.
 - `app/(app)/upcoming/page.tsx` — section layout (ui-section-header quando aplicado).
 - `app/(app)/person/page.tsx` — section layout (ui-container, ui-section-header quando aplicado).
-- **Shell/nav:** `components/TopNav.tsx` (topnav-app mais leve; sem seletor de tema). `components/AppShell.tsx` (banner PWA com ui-cta-primary).
+- **Shell/nav:** `components/TopNav.tsx` (tema Claro/Escuro/Sistema + navegação). `components/AppShell.tsx` (banner PWA com ui-cta-primary).
 
 ## Como adicionar novo utilitário
 
@@ -132,5 +132,5 @@ Os tokens `.dark` existem no CSS mas **não são aplicados** em runtime (light-o
 - **Landing CSS:** `app/(marketing)/landing.css`
 - **Filosofia de UI (guardrails):** `docs/PRODUCT_UI_PHILOSOPHY.md`
 - **Rebrand report (section layout, identity diff):** `docs/REBRAND_LANDING_FIRST_REPORT.md`
-- **Tema (light-only):** `docs/THEME.md`
+- **Tema:** `docs/THEME.md`
 - **Playbook de design:** `playbooks/design-skill.md`

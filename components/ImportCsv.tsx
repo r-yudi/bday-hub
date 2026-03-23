@@ -1,9 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { decodeCsvBytes } from "@/lib/csv-file";
 import { parseBirthdayCsv } from "@/lib/csv";
@@ -11,9 +10,11 @@ import type { BirthdayPerson } from "@/lib/types";
 
 type ImportCsvProps = {
   onImport: (people: BirthdayPerson[]) => Promise<void> | void;
+  /** When true, omits large page-style title (parent already provides context). */
+  embedded?: boolean;
 };
 
-export function ImportCsv({ onImport }: ImportCsvProps) {
+export function ImportCsv({ onImport, embedded = false }: ImportCsvProps) {
   const [rawText, setRawText] = useState("");
   const parsed = rawText ? parseBirthdayCsv(rawText) : null;
   const [importing, setImporting] = useState(false);
@@ -42,45 +43,65 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
     }
   }
 
+  const mono = "rounded-md border border-border/70 bg-surface2/40 px-1.5 py-0.5 font-mono text-[11px] text-text sm:text-xs";
+
   return (
-    <Card variant="elevated" className="p-4 sm:p-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="cursor-pointer">
-          <span className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 text-sm font-medium text-accentForeground shadow-sm hover:brightness-95">
-            Selecionar CSV
+    <div className="space-y-6">
+      {!embedded && (
+        <header className="ui-section-header">
+          <p className="ui-eyebrow">Dados</p>
+          <h2 className="ui-title-editorial text-2xl sm:text-[1.65rem]">Importar CSV</h2>
+          <p className="ui-subtitle-editorial max-w-[68ch] text-sm">
+            Um arquivo por vez. Linhas válidas entram na lista; inválidas são listadas para correção.
+          </p>
+        </header>
+      )}
+
+      <div className="rounded-2xl border border-dashed border-border/90 bg-surface2/20 px-4 py-8 text-center transition-colors hover:border-border sm:px-6">
+        <label className="inline-flex cursor-pointer flex-col items-center gap-3">
+          <span className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-medium shadow-sm">
+            Escolher arquivo .csv
+          </span>
+          <span className="max-w-[42ch] text-xs leading-relaxed text-muted">
+            UTF-8 ou Latin-1. Colunas obrigatórias no cabeçalho:{" "}
+            <span className={mono}>name, day, month</span>
           </span>
           <input
             type="file"
             accept=".csv,text/csv"
-            className="hidden"
+            className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0];
               if (file) void handleFile(file);
             }}
           />
         </label>
-
-        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <Chip as="span" variant="warning" className="ui-chip">Obrigatório</Chip>
-          <span className="text-muted">
-            Cabeçalho: <code className="rounded bg-surface2 px-1.5 py-0.5 text-[11px] sm:text-xs">name,day,month</code>
-          </span>
-          <Chip as="span" variant="subtle" className="ui-chip">Opcional</Chip>
-          <span className="text-muted">
-            <code className="rounded bg-surface2 px-1.5 py-0.5 text-[11px] sm:text-xs">tags, whatsapp, instagram, notes</code>
-          </span>
-        </div>
       </div>
 
-      <p className="mt-2 text-xs text-muted">
-        A coluna <code className="rounded bg-surface2 px-1 py-0.5">tags</code> vira categorias e aceita vírgula, ponto e vírgula ou pipe.
-      </p>
+      <div className="ui-callout rounded-xl border border-border/60 px-4 py-3 text-sm text-muted">
+        <p>
+          <span className="font-medium text-text">Opcional:</span>{" "}
+          <span className={mono}>tags</span>, <span className={mono}>whatsapp</span>,{" "}
+          <span className={mono}>instagram</span>, <span className={mono}>notes</span>. Em{" "}
+          <span className={mono}>tags</span>, use vírgula, ponto e vírgula ou pipe para várias categorias.
+        </p>
+      </div>
 
       {parsed && (
-        <div className="mt-4 space-y-3">
-          <div className="flex flex-wrap gap-3 text-sm">
-            <Chip as="span" variant="accent" className="ui-chip ui-chip-accent">Válidas: {parsed.valid.length}</Chip>
-            <Chip as="span" variant="danger" className="ui-chip">Inválidas: {parsed.invalid.length}</Chip>
+        <div className="space-y-5 border-t border-border/50 pt-6">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <Chip as="span" variant="accent" className="ui-chip">
+              Válidas: {parsed.valid.length}
+            </Chip>
+            <Chip as="span" variant="danger" className="ui-chip">
+              Inválidas: {parsed.invalid.length}
+            </Chip>
+            {parsed.valid.length > 0 && parsed.invalid.length === 0 && (
+              <span className="text-muted">Pronto para importar.</span>
+            )}
+            {parsed.valid.length === 0 && (
+              <span className="text-muted">Ajuste o arquivo e envie de novo.</span>
+            )}
           </div>
 
           {parsed.warnings.length > 0 && (
@@ -92,43 +113,57 @@ export function ImportCsv({ onImport }: ImportCsvProps) {
           )}
 
           {parsed.valid.length > 0 && (
-            <div className="rounded-xl border border-border bg-surface p-3">
-              <p className="mb-2 text-sm font-medium text-text">Prévia (válidas)</p>
-              <ul className="space-y-1 text-sm text-muted">
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">Pré-visualização</p>
+              <ul className="divide-y divide-border/50 rounded-xl border border-border/60">
                 {parsed.valid.slice(0, 8).map((row, idx) => (
-                  <li key={`${row.name}-${idx}`}>
-                    {row.name} • {String(row.day).padStart(2, "0")}/{String(row.month).padStart(2, "0")}
+                  <li key={`${row.name}-${idx}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-3 py-2.5 text-sm">
+                    <span className="font-medium text-text">{row.name}</span>
+                    <span className="text-muted">
+                      {String(row.day).padStart(2, "0")}/{String(row.month).padStart(2, "0")}
+                    </span>
                   </li>
                 ))}
-                {parsed.valid.length > 8 && <li>... e mais {parsed.valid.length - 8}</li>}
+                {parsed.valid.length > 8 && (
+                  <li className="px-3 py-2.5 text-sm text-muted">… e mais {parsed.valid.length - 8}</li>
+                )}
               </ul>
             </div>
           )}
 
           {parsed.invalid.length > 0 && (
-            <div className="rounded-xl border border-danger/25 bg-danger/10 p-3">
-              <p className="mb-2 text-sm font-medium text-danger">Linhas inválidas</p>
-              <ul className="space-y-1 text-sm text-danger">
+            <Alert variant="danger" className="text-sm">
+              <p className="mb-2 font-medium">Linhas com erro</p>
+              <ul className="space-y-1.5">
                 {parsed.invalid.slice(0, 8).map((row) => (
                   <li key={row.rowNumber}>
                     Linha {row.rowNumber}: {row.errors.join(", ")}
                   </li>
                 ))}
               </ul>
-            </div>
+            </Alert>
           )}
 
-          <Button
-            type="button"
-            disabled={parsed.valid.length === 0 || importing}
-            onClick={() => void handleImport()}
-            loading={importing}
-            className="ui-cta-primary"
-          >
-            {importing ? "Importando..." : "Importar"}
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              disabled={parsed.valid.length === 0 || importing}
+              onClick={() => void handleImport()}
+              loading={importing}
+              variant="primary"
+              size="md"
+              className="w-full sm:w-auto"
+            >
+              {importing ? "Importando…" : "Importar"}
+            </Button>
+            {parsed.valid.length > 0 && !importing && (
+              <p className="text-xs text-muted sm:max-w-[40ch]">
+                Isso adiciona à lista local (e sincroniza se você estiver logado).
+              </p>
+            )}
+          </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

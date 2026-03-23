@@ -4,13 +4,14 @@ import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AddBirthdayEntryModal } from "@/components/AddBirthdayEntryModal";
-import { PersonCard } from "@/components/PersonCard";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { AppToast } from "@/components/AppToast";
-import { Chip } from "@/components/ui/Chip";
-import { getTodayPeople, getUpcomingPeople, formatRelativeLabel } from "@/lib/dates";
-import { deleteBirthday, importCsvBirthdays, listBirthdays } from "@/lib/birthdaysRepo";
+import { TodayListItem } from "@/components/today/TodayListItem";
+import { TodayUpcomingList } from "@/components/today/TodayUpcomingList";
+import { formatTodayPageDateEyebrow } from "@/components/today/todayPageFormatters";
+import { getTodayPeople, getUpcomingPeople } from "@/lib/dates";
+import { importCsvBirthdays, listBirthdays } from "@/lib/birthdaysRepo";
 import { buildAddBirthdayToast, consumeBirthdayAddedToast, queueBirthdayAddedToast, type OnboardingToast } from "@/lib/onboarding-ui";
 import type { BirthdayPersonInput } from "@/lib/quickBirthdayParser";
 import type { BirthdayPerson } from "@/lib/types";
@@ -86,7 +87,7 @@ function TodayPageContent() {
   async function handleQuickImport(valid: BirthdayPersonInput[]) {
     if (valid.length === 0) return;
     const now = Date.now();
-    const people: BirthdayPerson[] = valid.map((row, idx) => ({
+    const imported: BirthdayPerson[] = valid.map((row, idx) => ({
       id: crypto.randomUUID(),
       name: row.name,
       day: row.day,
@@ -97,14 +98,9 @@ function TodayPageContent() {
       createdAt: now + idx,
       updatedAt: now + idx
     }));
-    await importCsvBirthdays(people);
+    await importCsvBirthdays(imported);
     await loadData();
     queueBirthdayAddedToast();
-  }
-
-  async function handleDelete(id: string) {
-    await deleteBirthday(id);
-    await loadData();
   }
 
   function onOpenAddModal(view: "menu" | "quick" | "csv") {
@@ -119,13 +115,13 @@ function TodayPageContent() {
 
   if (error) {
     return (
-      <div className="ui-container space-y-6">
+      <div className="ui-container space-y-6" data-page-canonical="today">
         <section className="ui-section ui-panel-soft rounded-2xl border p-6">
           <p className="text-sm font-medium text-danger">{error}</p>
           <button
             type="button"
             onClick={() => void loadData()}
-            className="ui-cta-secondary mt-3 rounded-xl border px-4 py-2 text-sm font-medium"
+            className="ui-cta-secondary ui-focus-surface mt-3 inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
           >
             Tentar de novo
           </button>
@@ -136,28 +132,7 @@ function TodayPageContent() {
 
   return (
     <>
-      <div className="ui-container space-y-9 lg:space-y-12" data-page-canonical="today">
-        <section className="ui-section ui-panel p-6 sm:p-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-            <div className="ui-section-header">
-              <p className="ui-eyebrow">Painel principal</p>
-              <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">Hoje</h1>
-              <p className="ui-subtitle-editorial text-sm sm:text-[15px]">
-                Veja quem faz aniversário hoje e os próximos dias. Adicione ou importe aniversários para não perder nenhum parabéns.
-              </p>
-            </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(true)}
-                className="btn-primary-brand ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm text-white hover:bg-accentHover focus-visible:outline-none"
-              >
-                + Adicionar aniversário
-              </button>
-            </div>
-          </div>
-        </section>
-
+      <div className="ui-container" data-page-canonical="today">
         {!loading && mounted && (
           <Suspense fallback={null}>
             <OnboardingGate
@@ -168,135 +143,113 @@ function TodayPageContent() {
           </Suspense>
         )}
 
-        {!loading && (
-          <OnboardingBanner count={people.length} mounted={mounted} returnTo={returnTo} />
-        )}
+        {!loading && <OnboardingBanner count={people.length} mounted={mounted} returnTo={returnTo} />}
 
-        {loading ? (
-          <section className="ui-section ui-panel-soft rounded-2xl border p-8">
-            <p className="text-sm text-muted">Carregando...</p>
-          </section>
-        ) : people.length === 0 ? (
-          <section className="ui-section">
-            <div className="ui-empty-hero">
-              <div className="ui-empty-icon" aria-hidden>
-                🎂
-              </div>
-              <h2 className="ui-empty-title">Nenhum aniversário hoje</h2>
-              <p className="ui-empty-subtitle">
-                Adicione aniversários para começar.
-              </p>
-              <div className="ui-empty-actions">
+        <section className="ui-section">
+          <div className="ui-panel mx-auto w-full max-w-2xl p-6 sm:p-8">
+            <header className="ui-section-header">
+              <p className="ui-eyebrow">{formatTodayPageDateEyebrow(new Date())}</p>
+              <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">Aniversários 🎂</h1>
+              <div className="mt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(true)}
-                  className="btn-primary-brand ui-cta-primary order-first inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accentHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+                  className="ui-cta-primary ui-focus-surface inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-medium focus-visible:outline-none"
                 >
                   Adicionar aniversário
                 </button>
               </div>
-              <p className="mt-3 text-center text-sm text-muted">
-                ou cole vários de uma vez
-              </p>
-            </div>
-          </section>
-        ) : (
-          <>
-            <section className="ui-section" aria-label="Aniversariantes de hoje">
-              <h2 className="ui-section-header mb-4 text-lg font-semibold tracking-tight text-text">
-                Hoje
-              </h2>
-              {todayPeople.length === 0 ? (
-                <div className="ui-empty-hero rounded-2xl border border-border/80 bg-surface2/40 p-6 sm:p-8">
+            </header>
+
+            <div className="ui-stack-lg mt-8">
+              {loading ? (
+                <p className="text-sm text-muted">Carregando...</p>
+              ) : people.length === 0 ? (
+                <div className="ui-empty-hero">
                   <div className="ui-empty-icon" aria-hidden>
-                    🎈
+                    🎂
                   </div>
-                  <h3 className="ui-empty-title text-base">Nenhum aniversário hoje</h3>
-                  <p className="ui-empty-subtitle text-sm">
-                    Você tem {people.length} pessoa(s) cadastrada(s). Veja os próximos ou adicione mais.
-                  </p>
-                  <div className="ui-empty-actions mt-4 flex flex-wrap gap-2">
-                    <Link
-                      href="/people"
-                      className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-                    >
-                      Ver pessoas
-                    </Link>
+                  <h2 className="ui-empty-title">Ninguém faz aniversário hoje</h2>
+                  <p className="ui-empty-subtitle">Adicione pessoas importantes para não esquecer</p>
+                  <div className="ui-empty-actions">
                     <button
                       type="button"
                       onClick={() => setShowAddModal(true)}
-                      className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+                      className="ui-cta-primary ui-focus-surface inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold focus-visible:outline-none"
                     >
                       Adicionar aniversário
                     </button>
                   </div>
+                  <p className="mt-3 text-center text-sm text-muted">ou cole vários de uma vez</p>
                 </div>
               ) : (
-                <div className="ui-list">
-                  {todayPeople.map((person) => (
-                    <div key={person.id} className="ui-list-item">
-                      <PersonCard person={person} onDelete={handleDelete} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section className="ui-section" aria-label="Próximos aniversários">
-              <h2 className="ui-section-header mb-4 text-lg font-semibold tracking-tight text-text">
-                Próximos aniversários
-              </h2>
-              {upcomingPeople.length === 0 ? (
-                <div className="ui-panel-soft rounded-2xl border border-border/80 p-6">
-                  <p className="text-sm text-muted">
-                    Nada nos próximos dias. Adicione algumas pessoas para o Lembra começar a te ajudar.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(true)}
-                    className="ui-cta-primary mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                <>
+                  <section
+                    className="today-page-hoje-block ui-panel-soft rounded-2xl border p-5 sm:p-6"
+                    aria-labelledby="today-section-title"
                   >
-                    Adicionar aniversário
-                  </button>
-                </div>
-              ) : (
-                <div className="ui-list rounded-2xl border border-border/80 bg-surface2/30 divide-y divide-border/60">
-                  {upcomingPeople.map((person, index) => (
-                    <div key={person.id} className="ui-list-item flex flex-wrap items-center justify-between gap-2 py-3">
-                      <div className="min-w-0 flex flex-wrap items-center gap-2">
-                        {index === 0 && (
-                          <Chip as="span" variant="subtle" className="ui-chip">
-                            Próximo
-                          </Chip>
-                        )}
-                        <span className="font-medium text-text">{person.name}</span>
-                        <span className="text-sm text-muted">
-                          {formatRelativeLabel(person.daysUntil)} · {String(person.day).padStart(2, "0")}/{String(person.month).padStart(2, "0")}
-                        </span>
+                    <h2 id="today-section-title" className="ui-feature-title text-text">
+                      Hoje
+                    </h2>
+                    {todayPeople.length === 0 ? (
+                      <div className="ui-empty-hero mt-4">
+                        <div className="ui-empty-icon" aria-hidden>
+                          🎈
+                        </div>
+                        <h3 className="ui-empty-title">Ninguém faz aniversário hoje</h3>
+                        <p className="ui-empty-subtitle">Adicione pessoas importantes para não esquecer</p>
+                        <div className="ui-empty-actions">
+                          <button
+                            type="button"
+                            onClick={() => setShowAddModal(true)}
+                            className="ui-cta-primary ui-focus-surface inline-flex h-11 min-w-[11rem] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold focus-visible:outline-none"
+                          >
+                            Adicionar aniversário
+                          </button>
+                        </div>
+                        <p className="mt-3 text-center text-sm text-muted">
+                          <Link href="/people" className="ui-link-tertiary">
+                            Ver todas as pessoas
+                          </Link>
+                        </p>
                       </div>
-                      <Link
-                        href={`/person?id=${encodeURIComponent(person.id)}`}
-                        className="ui-link-tertiary text-sm font-medium"
-                      >
-                        Ver
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                    ) : (
+                      <ul className="ui-list m-0 mt-4 list-none p-0">
+                        {todayPeople.map((person) => (
+                          <TodayListItem key={person.id} person={person} />
+                        ))}
+                      </ul>
+                    )}
+                  </section>
 
-            <section className="ui-section flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(true)}
-                className="ui-cta-primary inline-flex h-10 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-              >
-                + Adicionar aniversário
-              </button>
-            </section>
-          </>
-        )}
+                  <section className="today-page-upcoming-region" aria-labelledby="upcoming-section-title">
+                    <h2 id="upcoming-section-title" className="ui-feature-title text-text">
+                      Em breve
+                    </h2>
+                    {upcomingPeople.length === 0 ? (
+                      <div className="mt-4">
+                        <p className="text-sm text-muted">
+                          Nada nos próximos dias. Adicione pessoas para o Lembra te ajudar.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddModal(true)}
+                          className="ui-cta-secondary ui-focus-surface mt-4 inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
+                        >
+                          Adicionar aniversário
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-4">
+                        <TodayUpcomingList people={upcomingPeople} />
+                      </div>
+                    )}
+                  </section>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
 
       <AddBirthdayEntryModal
@@ -315,13 +268,17 @@ function TodayPageContent() {
 
 export default function TodayPage() {
   return (
-    <Suspense fallback={
-      <div className="ui-container space-y-6">
-        <section className="ui-section ui-panel-soft rounded-2xl border p-8">
-          <p className="text-sm text-muted">Carregando...</p>
-        </section>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="ui-container" data-page-canonical="today">
+          <section className="ui-section">
+            <div className="ui-panel mx-auto w-full max-w-2xl p-8">
+              <p className="text-sm text-muted">Carregando...</p>
+            </div>
+          </section>
+        </div>
+      }
+    >
       <TodayPageContent />
     </Suspense>
   );

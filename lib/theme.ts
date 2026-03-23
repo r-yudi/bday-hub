@@ -8,32 +8,45 @@ export function isThemeMode(value: string | null | undefined): value is ThemeMod
   return value === "light" || value === "dark" || value === "system";
 }
 
+/** Reads persisted preference; defaults to `system` when unset or invalid. */
 export function getStoredThemeMode(): ThemeMode {
+  if (typeof window === "undefined") return "system";
+  try {
+    const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return isThemeMode(raw) ? raw : "system";
+  } catch {
+    return "system";
+  }
+}
+
+export function resolveThemeMode(mode: ThemeMode): "light" | "dark" {
+  if (mode === "dark") return "dark";
+  if (mode === "light") return "light";
   if (typeof window === "undefined") return "light";
   try {
-    window.localStorage.removeItem(THEME_STORAGE_KEY);
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   } catch {
-    /* ignore */
+    return "light";
   }
-  return "light";
 }
 
-export function resolveThemeMode(_mode: ThemeMode): "light" | "dark" {
-  return "light";
-}
-
-/** Light-only pre-launch: always applies light; .dark is never added. */
-export function applyThemeToDocument(_mode: ThemeMode) {
+/** Applies `light` / `dark` class on `<html>` from mode (resolving `system`). */
+export function applyThemeToDocument(mode: ThemeMode) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.classList.remove("dark");
-  root.dataset.theme = "light";
-  root.style.colorScheme = "light";
+  const resolved = resolveThemeMode(mode);
+  root.classList.toggle("dark", resolved === "dark");
+  root.dataset.theme = mode;
+  root.style.colorScheme = resolved;
 }
 
 export function storeThemeMode(mode: ThemeMode) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(THEME_STORAGE_KEY, mode);
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, mode);
+  } catch {
+    /* ignore */
+  }
 }
 
 export async function loadRemoteThemePreference(userId: string): Promise<ThemeMode | null> {
@@ -65,17 +78,28 @@ export async function saveRemoteThemePreference(userId: string, theme: ThemeMode
   }
 }
 
-/** Light-only pre-launch: always sets light; .dark is never applied. */
+/**
+ * Inline boot script: runs before React to avoid theme flash.
+ * Reads `lembra_theme` and `prefers-color-scheme` when mode is `system`.
+ */
 export function getThemeBootScript() {
+  const key = THEME_STORAGE_KEY;
   return `
   (function () {
     try {
-      var key = '${THEME_STORAGE_KEY}';
-      try { localStorage.removeItem(key); } catch (_) {}
+      var k = ${JSON.stringify(key)};
+      var raw = null;
+      try { raw = localStorage.getItem(k); } catch (_) {}
+      var mode = (raw === "light" || raw === "dark" || raw === "system") ? raw : "system";
+      var prefersDark = false;
+      try {
+        prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      } catch (_) {}
+      var resolved = (mode === "dark" || (mode === "system" && prefersDark)) ? "dark" : "light";
       var root = document.documentElement;
-      root.classList.remove('dark');
-      root.dataset.theme = 'light';
-      root.style.colorScheme = 'light';
+      if (resolved === "dark") root.classList.add("dark"); else root.classList.remove("dark");
+      root.dataset.theme = mode;
+      root.style.colorScheme = resolved;
     } catch (_) {}
   })();
   `;

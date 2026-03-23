@@ -12,6 +12,9 @@ Formato adotado:
 
 ## [Unreleased]
 
+### Changed
+- **Tema em runtime:** `light` / `dark` / `system` (`lib/theme.ts`, boot script no layout, `ThemeProvider` + Supabase `user_settings.theme`); controle **Claro / Escuro / Sistema** no `TopNav` (app e landing). Tokens `.dark` alinhados ao fundo near-black e superfícies quentes; `/today` com hierarquia extra em dark (`today-page-hoje-block`, `today-page-upcoming-region`). Docs: `docs/THEME.md`, SPEC, DESIGN_SYSTEM, AGENTS.
+
 ### Added
 - **Mensagem sugerida V2 (mais humana):** campo opcional `nickname` (UI **Como chamar**), persistido guest + Supabase (`birthdays.nickname`, migration `20260322120000_add_nickname_to_birthdays.sql`). `getTodaySuggestedMessage` usa `nickname` ou primeiro nome de `name` + uma de 3 frases fixas; `notes` (**Sobre essa pessoa**) não compõe a sugestão (referência no card). Dia do aniversário: preview, **Copiar**, hint se sem nickname; `/upcoming` inalterado nos templates com nome.
 - **`lib/personLinks.ts`:** normalização de WhatsApp (número → `wa.me`) e Instagram (@/usuário → `instagram.com/...`) no save; leitura para edição a partir de URL legada; URLs `http(s)` existentes não são reescritas.

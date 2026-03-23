@@ -21,7 +21,6 @@ import type { BirthdayPerson } from "@/lib/types";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { Card } from "@/components/ui/Card";
 import { FieldGroup, FieldHelper, FieldLabel, SelectField, TextArea, TextInput } from "@/components/ui/Field";
 
 type PersonFormProps = {
@@ -76,7 +75,7 @@ function FieldHelpRow({
         role="region"
         aria-labelledby={triggerId}
         hidden={!isOpen}
-        className="rounded-lg border border-border/80 bg-surface2/90 px-3 py-2 text-xs leading-snug text-text"
+        className="rounded-lg border border-border/80 bg-surface2/90 px-3 py-2 text-xs leading-snug text-text dark:border-border/60 dark:bg-surface2/70"
       >
         {children}
       </div>
@@ -248,8 +247,8 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
   }
 
   return (
-    <Card variant="elevated" className="p-5 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="ui-panel-soft rounded-2xl border p-5 sm:p-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <Alert variant="info" className="text-xs">
           Campos com <span className="font-semibold text-primary">*</span> são obrigatórios. Os demais são opcionais.
         </Alert>
@@ -501,17 +500,26 @@ export function PersonForm({ initialPerson, onSave, onDelete }: PersonFormProps)
 
         {error && <Alert variant="danger">{error}</Alert>}
 
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <Button type="submit" loading={saving} className="ui-cta-primary">
+        <div className="flex flex-col gap-3 border-t border-border/50 pt-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <Button
+            type="submit"
+            loading={saving}
+            className="ui-cta-primary order-1 w-full sm:order-none sm:w-auto"
+          >
             {saving ? "Salvando..." : "Salvar"}
           </Button>
           {isEdit && onDelete && initialPerson && (
-            <Button type="button" variant="destructive" onClick={() => void onDelete(initialPerson.id)}>
-              Excluir
+            <Button
+              type="button"
+              variant="ghost"
+              className="order-2 w-full border border-danger/25 text-danger hover:bg-danger/10 sm:order-none sm:w-auto"
+              onClick={() => void onDelete(initialPerson.id)}
+            >
+              Excluir aniversário
             </Button>
           )}
         </div>
       </form>
-    </Card>
+    </div>
   );
 }

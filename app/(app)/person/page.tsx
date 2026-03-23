@@ -54,38 +54,58 @@ function PersonPageContent() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="ui-title-editorial text-3xl sm:text-[2.15rem]">
-            {id ? "Editar pessoa" : "Adicionar pessoa"}
-          </h1>
-          <p className="ui-subtitle-editorial mt-2 text-sm sm:text-[15px]">Adicione nome, data e categorias em poucos passos.</p>
-        </div>
-        <Link
-          href={returnTo}
-          className="ui-cta-secondary inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
-        >
-          Voltar
-        </Link>
-      </div>
+    <div className="ui-container" data-page-canonical="person">
+      <section className="ui-section">
+        <div className="ui-panel mx-auto w-full max-w-2xl p-6 sm:p-8">
+          <header className="ui-section-header">
+            <p className="ui-eyebrow">Cadastro</p>
+            <h1 className="ui-title-editorial text-4xl sm:text-[2.45rem]">
+              {id ? "Editar pessoa" : "Adicionar pessoa"}
+            </h1>
+            <p className="ui-subtitle-editorial text-sm sm:text-[15px]">
+              Nome, data e categorias em poucos passos. Campos opcionais deixam o Lembra mais útil no dia a dia.
+            </p>
+            <p className="mt-3">
+              <Link href={returnTo} className="ui-link-tertiary text-sm font-medium">
+                ← Voltar
+              </Link>
+            </p>
+          </header>
 
-      {loading ? (
-        <p className="text-sm text-muted">Carregando...</p>
-      ) : id && !initialPerson ? (
-        <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm text-text">
-          Pessoa não encontrada.
+          <div className="ui-stack-lg mt-8">
+            {loading ? (
+              <p className="text-sm text-muted">Carregando...</p>
+            ) : id && !initialPerson ? (
+              <div className="ui-callout rounded-2xl border border-warning/35 bg-warning/10 px-4 py-3 text-sm text-text">
+                <p className="font-medium">Pessoa não encontrada.</p>
+                <p className="mt-1 text-muted">Confira o link ou volte à lista.</p>
+                <Link href={returnTo} className="ui-link-tertiary mt-3 inline-block text-sm font-medium">
+                  Ir para o app
+                </Link>
+              </div>
+            ) : (
+              <PersonForm initialPerson={initialPerson} onSave={handleSave} onDelete={handleDelete} />
+            )}
+          </div>
         </div>
-      ) : (
-        <PersonForm initialPerson={initialPerson} onSave={handleSave} onDelete={handleDelete} />
-      )}
+      </section>
     </div>
   );
 }
 
 export default function PersonPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-muted">Carregando...</p>}>
+    <Suspense
+      fallback={
+        <div className="ui-container" data-page-canonical="person">
+          <section className="ui-section">
+            <div className="ui-panel mx-auto w-full max-w-2xl p-8">
+              <p className="text-sm text-muted">Carregando...</p>
+            </div>
+          </section>
+        </div>
+      }
+    >
       <PersonPageContent />
     </Suspense>
   );

@@ -124,7 +124,7 @@ export function AddBirthdayEntryModal({
               Importar CSV
             </h2>
             <div className="mt-4">
-              <ImportCsv onImport={handleCsvImport} />
+              <ImportCsv embedded onImport={handleCsvImport} />
             </div>
           </>
         )}

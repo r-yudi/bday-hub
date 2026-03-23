@@ -230,9 +230,9 @@
 
 ---
 
-## Light-only (pre-launch)
+## Tema (claro / escuro / sistema)
 
-O app está em **light-only**: dark mode desabilitado em runtime. A classe `.dark` não é aplicada no `<html>`. Implementação em `lib/theme.ts` e `components/ThemeProvider.tsx`; TopNav sem seletor de tema. Detalhes em `docs/THEME.md`. Tokens `.dark` permanecem no CSS mas não são usados.
+Dark mode está **habilitado em runtime** (classe `.dark` no `<html>` quando o tema resolvido é escuro). Ver `docs/THEME.md`, `lib/theme.ts`, `components/ThemeProvider.tsx` e controle no `TopNav`.
 
 ---
 

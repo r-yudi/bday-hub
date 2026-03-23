@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addDaysToDateKey, getDateKey } from "@/lib/timezone";
+import { addDaysToDateKey, FALLBACK_TZ, getDateKey } from "@/lib/timezone";
 
 test("getDateKey returns YYYY-MM-DD for America/Sao_Paulo", () => {
   const date = new Date("2026-06-15T12:00:00Z");
@@ -32,11 +32,12 @@ test("getDateKey handles midnight boundary", () => {
   assert.equal(result, "2025-12-31");
 });
 
-test("getDateKey falls back to America/Sao_Paulo on invalid timezone", () => {
+test("getDateKey falls back to FALLBACK_TZ on invalid timezone", () => {
   const date = new Date("2026-06-15T12:00:00Z");
   const result = getDateKey(date, "Invalid/Zone");
-  const expected = getDateKey(date, "America/Sao_Paulo");
+  const expected = getDateKey(date, FALLBACK_TZ);
   assert.equal(result, expected);
+  assert.equal(FALLBACK_TZ, "America/Sao_Paulo");
 });
 
 test("getDateKey works with UTC", () => {

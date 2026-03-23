@@ -9,9 +9,11 @@ export default function ManagePage() {
     router.replace("/people");
   }, [router]);
   return (
-    <div className="ui-container space-y-6">
-      <section className="ui-section ui-panel-soft rounded-2xl border p-8">
-        <p className="text-sm text-muted">Redirecionando para Pessoas...</p>
+    <div className="ui-container" data-page-canonical="manage">
+      <section className="ui-section">
+        <div className="ui-panel mx-auto w-full max-w-md p-8 text-center">
+          <p className="text-sm text-muted">Redirecionando para Pessoas…</p>
+        </div>
       </section>
     </div>
   );

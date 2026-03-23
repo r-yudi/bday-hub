@@ -34,7 +34,7 @@
   - birthdays sincronizados com Supabase quando usuário está logado
   - fallback local quando não logado
 - UX:
-  - light-only (pre-launch); ver [docs/THEME.md](docs/THEME.md)
+  - tema claro / escuro / sistema; ver [docs/THEME.md](docs/THEME.md)
   - onboarding leve e toasts; ordem do wizard: passo 1 Login → passo 2 Adicionar aniversários → passo 3 Alertas (notificação) → passo 4 Dicas (pedido de notificação só após valor percebido). No passo 2: CTA "Adicionar pessoa" e "Colar vários de uma vez" (abre modal na view quick); modal de adição é o ponto único de criação a partir de /today (menu: Adicionar pessoa, Colar vários, Importar CSV). Banner "Complete sua lista" (X de 5) preserva `returnTo` no link para /person.
   - banner PWA contextual
   - links de privacidade/termos no footer interno
@@ -48,7 +48,7 @@
 - Design System:
   - tokens em `app/styles/tokens.css`
   - utilitários globais `ui-*` em `app/globals.css`
-  - tema **light-only (pre-launch):** aplicado em `lib/theme.ts`, `components/ThemeProvider.tsx`; TopNav sem seletor de tema. Ver [docs/THEME.md](docs/THEME.md)
+  - tema **claro / escuro / sistema:** `lib/theme.ts`, `components/ThemeProvider.tsx`, controle em `components/TopNav.tsx`. Ver [docs/THEME.md](docs/THEME.md)
 - Persistência local: IndexedDB (via `idb`) com fallback localStorage
 - PWA: `next-pwa`
 - Deploy: Vercel
@@ -273,13 +273,13 @@ Composição via classes `ui-*` em `app/globals.css`. Tabela **Utility → Uso r
 - Comandos: `npm run build`, `npm test`, `npm run test:e2e`.
 - Smoke: `npx playwright test e2e/smoke.spec.ts`.
 - Screenshots (polish): `npx playwright test e2e/screenshots-polish.spec.ts`.
-- Contrato visual (referência): [docs/visual-contract.md](docs/visual-contract.md) — não citar dark como ativo (app é light-only).
+- Contrato visual (referência): [docs/visual-contract.md](docs/visual-contract.md) — light e dark via tokens.
 
 ### Referências de UI
 - [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — contrato completo, tokens, utilitários, páginas migradas
 - [docs/PRODUCT_UI_PHILOSOPHY.md](docs/PRODUCT_UI_PHILOSOPHY.md) — filosofia e guardrails
 - [docs/REBRAND_LANDING_FIRST_REPORT.md](docs/REBRAND_LANDING_FIRST_REPORT.md) — section layout, identity diff
-- [docs/THEME.md](docs/THEME.md) — light-only
+- [docs/THEME.md](docs/THEME.md) — claro / escuro / sistema
 
 ## 10) Limitações / próximos focos (vNext)
 - Revogação completa de links compartilhados com UX de gestão

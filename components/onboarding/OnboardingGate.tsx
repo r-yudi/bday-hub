@@ -145,10 +145,7 @@ export function OnboardingGate({ peopleCount, mounted, onOpenAddModal }: Onboard
             Tudo pronto 🎉
           </h2>
           <p className="mt-2 text-sm text-muted">
-            Quando alguém da sua lista fizer aniversário, o Lembra vai te avisar no horário escolhido.
-          </p>
-          <p className="mt-2 text-sm text-muted">
-            Quando chegar o próximo aniversário da sua lista, o Lembra te avisa no horário escolhido.
+            No dia de cada aniversário da sua lista, o Lembra te avisa no horário que você configurou nos alertas.
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <Link
@@ -203,7 +200,7 @@ export function OnboardingGate({ peopleCount, mounted, onOpenAddModal }: Onboard
               <Link
                 ref={primaryActionRef as RefObject<HTMLAnchorElement>}
                 href="/login?returnTo=%2Ftoday"
-                className="btn-primary-brand ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+                className="ui-cta-primary inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
               >
                 Entrar com Google
               </Link>

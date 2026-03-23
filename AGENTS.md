@@ -68,7 +68,7 @@
 - Login Google + sessão persistente (Supabase)
 - Sync multi-device de birthdays quando logado
 - Categorias predefinidas + custom (guest + Supabase `user_categories`)
-- Dark mode (`Claro/Escuro/Sistema`)
+- Dark mode (`Claro` / `Escuro` / `Sistema` em TopNav + `user_settings.theme` quando logado)
 - Footer com links `/privacy` e `/terms`
 
 ## Segurança e dados (pontos sensíveis)
@@ -112,14 +112,14 @@ Use os playbooks em `playbooks/` para acelerar entregas com consistência, sem m
 - Produto: `playbooks/product-skill.md`
   - decidir escopo, fora de escopo, hipótese, critérios de aceite e atualização de `PRD.md`/`SPEC.md`
 - Design: `playbooks/design-skill.md`
-  - evoluir UI com contrato visual (`ui-*`, tokens, tema light-only, acessibilidade)
+  - evoluir UI com contrato visual (`ui-*`, tokens, tema claro/escuro/sistema, acessibilidade)
 - Desenvolvimento: `playbooks/dev-skill.md`
   - implementar rápido com segurança (`scaffold -> wired -> polish -> harden`)
 
 ### Fonte única do design system
 - `docs/DESIGN_SYSTEM.md` (canônico; raiz `DESIGN_SYSTEM.md` aponta para este)
 - `docs/visual-contract.md`
-- `docs/THEME.md` (light-only)
+- `docs/THEME.md` (claro / escuro / sistema)
 - `app/styles/tokens.css`
 - `app/globals.css`
 

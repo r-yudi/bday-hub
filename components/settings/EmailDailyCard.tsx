@@ -222,7 +222,7 @@ export function EmailDailyCard({ variant = "default" }: EmailDailyCardProps) {
               disabled={saving}
               className={[
                 "inline-flex h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium focus-visible:outline-none",
-                emailSettings?.emailEnabled ? "ui-cta-secondary border" : "btn-primary-brand ui-cta-primary bg-accent text-white"
+                emailSettings?.emailEnabled ? "ui-cta-secondary border" : "ui-cta-primary bg-accent text-white"
               ].join(" ")}
             >
               {saving ? "Salvando..." : emailSettings?.emailEnabled ? "Desativar email diário" : "Ativar email diário"}

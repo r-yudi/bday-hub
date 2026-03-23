@@ -1,7 +1,6 @@
 :root {
   color-scheme: light;
-  /* dark disabled pre-launch; .dark class is never applied */
-  /* cream/paper (landing-first) */
+  /* cream/paper (landing-first); `.dark` on `<html>` switches to dark tokens at runtime */
   --bg: 40 33% 98%;
   --surface: 40 35% 99%;
   --surface-2: 38 28% 96%;
@@ -58,9 +57,10 @@
 .dark {
   color-scheme: dark;
 
-  --bg: 22 18% 9%;
-  --surface: 24 16% 12%;
-  --surface-2: 26 14% 18%;
+  /* Near-black base, warm elevated surfaces (launch dark) */
+  --bg: 20 16% 8%;
+  --surface: 24 15% 11%;
+  --surface-2: 26 13% 16%;
   --text: 40 28% 96%;
   --muted: 32 18% 80%;
   --border: 24 12% 32%;
@@ -77,11 +77,11 @@
 
   --ring: var(--primary);
 
-  --ui-bg: 22 18% 9%;
-  --ui-surface: 24 16% 12%;
-  --ui-surface-2: 26 14% 18%;
-  --ui-surface-elevated: 26 14% 20%;
-  --ui-surface-overlay: 28 12% 24%;
+  --ui-bg: var(--bg);
+  --ui-surface: var(--surface);
+  --ui-surface-2: var(--surface-2);
+  --ui-surface-elevated: 26 14% 19%;
+  --ui-surface-overlay: 28 12% 22%;
   --ui-border: 24 12% 32%;
   --ui-border-subtle: 24 10% 30%;
   --ui-border-strong: 22 8% 42%;

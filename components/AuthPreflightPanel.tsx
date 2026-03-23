@@ -14,7 +14,7 @@ export function AuthPreflightPanel() {
     return (
       <section className="ui-prose-panel p-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Auth redirect preflight</h2>
-        <p className="mt-2 text-sm text-muted">Carregando… (disponível apenas no client.)</p>
+        <p className="mt-2 text-sm text-muted">Carregando... (disponível apenas no client.)</p>
       </section>
     );
   }

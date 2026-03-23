@@ -1,31 +1,11 @@
 import Link from "next/link";
+import { LandingNav } from "@/components/landing/LandingNav";
 import { LandingMotion } from "./LandingMotion";
 
 export function Landing() {
   return (
     <LandingMotion>
-      <nav>
-        <div className="nav-logo">
-          <span className="topnav-brand-dot" aria-hidden />
-          <span className="topnav-brand-title">Lembra.</span>
-        </div>
-        <ul className="nav-links">
-          <li>
-            <Link href="#why">Por que usar</Link>
-          </li>
-          <li>
-            <Link href="#reminder">Como funciona</Link>
-          </li>
-          <li>
-            <Link href="#trust">Privacidade</Link>
-          </li>
-          <li>
-            <Link href="/today?onboarding=1" className="nav-cta">
-              Começar grátis
-            </Link>
-          </li>
-        </ul>
-      </nav>
+      <LandingNav />
 
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <div className="hero">
@@ -38,8 +18,7 @@ export function Landing() {
               Nunca esqueça um <em>aniversário</em> importante novamente
             </h1>
             <p className="hero-sub">
-              Lembra é o jeito mais simples de acompanhar aniversários, lembrar
-              na hora certa e enviar uma mensagem em segundos.
+              Lista calma, lembretes no ritmo que você escolhe e mensagem pronta em um toque — no celular ou no computador, com ou sem conta.
             </p>
             <div className="hero-pills">
               <span className="pill">Sem planilhas</span>
@@ -148,61 +127,49 @@ export function Landing() {
                     <div className="phone-title">Aniversários 🎂</div>
                   </div>
 
-                  <div className="today-section">
-                    <div className="section-label">Hoje</div>
-                    <div className="birthday-card today">
-                      <div
-                        className="bday-avatar"
-                        style={{ background: "#FFF0E8" }}
-                      >
-                        🎉
-                      </div>
-                      <div className="bday-info">
-                        <div className="bday-name">Ana Souza</div>
-                        <div className="bday-meta">Faz 28 anos hoje</div>
-                      </div>
-                      <button type="button" className="bday-action">
-                        Copiar
-                      </button>
-                    </div>
-                    <div className="birthday-card today">
-                      <div
-                        className="bday-avatar"
-                        style={{ background: "#FFF8E8" }}
-                      >
-                        🥳
-                      </div>
-                      <div className="bday-info">
-                        <div className="bday-name">Lucas Melo</div>
-                        <div className="bday-meta">Faz 32 anos hoje</div>
-                      </div>
-                      <button
-                        type="button"
-                        className="bday-action"
-                        style={{ background: "#F0F0F0", color: "#1A1410" }}
-                      >
-                        Zap
-                      </button>
-                    </div>
-                  </div>
+                  <div className="phone-mock-sheet">
+                    <div className="phone-mock-eyebrow">Hoje</div>
+                    <ul className="phone-mock-list" aria-hidden>
+                      <li className="phone-mock-row">
+                        <span className="phone-mock-emoji">🎉</span>
+                        <div className="phone-mock-row-main">
+                          <span className="phone-mock-name">Ana Souza</span>
+                          <span className="phone-mock-meta">Aniversário hoje</span>
+                        </div>
+                        <button type="button" className="phone-mock-cta">
+                          Copiar msg
+                        </button>
+                      </li>
+                      <li className="phone-mock-row">
+                        <span className="phone-mock-emoji">🥳</span>
+                        <div className="phone-mock-row-main">
+                          <span className="phone-mock-name">Lucas Melo</span>
+                          <span className="phone-mock-meta">Aniversário hoje</span>
+                        </div>
+                        <button type="button" className="phone-mock-cta phone-mock-cta--quiet">
+                          Copiar msg
+                        </button>
+                      </li>
+                    </ul>
 
-                  <div className="phone-upcoming">
-                    <div className="section-label">Em breve</div>
-                    <div className="upcoming-item">
-                      <div className="upcoming-days">3d</div>
-                      <div className="upcoming-name">Marina Castro</div>
-                      <div className="upcoming-date">7 mar</div>
-                    </div>
-                    <div className="upcoming-item">
-                      <div className="upcoming-days">9d</div>
-                      <div className="upcoming-name">Pedro Lima</div>
-                      <div className="upcoming-date">13 mar</div>
-                    </div>
-                    <div className="upcoming-item">
-                      <div className="upcoming-days">14d</div>
-                      <div className="upcoming-name">Carla Dias</div>
-                      <div className="upcoming-date">18 mar</div>
-                    </div>
+                    <div className="phone-mock-eyebrow phone-mock-eyebrow--spaced">Em breve</div>
+                    <ul className="phone-mock-list phone-mock-list--compact" aria-hidden>
+                      <li className="phone-mock-row phone-mock-row--compact">
+                        <span className="phone-mock-emoji phone-mock-emoji--sm">🌸</span>
+                        <span className="phone-mock-name">Marina Castro</span>
+                        <span className="phone-mock-soon">em 3 dias</span>
+                      </li>
+                      <li className="phone-mock-row phone-mock-row--compact">
+                        <span className="phone-mock-emoji phone-mock-emoji--sm">⭐</span>
+                        <span className="phone-mock-name">Pedro Lima</span>
+                        <span className="phone-mock-soon">em 9 dias</span>
+                      </li>
+                      <li className="phone-mock-row phone-mock-row--compact">
+                        <span className="phone-mock-emoji phone-mock-emoji--sm">🎂</span>
+                        <span className="phone-mock-name">Carla Dias</span>
+                        <span className="phone-mock-soon">em 14 dias</span>
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -359,12 +326,8 @@ export function Landing() {
                         🎈
                       </div>
                       <div className="dash-name">Lucas Melo</div>
-                      <button
-                        type="button"
-                        className="dash-btn"
-                        style={{ background: "#1C6E3A" }}
-                      >
-                        Abrir Zap
+                      <button type="button" className="dash-btn dash-btn--secondary">
+                        Copiar msg
                       </button>
                     </div>
                   </div>

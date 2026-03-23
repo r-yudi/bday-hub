@@ -145,7 +145,7 @@ export function NotificationCard({ variant = "default" }: NotificationCardProps)
         type="button"
         onClick={() => void handleToggle()}
         disabled={!mounted || !support.supported || support.permission === "denied" || saving}
-        className="btn-primary-brand ui-cta-primary mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted focus-visible:outline-none"
+        className="ui-cta-primary mt-3 rounded-xl bg-accent px-3 py-2 text-sm text-white hover:bg-accentHover disabled:cursor-not-allowed disabled:bg-surface2 disabled:text-muted focus-visible:outline-none"
       >
         {saving ? "Salvando..." : ctaLabel}
       </button>

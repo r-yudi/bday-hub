@@ -13,7 +13,7 @@ Propósito: definir guardrails para manter a UI do Lembra. consistente com o reb
 - **Empty states como hero:** Empty = `ui-empty-hero` com ícone, título, subtítulo e ações (não só texto solto).
 - **Feature blocks em vez de sidebars:** Conteúdo lateral em blocos editoriais (`ui-feature-block`), não widgets soltos em coluna separada.
 - **Listas com separadores leves:** `ui-list` / `ui-list-item`; hover leve; evitar cards dentro de cards.
-- **Light-only (pre-launch):** Apenas tema claro ativo; sem toggle de tema. Ver [docs/THEME.md](docs/THEME.md).
+- **Tema:** Claro, escuro ou sistema; preferir tokens e `ui-*` em ambos. Ver [docs/THEME.md](docs/THEME.md).
 
 ## Golden Rules (5)
 
@@ -34,5 +34,5 @@ Propósito: definir guardrails para manter a UI do Lembra. consistente com o reb
 ## Referências
 
 - [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — contrato completo, tokens, utilitários, Do/Don't
-- [docs/THEME.md](docs/THEME.md) — light-only
+- [docs/THEME.md](docs/THEME.md) — claro / escuro / sistema
 - [docs/REBRAND_LANDING_FIRST_REPORT.md](docs/REBRAND_LANDING_FIRST_REPORT.md) — section layout, identity diff
