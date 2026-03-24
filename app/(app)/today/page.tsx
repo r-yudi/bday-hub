@@ -185,14 +185,14 @@ function TodayPageContent() {
               ) : (
                 <>
                   <section
-                    className="today-page-hoje-block ui-panel-soft rounded-2xl border p-5 sm:p-6"
-                    aria-labelledby="today-section-title"
+                    className="today-page-birthday-sheet ui-panel-soft rounded-2xl border p-3 sm:p-5"
+                    aria-labelledby="today-section-title upcoming-section-title"
                   >
                     <h2 id="today-section-title" className="ui-feature-title text-text">
                       Hoje
                     </h2>
                     {todayPeople.length === 0 ? (
-                      <div className="ui-empty-hero mt-4">
+                      <div className="ui-empty-hero mt-3 sm:mt-4">
                         <div className="ui-empty-icon" aria-hidden>
                           🎈
                         </div>
@@ -214,7 +214,7 @@ function TodayPageContent() {
                         </p>
                       </div>
                     ) : (
-                      <ul className="m-0 mt-3 list-none divide-y divide-border/20 p-0 dark:divide-white/[0.08] sm:mt-4">
+                      <ul className="m-0 mt-2 list-none divide-y divide-border/20 p-0 dark:divide-white/[0.08] sm:mt-3">
                         {todayPeople.map((person, index) => (
                           <TodayListItem
                             key={person.id}
@@ -225,27 +225,28 @@ function TodayPageContent() {
                         ))}
                       </ul>
                     )}
-                  </section>
 
-                  <section className="today-page-upcoming-region" aria-labelledby="upcoming-section-title">
-                    <h2 id="upcoming-section-title" className="ui-feature-title text-text">
+                    <h2
+                      id="upcoming-section-title"
+                      className="ui-feature-title today-page-em-breve-title mt-5 text-text sm:mt-6"
+                    >
                       Em breve
                     </h2>
                     {upcomingPeople.length === 0 ? (
-                      <div className="mt-4">
+                      <div className="mt-3">
                         <p className="text-sm text-muted">
                           Nada nos próximos dias. Adicione pessoas para o Lembra te ajudar.
                         </p>
                         <button
                           type="button"
                           onClick={() => setShowAddModal(true)}
-                          className="ui-cta-secondary ui-focus-surface mt-4 inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
+                          className="ui-cta-secondary ui-focus-surface mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium focus-visible:outline-none"
                         >
                           Adicionar aniversário
                         </button>
                       </div>
                     ) : (
-                      <div className="mt-4">
+                      <div className="mt-2 sm:mt-3">
                         <TodayUpcomingList people={upcomingPeople} />
                       </div>
                     )}

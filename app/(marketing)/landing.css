@@ -909,6 +909,15 @@
   --border-dark: rgba(255, 255, 255, 0.12);
 }
 
+/* Privacidade (#trust): fundo escuro no dark (light mode mantém #efe9de em .landing .trust). */
+.dark .landing .trust {
+  background: var(--cream);
+}
+
+.dark .landing .trust .check-item:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.32);
+}
+
 /* Texto claro em blocos escuros: --cream no dark landing é o fundo da página, não “papel claro”. */
 .dark .landing .reminder h2,
 .dark .landing .cta-section h2 {

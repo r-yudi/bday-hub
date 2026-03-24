@@ -95,14 +95,14 @@ export function TodayListItem({ person, onToast, darParabensTone = "emphasis" }:
 
   const darParabensClass =
     darParabensTone === "quiet"
-      ? "ui-cta-secondary ui-focus-surface inline-flex !h-9 shrink-0 items-center justify-center self-center !rounded-lg !px-2.5 !py-2 !text-xs !font-semibold leading-snug whitespace-nowrap focus-visible:outline-none"
-      : "ui-cta-primary ui-focus-surface inline-flex !h-9 shrink-0 items-center justify-center self-center !rounded-lg !px-2.5 !py-2 !text-xs !font-semibold leading-snug whitespace-nowrap shadow-sm focus-visible:outline-none dark:!shadow-md dark:ring-1 dark:ring-primary/25";
+      ? "ui-cta-secondary ui-focus-surface inline-flex !h-8 shrink-0 items-center justify-center self-center !rounded-lg !px-2 !py-1.5 !text-[11px] !font-semibold leading-snug whitespace-nowrap focus-visible:outline-none sm:!h-9 sm:!px-2.5 sm:!py-2 sm:!text-xs"
+      : "ui-cta-primary ui-focus-surface inline-flex !h-8 shrink-0 items-center justify-center self-center !rounded-lg !px-2 !py-1.5 !text-[11px] !font-semibold leading-snug whitespace-nowrap shadow-sm focus-visible:outline-none dark:!shadow-md dark:ring-1 dark:ring-primary/25 sm:!h-9 sm:!px-2.5 sm:!py-2 sm:!text-xs";
 
   return (
     <>
-      <li className="list-none py-2.5 sm:py-3">
-        {/* Single row like landing phone mock: emoji | name+meta | CTA (no nested card chrome). */}
-        <div className="flex flex-row items-center gap-2.5">
+      <li className="list-none py-2 sm:py-2.5">
+        {/* Landing phone mock: one row only — emoji | name + meta | Dar parabéns (no list extras). */}
+        <div className="flex flex-row items-center gap-2 sm:gap-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[15px] leading-none" aria-hidden>
             {emoji}
           </span>
@@ -110,18 +110,12 @@ export function TodayListItem({ person, onToast, darParabensTone = "emphasis" }:
             <h3 className="text-[13px] font-semibold leading-tight tracking-tight text-text sm:text-sm">
               <Link
                 href={personEditHref}
-                className="ui-link-tertiary line-clamp-2 block min-w-0 rounded-sm font-semibold text-text decoration-transparent hover:text-text hover:decoration-inherit focus-visible:outline-none dark:text-text dark:hover:text-text [overflow-wrap:anywhere]"
+                className="line-clamp-2 block min-w-0 rounded-sm font-semibold text-text no-underline decoration-transparent [overflow-wrap:anywhere] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ui-focus-ring)/0.38)] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--ui-surface))] dark:focus-visible:ring-[hsl(var(--ui-focus-ring)/0.45)] dark:focus-visible:ring-offset-[hsl(var(--ui-surface))]"
               >
                 {displayName}
               </Link>
             </h3>
             <p className="mt-0.5 text-[10px] leading-snug text-muted dark:text-text/78 sm:text-[11px]">Aniversário hoje</p>
-            <Link
-              href={personEditHref}
-              className="ui-link-tertiary mt-0.5 inline-block text-[10px] font-medium leading-snug focus-visible:outline-none dark:text-text/88 dark:hover:text-text sm:text-[11px]"
-            >
-              Editar
-            </Link>
           </div>
           <button
             ref={congratsTriggerRef}
@@ -134,15 +128,6 @@ export function TodayListItem({ person, onToast, darParabensTone = "emphasis" }:
           >
             Dar parabéns
           </button>
-        </div>
-
-        <div className="mt-2 min-w-0 pl-10 sm:pl-11">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted dark:text-text/68">
-            Mensagem sugerida
-          </p>
-          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted dark:text-text/82">
-            {suggestedMessage}
-          </p>
         </div>
       </li>
 

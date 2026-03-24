@@ -1542,22 +1542,18 @@
       0 0 0 4px hsl(var(--ui-focus-ring) / 0.35);
   }
 
-  /* /today: stronger hierarchy in dark (Hoje vs Em breve) */
-  .dark .today-page-hoje-block {
-    border-color: hsl(var(--ui-border-strong) / 0.42);
+  /* /today: one sheet (Hoje + Em breve), closer to landing phone mock */
+  .dark .today-page-birthday-sheet {
+    border-color: hsl(var(--ui-border-strong) / 0.38);
     background: linear-gradient(
       180deg,
-      hsl(var(--ui-surface-elevated) / 0.75),
-      hsl(var(--ui-surface) / 0.5)
+      hsl(var(--ui-surface-elevated) / 0.65),
+      hsl(var(--ui-surface) / 0.45)
     );
-    box-shadow: 0 0 0 1px hsl(var(--accent) / 0.14);
+    box-shadow: 0 0 0 1px hsl(var(--accent) / 0.12);
   }
 
-  .dark .today-page-upcoming-region {
-    opacity: 0.94;
-  }
-
-  .dark .today-page-upcoming-region .ui-feature-title {
+  .dark .today-page-em-breve-title {
     color: hsl(var(--ui-muted));
   }
 
