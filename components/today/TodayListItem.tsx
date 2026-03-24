@@ -22,9 +22,11 @@ function isSafeHttpUrl(raw: string | undefined): boolean {
 type TodayListItemProps = {
   person: BirthdayPerson;
   onToast?: (toast: OnboardingToast) => void;
+  /** Matches landing phone mock: first row emphasis CTA, following rows quieter. */
+  darParabensTone?: "emphasis" | "quiet";
 };
 
-export function TodayListItem({ person, onToast }: TodayListItemProps) {
+export function TodayListItem({ person, onToast, darParabensTone = "emphasis" }: TodayListItemProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const congratsTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -91,61 +93,57 @@ export function TodayListItem({ person, onToast }: TodayListItemProps) {
     return () => window.clearTimeout(t);
   }, [sheetOpen]);
 
+  const darParabensClass =
+    darParabensTone === "quiet"
+      ? "ui-cta-secondary ui-focus-surface inline-flex !h-9 shrink-0 items-center justify-center self-center !rounded-lg !px-2.5 !py-2 !text-xs !font-semibold leading-snug whitespace-nowrap focus-visible:outline-none"
+      : "ui-cta-primary ui-focus-surface inline-flex !h-9 shrink-0 items-center justify-center self-center !rounded-lg !px-2.5 !py-2 !text-xs !font-semibold leading-snug whitespace-nowrap shadow-sm focus-visible:outline-none dark:!shadow-md dark:ring-1 dark:ring-primary/25";
+
   return (
     <>
-      <li className="mt-3 list-none first:mt-0">
-        <article className="ui-panel-soft rounded-2xl border border-border p-3 sm:p-3 dark:border-border/90">
-          {/* Row mirrors landing; stacks below 400px to avoid squeeze/overlap on narrow viewports */}
-          <div className="flex flex-col gap-2 min-[400px]:flex-row min-[400px]:items-center min-[400px]:gap-2.5">
-            <div className="flex min-w-0 flex-1 items-center gap-2.5">
-              <div
-                className="ui-panel-soft flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-sm leading-none dark:border-border/80"
-                aria-hidden
-              >
-                {emoji}
-              </div>
-              <div className="min-w-0 flex-1 overflow-hidden">
-              <h3 className="text-sm font-semibold leading-tight tracking-tight text-text">
-                <Link
-                  href={personEditHref}
-                  className="ui-link-tertiary ui-focus-surface line-clamp-2 block min-w-0 rounded-sm font-semibold text-text decoration-transparent hover:text-text hover:decoration-inherit focus-visible:outline-none dark:text-text dark:hover:text-text [overflow-wrap:anywhere]"
-                >
-                  {displayName}
-                </Link>
-              </h3>
-              <p className="mt-0.5 text-[11px] leading-snug text-muted dark:text-text/78 sm:text-xs">
-                faz aniversário hoje
-              </p>
+      <li className="list-none py-2.5 sm:py-3">
+        {/* Single row like landing phone mock: emoji | name+meta | CTA (no nested card chrome). */}
+        <div className="flex flex-row items-center gap-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[15px] leading-none" aria-hidden>
+            {emoji}
+          </span>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <h3 className="text-[13px] font-semibold leading-tight tracking-tight text-text sm:text-sm">
               <Link
                 href={personEditHref}
-                className="ui-link-tertiary ui-focus-surface mt-0.5 inline-block text-[11px] font-medium leading-snug focus-visible:outline-none dark:text-text/88 dark:hover:text-text sm:text-xs"
+                className="ui-link-tertiary line-clamp-2 block min-w-0 rounded-sm font-semibold text-text decoration-transparent hover:text-text hover:decoration-inherit focus-visible:outline-none dark:text-text dark:hover:text-text [overflow-wrap:anywhere]"
               >
-                Editar
+                {displayName}
               </Link>
-              </div>
-            </div>
-            <button
-              ref={congratsTriggerRef}
-              type="button"
-              onClick={() => setSheetOpen(true)}
-              aria-haspopup="dialog"
-              aria-expanded={sheetOpen}
-              aria-controls={sheetOpen ? congratsSheetId : undefined}
-              className="ui-cta-primary ui-focus-surface inline-flex !h-9 w-full min-[400px]:w-auto shrink-0 items-center justify-center self-stretch min-[400px]:self-center !rounded-lg !px-2.5 !py-2 !text-xs !font-semibold leading-snug whitespace-nowrap shadow-sm focus-visible:outline-none dark:!shadow-md dark:ring-1 dark:ring-primary/25"
+            </h3>
+            <p className="mt-0.5 text-[10px] leading-snug text-muted dark:text-text/78 sm:text-[11px]">Aniversário hoje</p>
+            <Link
+              href={personEditHref}
+              className="ui-link-tertiary mt-0.5 inline-block text-[10px] font-medium leading-snug focus-visible:outline-none dark:text-text/88 dark:hover:text-text sm:text-[11px]"
             >
-              Dar parabéns
-            </button>
+              Editar
+            </Link>
           </div>
+          <button
+            ref={congratsTriggerRef}
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={sheetOpen}
+            aria-controls={sheetOpen ? congratsSheetId : undefined}
+            className={darParabensClass}
+          >
+            Dar parabéns
+          </button>
+        </div>
 
-          <div className="mt-2 min-w-0 pl-0 min-[400px]:pl-[42px]">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted dark:text-text/68">
-              Mensagem sugerida
-            </p>
-            <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted dark:text-text/82">
-              {suggestedMessage}
-            </p>
-          </div>
-        </article>
+        <div className="mt-2 min-w-0 pl-10 sm:pl-11">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted dark:text-text/68">
+            Mensagem sugerida
+          </p>
+          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted dark:text-text/82">
+            {suggestedMessage}
+          </p>
+        </div>
       </li>
 
       {sheetOpen && (

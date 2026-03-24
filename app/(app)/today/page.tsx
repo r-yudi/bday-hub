@@ -214,9 +214,14 @@ function TodayPageContent() {
                         </p>
                       </div>
                     ) : (
-                      <ul className="ui-list m-0 mt-4 list-none p-0">
-                        {todayPeople.map((person) => (
-                          <TodayListItem key={person.id} person={person} onToast={setToast} />
+                      <ul className="m-0 mt-3 list-none divide-y divide-border/20 p-0 dark:divide-white/[0.08] sm:mt-4">
+                        {todayPeople.map((person, index) => (
+                          <TodayListItem
+                            key={person.id}
+                            person={person}
+                            onToast={setToast}
+                            darParabensTone={index === 0 ? "emphasis" : "quiet"}
+                          />
                         ))}
                       </ul>
                     )}
