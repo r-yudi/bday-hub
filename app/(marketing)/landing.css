@@ -293,6 +293,7 @@
 
 .landing .phone-mock-row--compact {
   padding: 8px 4px;
+  gap: 8px;
 }
 
 .landing .phone-mock-emoji {
@@ -329,34 +330,62 @@
   color: var(--ink-soft);
 }
 
-.landing .phone-mock-soon {
+.landing .phone-mock-name--flex {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.landing .phone-mock-date {
+  flex-shrink: 0;
   font-size: 10px;
   font-weight: 500;
   color: var(--ink-soft);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing .phone-mock-days-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(26, 20, 16, 0.12);
+  background: rgba(26, 20, 16, 0.04);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .landing .phone-mock-cta {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: 8px;
   background: var(--ink);
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
-  padding: 6px 10px;
+  padding: 6px 7px;
+  line-height: 1.15;
   cursor: default;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .landing .phone-mock-cta--quiet {
   background: rgba(26, 20, 16, 0.08);
   color: var(--ink);
-}
-
-.landing .phone-mock-list--compact .phone-mock-name {
-  font-weight: 500;
-  font-size: 12px;
 }
 
 /* Floating confetti elements */
@@ -582,19 +611,19 @@
 }
 
 .landing .dash-today {
-  background: rgba(232, 93, 38, 0.12);
-  border: 1px solid rgba(232, 93, 38, 0.25);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-dark);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
 }
 
 .landing .dash-today-label {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--accent-soft);
+  letter-spacing: 0.12em;
+  color: rgba(250, 248, 243, 0.45);
   margin-bottom: 10px;
 }
 
@@ -609,42 +638,78 @@
   margin-bottom: 0;
 }
 
-.landing .dash-avatar-sm {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+.landing .dash-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.landing .dash-mock-emoji {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.landing .dash-mock-emoji--sm {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
 }
 
 .landing .dash-name {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--cream);
-  flex: 1;
+  line-height: 1.2;
+}
+
+.landing .dash-meta {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgba(250, 248, 243, 0.45);
 }
 
 .landing .dash-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--accent);
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  cursor: default;
 }
 
 .landing .dash-btn--secondary {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   color: rgba(250, 248, 243, 0.92);
 }
 
+.landing .dash-list-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(250, 248, 243, 0.45);
+  margin-bottom: 6px;
+}
+
 .landing .dash-list {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .landing .dash-list-item {
@@ -664,45 +729,25 @@
   font-weight: 500;
   color: rgba(250, 248, 243, 0.82);
   flex: 1;
+  min-width: 0;
 }
 
 .landing .dash-list-date {
   font-size: 11px;
-  color: rgba(250, 248, 243, 0.35);
+  color: rgba(250, 248, 243, 0.45);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .landing .dash-days-badge {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 2px 7px;
+  font-size: 10px;
   font-weight: 600;
-  color: rgba(250, 248, 243, 0.5);
-}
-
-.landing .email-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-dark);
-  border-radius: 10px;
-  padding: 12px 14px;
-}
-
-.landing .email-icon-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.landing .email-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(250, 248, 243, 0.78);
-}
-.landing .email-body {
-  font-size: 11px;
-  color: rgba(250, 248, 243, 0.48);
-  line-height: 1.5;
+  color: rgba(250, 248, 243, 0.88);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── TRUST ── */
@@ -974,6 +1019,20 @@
 .dark .landing .phone-mock-cta {
   background: #f5f2eb;
   color: #1a1816;
+}
+
+.dark .landing .phone-mock-name--flex {
+  color: rgba(245, 242, 235, 0.96);
+}
+
+.dark .landing .phone-mock-date {
+  color: rgba(245, 242, 235, 0.48);
+}
+
+.dark .landing .phone-mock-days-badge {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(245, 242, 235, 0.92);
 }
 
 /* ── LANDING HEADER (fixed nav): mobile-safe + CTA polish (scoped to .landing only) ── */

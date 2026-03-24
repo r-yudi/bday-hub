@@ -137,7 +137,7 @@ export function Landing() {
                           <span className="phone-mock-meta">Aniversário hoje</span>
                         </div>
                         <button type="button" className="phone-mock-cta">
-                          Copiar msg
+                          Dar parabéns
                         </button>
                       </li>
                       <li className="phone-mock-row">
@@ -147,7 +147,7 @@ export function Landing() {
                           <span className="phone-mock-meta">Aniversário hoje</span>
                         </div>
                         <button type="button" className="phone-mock-cta phone-mock-cta--quiet">
-                          Copiar msg
+                          Dar parabéns
                         </button>
                       </li>
                     </ul>
@@ -156,18 +156,21 @@ export function Landing() {
                     <ul className="phone-mock-list phone-mock-list--compact" aria-hidden>
                       <li className="phone-mock-row phone-mock-row--compact">
                         <span className="phone-mock-emoji phone-mock-emoji--sm">🌸</span>
-                        <span className="phone-mock-name">Marina Castro</span>
-                        <span className="phone-mock-soon">em 3 dias</span>
+                        <span className="phone-mock-name phone-mock-name--flex">Marina Castro</span>
+                        <span className="phone-mock-date">7 mar</span>
+                        <span className="phone-mock-days-badge">3d</span>
                       </li>
                       <li className="phone-mock-row phone-mock-row--compact">
                         <span className="phone-mock-emoji phone-mock-emoji--sm">⭐</span>
-                        <span className="phone-mock-name">Pedro Lima</span>
-                        <span className="phone-mock-soon">em 9 dias</span>
+                        <span className="phone-mock-name phone-mock-name--flex">Pedro Lima</span>
+                        <span className="phone-mock-date">13 mar</span>
+                        <span className="phone-mock-days-badge">9d</span>
                       </li>
                       <li className="phone-mock-row phone-mock-row--compact">
                         <span className="phone-mock-emoji phone-mock-emoji--sm">🎂</span>
-                        <span className="phone-mock-name">Carla Dias</span>
-                        <span className="phone-mock-soon">em 14 dias</span>
+                        <span className="phone-mock-name phone-mock-name--flex">Carla Dias</span>
+                        <span className="phone-mock-date">25 mar</span>
+                        <span className="phone-mock-days-badge">1d</span>
                       </li>
                     </ul>
                   </div>
@@ -305,95 +308,58 @@ export function Landing() {
                 </div>
                 <div className="dash-body">
                   <div className="dash-today">
-                    <div className="dash-today-label">🎉 Hoje</div>
+                    <div className="dash-today-label">Hoje</div>
                     <div className="dash-row">
-                      <div
-                        className="dash-avatar-sm"
-                        style={{ background: "rgba(255,100,50,0.2)" }}
-                      >
+                      <span className="dash-mock-emoji" aria-hidden>
                         🎂
+                      </span>
+                      <div className="dash-row-main">
+                        <div className="dash-name">Ana Souza</div>
+                        <div className="dash-meta">Aniversário hoje</div>
                       </div>
-                      <div className="dash-name">Ana Souza</div>
                       <button type="button" className="dash-btn">
-                        Copiar msg
+                        Dar parabéns
                       </button>
                     </div>
                     <div className="dash-row">
-                      <div
-                        className="dash-avatar-sm"
-                        style={{ background: "rgba(100,150,255,0.2)" }}
-                      >
+                      <span className="dash-mock-emoji" aria-hidden>
                         🎈
+                      </span>
+                      <div className="dash-row-main">
+                        <div className="dash-name">Lucas Melo</div>
+                        <div className="dash-meta">Aniversário hoje</div>
                       </div>
-                      <div className="dash-name">Lucas Melo</div>
                       <button type="button" className="dash-btn dash-btn--secondary">
-                        Copiar msg
+                        Dar parabéns
                       </button>
                     </div>
                   </div>
 
                   <div className="dash-list">
-                    <div
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
-                        color: "rgba(250,248,243,0.35)",
-                        marginBottom: 8,
-                      }}
-                    >
-                      Próximos
-                    </div>
+                    <div className="dash-list-section-label">Em breve</div>
                     <div className="dash-list-item">
-                      <div
-                        className="dash-avatar-sm"
-                        style={{
-                          background: "rgba(255,255,255,0.06)",
-                          fontSize: 12,
-                        }}
-                      >
+                      <span className="dash-mock-emoji dash-mock-emoji--sm" aria-hidden>
                         🌸
-                      </div>
+                      </span>
                       <div className="dash-list-name">Marina Castro</div>
                       <div className="dash-list-date">7 mar</div>
                       <div className="dash-days-badge">3d</div>
                     </div>
                     <div className="dash-list-item">
-                      <div
-                        className="dash-avatar-sm"
-                        style={{
-                          background: "rgba(255,255,255,0.06)",
-                          fontSize: 12,
-                        }}
-                      >
+                      <span className="dash-mock-emoji dash-mock-emoji--sm" aria-hidden>
                         ⭐
-                      </div>
+                      </span>
                       <div className="dash-list-name">Pedro Lima</div>
                       <div className="dash-list-date">13 mar</div>
                       <div className="dash-days-badge">9d</div>
                     </div>
-                  </div>
-
-                  <div className="email-card">
-                    <div className="email-icon-row">
-                      <svg
-                        width={12}
-                        height={12}
-                        fill="none"
-                        stroke="rgba(250,248,243,0.4)"
-                        strokeWidth={2}
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                        <polyline points="22,6 12,13 2,6" />
-                      </svg>
-                      <div className="email-title">
-                        Lembrete por e-mail — 8h00
-                      </div>
-                    </div>
-                    <div className="email-body">
-                      Hoje é aniversário de Ana e Lucas. Toque para parabenizar.
+                    <div className="dash-list-item">
+                      <span className="dash-mock-emoji dash-mock-emoji--sm" aria-hidden>
+                        🎂
+                      </span>
+                      <div className="dash-list-name">Carla Dias</div>
+                      <div className="dash-list-date">25 mar</div>
+                      <div className="dash-days-badge">1d</div>
                     </div>
                   </div>
                 </div>
