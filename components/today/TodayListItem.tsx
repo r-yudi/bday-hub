@@ -94,30 +94,35 @@ export function TodayListItem({ person, onToast }: TodayListItemProps) {
   return (
     <>
       <li className="mt-3 list-none first:mt-0">
-        <article className="ui-panel-soft rounded-xl border p-3 sm:p-4">
-          <div className="flex items-start gap-3">
-            <div
-              className="ui-panel-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-base"
-              aria-hidden
-            >
-              {emoji}
-            </div>
-            <div className="min-w-0 flex-1 pr-1">
-              <h3 className="text-base font-semibold leading-snug tracking-tight text-text">
+        <article className="ui-panel-soft rounded-2xl border border-border p-3 sm:p-3 dark:border-border/90">
+          {/* Row mirrors landing; stacks below 400px to avoid squeeze/overlap on narrow viewports */}
+          <div className="flex flex-col gap-2 min-[400px]:flex-row min-[400px]:items-center min-[400px]:gap-2.5">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+              <div
+                className="ui-panel-soft flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-sm leading-none dark:border-border/80"
+                aria-hidden
+              >
+                {emoji}
+              </div>
+              <div className="min-w-0 flex-1 overflow-hidden">
+              <h3 className="text-sm font-semibold leading-tight tracking-tight text-text">
                 <Link
                   href={personEditHref}
-                  className="ui-link-tertiary ui-focus-surface break-words rounded-sm font-semibold text-text decoration-transparent hover:decoration-inherit focus-visible:outline-none"
+                  className="ui-link-tertiary ui-focus-surface line-clamp-2 block min-w-0 rounded-sm font-semibold text-text decoration-transparent hover:text-text hover:decoration-inherit focus-visible:outline-none dark:text-text dark:hover:text-text [overflow-wrap:anywhere]"
                 >
                   {displayName}
                 </Link>
               </h3>
-              <p className="mt-0.5 text-sm text-muted">faz aniversário hoje</p>
+              <p className="mt-0.5 text-[11px] leading-snug text-muted dark:text-text/78 sm:text-xs">
+                faz aniversário hoje
+              </p>
               <Link
                 href={personEditHref}
-                className="ui-link-tertiary ui-focus-surface mt-1 inline-block text-sm font-medium focus-visible:outline-none"
+                className="ui-link-tertiary ui-focus-surface mt-0.5 inline-block text-[11px] font-medium leading-snug focus-visible:outline-none dark:text-text/88 dark:hover:text-text sm:text-xs"
               >
                 Editar
               </Link>
+              </div>
             </div>
             <button
               ref={congratsTriggerRef}
@@ -126,15 +131,19 @@ export function TodayListItem({ person, onToast }: TodayListItemProps) {
               aria-haspopup="dialog"
               aria-expanded={sheetOpen}
               aria-controls={sheetOpen ? congratsSheetId : undefined}
-              className="ui-cta-primary ui-focus-surface mt-0.5 h-10 shrink-0 whitespace-nowrap rounded-xl px-3 text-sm font-medium focus-visible:outline-none sm:px-4"
+              className="ui-cta-primary ui-focus-surface inline-flex !h-9 w-full min-[400px]:w-auto shrink-0 items-center justify-center self-stretch min-[400px]:self-center !rounded-lg !px-2.5 !py-2 !text-xs !font-semibold leading-snug whitespace-nowrap shadow-sm focus-visible:outline-none dark:!shadow-md dark:ring-1 dark:ring-primary/25"
             >
               Dar parabéns
             </button>
           </div>
 
-          <div className="mt-3 border-t border-border/20 pt-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted">Mensagem sugerida</p>
-            <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-text">{suggestedMessage}</p>
+          <div className="mt-2 min-w-0 pl-0 min-[400px]:pl-[42px]">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted dark:text-text/68">
+              Mensagem sugerida
+            </p>
+            <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted dark:text-text/82">
+              {suggestedMessage}
+            </p>
           </div>
         </article>
       </li>

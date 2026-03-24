@@ -24,7 +24,7 @@ export function SiteHeader({
 
   return (
     <header className={positionClass}>
-      <div className="topnav-inner mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-y-2">
+      <div className="topnav-inner mx-auto flex w-full min-w-0 max-w-[1200px] flex-wrap items-center justify-between gap-x-3 gap-y-2">
         {left}
         {right}
       </div>

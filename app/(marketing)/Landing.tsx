@@ -7,7 +7,7 @@ export function Landing() {
     <LandingMotion>
       <LandingNav />
 
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1200, width: "100%", margin: "0 auto", boxSizing: "border-box" }}>
         <div className="hero">
           <div className="hero-left">
             <div className="hero-tag">

@@ -204,12 +204,16 @@
   .ui-cta-primary,
   .landing-cta-premium {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: hsl(var(--primary)) !important;
     color: hsl(var(--primary-foreground)) !important;
     padding: 14px 28px;
     border-radius: 10px;
     font-size: 15px;
     font-weight: 500;
+    line-height: 1.2;
     box-shadow: none;
     transition: background 0.15s ease, transform 0.15s ease;
     will-change: transform;
@@ -250,6 +254,9 @@
   .ui-cta-secondary,
   .landing-cta-secondary {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid hsl(var(--ui-border) / 0.85) !important;
     background: hsl(var(--ui-surface)) !important;
     color: hsl(var(--ui-text)) !important;
@@ -257,6 +264,7 @@
     border-radius: 10px;
     font-size: 15px;
     font-weight: 500;
+    line-height: 1.2;
     box-shadow: none;
     transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
     will-change: transform;
@@ -1242,6 +1250,8 @@
   .topnav-shell {
     position: relative;
     z-index: 10;
+    max-width: 100%;
+    overflow-x: clip;
     border-color: hsl(var(--border) / 0.85);
     /* Slightly more opaque = less compositing shift when content scrolls under sticky/fixed bar */
     background: hsl(var(--surface) / 0.92);
@@ -1252,7 +1262,16 @@
   }
 
   .topnav-inner {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 16px 24px;
+  }
+
+  @media (max-width: 480px) {
+    .topnav-inner {
+      padding: 12px 14px;
+    }
   }
 
   @media (min-width: 901px) {
@@ -1271,6 +1290,8 @@
   .nav-header-links,
   .nav-header-end {
     display: flex;
+    min-width: 0;
+    max-width: 100%;
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
@@ -1404,6 +1425,7 @@
     position: relative;
     z-index: 1;
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     min-height: 40px;
     color: hsl(var(--text));
@@ -1476,16 +1498,17 @@
     display: inline-flex;
     min-height: 34px;
     align-items: center;
+    justify-content: center;
     border: none;
     background: transparent;
     color: hsl(var(--ui-muted));
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.01em;
-    padding: 0 9px;
+    padding: 0 8px;
     border-radius: 9999px;
     cursor: pointer;
-    line-height: 1.15;
+    line-height: 1.2;
     transition:
       background-color var(--dur-1) var(--ease),
       color var(--dur-1) var(--ease);
@@ -1565,10 +1588,10 @@
     justify-content: center;
     background: hsl(var(--primary)) !important;
     color: hsl(var(--primary-foreground)) !important;
-    padding: 10px 20px;
+    padding: 10px 16px;
     font-size: 14px;
     font-weight: 500;
-    line-height: 1.25;
+    line-height: 1.15;
     border-radius: 8px;
     box-shadow: none;
     text-decoration: none;
@@ -1605,10 +1628,10 @@
     min-height: 40px;
     align-items: center;
     justify-content: center;
-    padding: 8px 14px;
+    padding: 8px 12px;
     font-size: 14px;
     font-weight: 500;
-    line-height: 1.25;
+    line-height: 1.15;
     color: hsl(var(--ui-muted));
     text-decoration: none;
     background: transparent !important;
