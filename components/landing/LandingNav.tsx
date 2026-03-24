@@ -15,7 +15,7 @@ export function LandingNav() {
         </Link>
       }
       right={
-        <ul className="nav-header-links">
+        <ul className="nav-header-links landing-header-actions">
           <li className="nav-header-slot--landing-anchor">
             <Link href="#why" className="nav-header-link">
               Por que usar
