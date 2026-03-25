@@ -146,7 +146,7 @@ export function Landing() {
                           <span className="phone-mock-name">Lucas Melo</span>
                           <span className="phone-mock-meta">Aniversário hoje</span>
                         </div>
-                        <button type="button" className="phone-mock-cta phone-mock-cta--quiet">
+                        <button type="button" className="phone-mock-cta">
                           Dar parabéns
                         </button>
                       </li>
@@ -326,7 +326,7 @@ export function Landing() {
                         <div className="dash-name">Lucas Melo</div>
                         <div className="dash-meta">Aniversário hoje</div>
                       </div>
-                      <button type="button" className="dash-btn dash-btn--secondary">
+                      <button type="button" className="dash-btn">
                         Dar parabéns
                       </button>
                     </div>

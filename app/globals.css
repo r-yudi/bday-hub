@@ -104,16 +104,8 @@
   }
 
   .bg-celebration-dark {
-    background-image:
-      radial-gradient(circle at 14% 22%, hsl(var(--primary) / 0.09), transparent 40%),
-      radial-gradient(circle at 78% 18%, hsl(var(--lilac) / 0.08), transparent 44%),
-      radial-gradient(circle at 62% 70%, hsl(var(--accent) / 0.04), transparent 42%),
-      linear-gradient(180deg, hsl(var(--bg)), hsl(var(--bg)));
-    animation:
-      celebrationDarkBgA 24s ease-in-out infinite,
-      celebrationDarkBgB 30s ease-in-out infinite reverse;
-    background-size: 100% 100%, 112% 112%, 105% 105%, 100% 100%;
-    background-repeat: no-repeat;
+    background-color: hsl(var(--bg));
+    background-image: none;
   }
 
   .glow-coral {
@@ -280,6 +272,46 @@
   .ui-cta-secondary:active,
   .landing-cta-secondary:active {
     transform: translateY(0);
+  }
+
+  /* "Dar parabéns" only: white chip, dark label — /today + landing mocks (no accent/gray hierarchy) */
+  .ui-cta-parabens {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+    background: #ffffff !important;
+    color: #161412 !important;
+    border-radius: 6px;
+    font-weight: 600;
+    line-height: 1.15;
+    box-shadow: none !important;
+    transition: background-color 0.15s ease, filter 0.15s ease;
+  }
+
+  .ui-cta-parabens:hover {
+    background: #f0f0f0 !important;
+    color: #161412 !important;
+    transform: none;
+  }
+
+  .ui-cta-parabens:active {
+    background: #e8e8e8 !important;
+    transform: none;
+  }
+
+  .dark .ui-cta-parabens:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--ui-surface) / 0.98),
+      0 0 0 4px rgba(255, 255, 255, 0.42);
+  }
+
+  html:not(.dark) .ui-cta-parabens:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--ui-surface) / 0.98),
+      0 0 0 4px hsl(var(--text) / 0.22);
   }
 
   .ui-cta-secondary:focus-visible,
@@ -1990,16 +2022,6 @@
 @keyframes twinkle {
   0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }
-}
-
-@keyframes celebrationDarkBgA {
-  0%, 100% { background-position: 14% 22%, 78% 18%, 62% 70%, 0 0; }
-  50% { background-position: 16% 19%, 75% 21%, 65% 66%, 0 0; }
-}
-
-@keyframes celebrationDarkBgB {
-  0%, 100% { filter: saturate(1); }
-  50% { filter: saturate(1.06); }
 }
 
 @keyframes confettiTwinkle {

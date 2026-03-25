@@ -22,11 +22,9 @@ function isSafeHttpUrl(raw: string | undefined): boolean {
 type TodayListItemProps = {
   person: BirthdayPerson;
   onToast?: (toast: OnboardingToast) => void;
-  /** Matches landing phone mock: first row emphasis CTA, following rows quieter. */
-  darParabensTone?: "emphasis" | "quiet";
 };
 
-export function TodayListItem({ person, onToast, darParabensTone = "emphasis" }: TodayListItemProps) {
+export function TodayListItem({ person, onToast }: TodayListItemProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const congratsTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -94,14 +92,12 @@ export function TodayListItem({ person, onToast, darParabensTone = "emphasis" }:
   }, [sheetOpen]);
 
   const darParabensClass =
-    darParabensTone === "quiet"
-      ? "ui-cta-secondary ui-focus-surface inline-flex !h-8 shrink-0 items-center justify-center self-center !rounded-lg !px-2 !py-1.5 !text-[11px] !font-semibold leading-snug whitespace-nowrap focus-visible:outline-none sm:!h-9 sm:!px-2.5 sm:!py-2 sm:!text-xs"
-      : "ui-cta-primary ui-focus-surface inline-flex !h-8 shrink-0 items-center justify-center self-center !rounded-lg !px-2 !py-1.5 !text-[11px] !font-semibold leading-snug whitespace-nowrap shadow-sm focus-visible:outline-none dark:!shadow-md dark:ring-1 dark:ring-primary/25 sm:!h-9 sm:!px-2.5 sm:!py-2 sm:!text-xs";
+    "ui-cta-parabens ui-focus-surface inline-flex !h-8 shrink-0 items-center justify-center self-center !rounded-md !px-2 !py-1.5 !text-[11px] leading-snug whitespace-nowrap focus-visible:outline-none sm:!h-9 sm:!px-2.5 sm:!py-2 sm:!text-xs";
 
   return (
     <>
       <li className="list-none py-2 sm:py-2.5">
-        {/* Landing phone mock: one row only — emoji | name + meta | Dar parabéns (no list extras). */}
+        {/* Row layout aligned with landing mocks: emoji | name + meta | Dar parabéns */}
         <div className="flex flex-row items-center gap-2 sm:gap-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[15px] leading-none" aria-hidden>
             {emoji}

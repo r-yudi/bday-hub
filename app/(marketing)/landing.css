@@ -16,8 +16,8 @@
   --warm-white: #ffffff;
   --accent: #e85d26;
   --accent-soft: #f4845a;
-  --dark: #0f0d0a;
-  --dark-card: #1c1a16;
+  --dark: #161412;
+  --dark-card: #1a1715;
   --border: rgba(26, 20, 16, 0.1);
   --border-dark: rgba(255, 255, 255, 0.1);
   --gold: #c9973a;
@@ -370,9 +370,9 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 8px;
-  background: var(--ink);
-  color: #fff;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #161412;
   font-size: 9px;
   font-weight: 600;
   padding: 6px 7px;
@@ -381,11 +381,6 @@
   letter-spacing: 0.01em;
   white-space: nowrap;
   text-align: center;
-}
-
-.landing .phone-mock-cta--quiet {
-  background: rgba(26, 20, 16, 0.08);
-  color: var(--ink);
 }
 
 /* Floating confetti elements */
@@ -680,21 +675,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
-  color: white;
+  background: #ffffff;
+  color: #161412;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 6px 8px;
   font-size: 10px;
   font-weight: 600;
   line-height: 1.15;
   white-space: nowrap;
   cursor: default;
-}
-
-.landing .dash-btn--secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(250, 248, 243, 0.92);
 }
 
 .landing .dash-list-section-label {
@@ -943,11 +933,11 @@
 
 /* ── DARK (alinhado ao tema global no html) ── */
 .dark .landing {
-  --cream: #141210;
+  --cream: #161412;
   --ink: #f5f2eb;
   --ink-mid: #d2cbc0;
   --ink-soft: #a39a8e;
-  --warm-white: #1c1a16;
+  --warm-white: #1a1715;
   --border: rgba(255, 255, 255, 0.09);
   --border-dark: rgba(255, 255, 255, 0.12);
 }
@@ -1002,21 +992,16 @@
 
 .dark .landing .phone-mock-sheet {
   border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(34, 32, 30, 0.92);
+  background: rgba(26, 23, 21, 0.96);
 }
 
 .dark .landing .phone-mock-row {
   border-bottom-color: rgba(255, 255, 255, 0.07);
 }
 
-.dark .landing .phone-mock-cta--quiet {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(245, 242, 235, 0.92);
-}
-
 .dark .landing .phone-mock-cta {
-  background: #f5f2eb;
-  color: #1a1816;
+  background: #ffffff;
+  color: #161412;
 }
 
 .dark .landing .phone-mock-name--flex {
