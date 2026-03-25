@@ -283,9 +283,6 @@ export function Landing() {
                 <Link href="/today" className="btn-primary">
                   Começar agora
                 </Link>
-                <Link href="/today" className="btn-dark-outline">
-                  Ver demo
-                </Link>
               </div>
             </div>
 

@@ -610,11 +610,8 @@
   padding: 20px;
 }
 
+/* Hoje: same pattern as app /today — section label + simple rows (no inner card) */
 .landing .dash-today {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-dark);
-  border-radius: 16px;
-  padding: 12px 14px;
   margin-bottom: 14px;
 }
 
@@ -624,18 +621,19 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: rgba(250, 248, 243, 0.45);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .landing .dash-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-dark);
 }
 
 .landing .dash-row:last-child {
-  margin-bottom: 0;
+  border-bottom: none;
 }
 
 .landing .dash-row-main {

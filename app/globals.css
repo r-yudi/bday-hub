@@ -1542,15 +1542,11 @@
       0 0 0 4px hsl(var(--ui-focus-ring) / 0.35);
   }
 
-  /* /today: one sheet (Hoje + Em breve), closer to landing phone mock */
+  /* /today: one sheet (Hoje + Em breve); neutral surface — no accent ring or warm gradient */
   .dark .today-page-birthday-sheet {
-    border-color: hsl(var(--ui-border-strong) / 0.38);
-    background: linear-gradient(
-      180deg,
-      hsl(var(--ui-surface-elevated) / 0.65),
-      hsl(var(--ui-surface) / 0.45)
-    );
-    box-shadow: 0 0 0 1px hsl(var(--accent) / 0.12);
+    border-color: hsl(var(--ui-border-subtle) / 0.3);
+    background: hsl(var(--ui-surface-elevated) / 0.9);
+    box-shadow: none;
   }
 
   .dark .today-page-em-breve-title {
