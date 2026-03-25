@@ -57,10 +57,16 @@
 .dark {
   color-scheme: dark;
 
-  /* Neutral dark base ~#161412, elevated ~#1a1715 (achromatic HSL — avoids brown #201b18 cast) */
+  /* Exact neutral luminance scale (shared with landing mocks); no hue shift vs #201b18 brown */
+  --neutral-base: #161412;
+  --neutral-elevated: #1a1715;
+  --neutral-inner: #1c1917;
+  --neutral-base-rgb: 22, 20, 18;
+
+  /* HSL mirrors for Tailwind hsl(var(--*)) + alphas (achromatic, close to neutral-base) */
   --bg: 0 0% 8.5%;
   --surface: 0 0% 9.8%;
-  --surface-2: 0 0% 11.2%;
+  --surface-2: 0 0% 10.8%;
   --text: 40 28% 96%;
   --muted: 0 0% 72%;
   --border: 0 0% 24%;
@@ -80,8 +86,8 @@
   --ui-bg: var(--bg);
   --ui-surface: var(--surface);
   --ui-surface-2: var(--surface-2);
-  --ui-surface-elevated: 0 0% 9.6%;
-  --ui-surface-overlay: 0 0% 12%;
+  --ui-surface-elevated: 0 0% 9.8%;
+  --ui-surface-overlay: 0 0% 11.5%;
   --ui-border: 0 0% 24%;
   --ui-border-subtle: 0 0% 21%;
   --ui-border-strong: 0 0% 42%;

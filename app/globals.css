@@ -21,6 +21,10 @@
     background-color: hsl(var(--bg));
   }
 
+  .dark body {
+    background-color: var(--neutral-base);
+  }
+
   /* Single flat shell: page glow lived on wrap + topnav + main and stacked into a muddy band in dark */
   .app-shell-wrap {
     min-height: 100%;
@@ -1448,8 +1452,8 @@
   }
 
   .dark .topnav-shell {
-    border-color: hsl(var(--border) / 0.9);
-    background: hsl(var(--bg) / 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--neutral-base-rgb), 0.93);
     box-shadow: none;
   }
 
@@ -1574,10 +1578,10 @@
       0 0 0 4px hsl(var(--ui-focus-ring) / 0.35);
   }
 
-  /* /today: one sheet (Hoje + Em breve); neutral surface — no accent ring or warm gradient */
+  /* /today: inner sheet sits one step above main card (neutral-inner) */
   .dark .today-page-birthday-sheet {
-    border-color: hsl(var(--ui-border-subtle) / 0.3);
-    background: hsl(var(--ui-surface-elevated) / 0.9);
+    border-color: rgba(255, 255, 255, 0.09);
+    background: var(--neutral-inner);
     box-shadow: none;
   }
 
@@ -1938,11 +1942,21 @@
     box-shadow: none;
   }
 
+  .dark .ui-panel {
+    background: var(--neutral-elevated);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
   .ui-panel-soft {
     background: hsl(var(--ui-surface-2) / 0.88);
     border: 1px solid hsl(var(--ui-border-subtle) / 0.35);
     border-radius: 18px;
     box-shadow: none;
+  }
+
+  .dark .ui-panel-soft {
+    background: var(--neutral-inner);
+    border-color: rgba(255, 255, 255, 0.09);
   }
 
   .ui-page-hero {
@@ -1953,8 +1967,8 @@
   }
 
   .dark .ui-page-hero {
-    border-color: hsl(var(--ui-border-subtle) / 0.3);
-    background: hsl(var(--ui-surface-elevated) / 0.9);
+    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--neutral-elevated);
     box-shadow: none;
   }
 
