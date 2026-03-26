@@ -39,7 +39,7 @@ function EmailExplanation({ compact, listEmpty }: { compact: boolean; listEmpty?
 
 export function EmailDailyCard({ variant = "default", listEmpty = false }: EmailDailyCardProps) {
   const compact = variant === "compact";
-  const { user } = useAuth();
+  const { user, initialized, loading: authLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [emailSettings, setEmailSettings] = useState<EmailReminderSettings | null>(null);
   const [lastDispatch, setLastDispatch] = useState<LastEmailDispatch>(null);
@@ -48,18 +48,52 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [timeFeedback, setTimeFeedback] = useState<string | null>(null);
+  const [emailLoadState, setEmailLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || !user) return;
-    void getEmailReminderSettings().then((s) => {
-      if (s) setEmailSettings(s);
-    });
-    void getLastEmailDispatch().then(setLastDispatch);
-  }, [mounted, user?.id]);
+    if (!mounted) return;
+    if (!user) {
+      setEmailSettings(null);
+      setEmailLoadState("idle");
+      setLastDispatch(null);
+      return;
+    }
+    if (!initialized || authLoading) return;
+
+    let cancelled = false;
+    setEmailLoadState("loading");
+
+    void (async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const s = await getEmailReminderSettings();
+        if (cancelled) return;
+        if (s !== null) {
+          setEmailSettings(s);
+          setEmailLoadState("ready");
+          void getLastEmailDispatch().then((d) => {
+            if (!cancelled) setLastDispatch(d);
+          });
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 80 * (attempt + 1)));
+      }
+      if (!cancelled) {
+        setEmailLoadState("error");
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[EmailDailyCard] getEmailReminderSettings returned null after retries");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, user?.id, initialized, authLoading, reloadKey]);
 
   async function handleEmailTimeChange(h: number, m: number) {
     if (!user || !emailSettings) return;
@@ -89,7 +123,7 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
   }
 
   async function handleToggle() {
-    if (!user) return;
+    if (!user || !emailSettings) return;
     setSaving(true);
     setError(null);
     setSuccess(null);
@@ -153,7 +187,26 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
             </Link>
           </div>
         </div>
-      ) : (
+      ) : !initialized || authLoading ? (
+        <div className={compact ? "mt-2" : "mt-4"}>
+          <p className="text-sm text-muted">Carregando configurações…</p>
+        </div>
+      ) : emailLoadState === "loading" ? (
+        <div className={compact ? "mt-2" : "mt-4"}>
+          <p className="text-sm text-muted">Carregando preferências de email…</p>
+        </div>
+      ) : emailLoadState === "error" ? (
+        <div className={compact ? "mt-2" : "mt-4"}>
+          <p className="text-sm text-muted">Não foi possível carregar as preferências de email.</p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      ) : emailSettings ? (
         <div className={compact ? "mt-2" : "mt-4"}>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <div className="flex shrink-0 items-center gap-3">
@@ -250,6 +303,10 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
           )}
           {error && <p className="mt-2 text-xs text-danger">{error}</p>}
           {success && <p className="mt-2 text-xs text-success">{success}</p>}
+        </div>
+      ) : (
+        <div className={compact ? "mt-2" : "mt-4"}>
+          <p className="text-sm text-muted">Carregando preferências de email…</p>
         </div>
       )}
     </section>

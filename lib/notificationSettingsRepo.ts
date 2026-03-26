@@ -1,5 +1,3 @@
-"use client";
-
 import { getSafeBrowserSession, getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
   DEFAULT_EMAIL_REMINDER_SETTINGS,
@@ -49,6 +47,10 @@ function normalizeSettings(row?: UserSettingsRow | null): EmailReminderSettings 
   };
 }
 
+export function mapUserSettingsRowToEmailSettings(row?: UserSettingsRow | null): EmailReminderSettings {
+  return normalizeSettings(row);
+}
+
 export function normalizePushSettings(row?: UserSettingsRow | null): PushSettings {
   return {
     pushEnabled: Boolean(row?.push_enabled ?? false)
@@ -58,6 +60,55 @@ export function normalizePushSettings(row?: UserSettingsRow | null): PushSetting
 async function getCurrentUserId() {
   const { session } = await getSafeBrowserSession();
   return session?.user?.id ?? null;
+}
+
+/** Minimal Supabase shape for bootstrap tests (mock-friendly). */
+export type UserSettingsBootstrapSupabase = {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => Promise<{
+          data: { user_id?: string } | null;
+          error: { message: string; code?: string } | null;
+        }>;
+      };
+    };
+    insert: (row: Record<string, unknown>) => Promise<{
+      error: { message: string; code?: string } | null;
+    }>;
+  };
+};
+
+/**
+ * Ensures a `user_settings` row exists for new accounts with `email_enabled: true`.
+ * Single canonical place for that rule: no-op if a row already exists; ignores unique-violation races.
+ */
+export async function ensureUserSettingsRowForNewUserWithSupabase(
+  supabase: UserSettingsBootstrapSupabase,
+  userId: string
+): Promise<void> {
+  if (!userId) return;
+  const { data, error } = await supabase.from("user_settings").select("user_id").eq("user_id", userId).maybeSingle();
+  if (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[user_settings bootstrap] read failed:", error.message);
+    }
+    return;
+  }
+  if (data?.user_id) return;
+
+  const { error: insertError } = await supabase.from("user_settings").insert({ user_id: userId, email_enabled: true });
+  if (!insertError) return;
+  if (insertError.code === "23505") return;
+  if (process.env.NODE_ENV === "development") {
+    console.warn("[user_settings bootstrap] insert failed:", insertError.message);
+  }
+}
+
+export async function ensureUserSettingsRowForNewUser(userId: string): Promise<void> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase || !userId) return;
+  await ensureUserSettingsRowForNewUserWithSupabase(supabase as unknown as UserSettingsBootstrapSupabase, userId);
 }
 
 export async function getEmailReminderSettings(): Promise<EmailReminderSettings | null> {
@@ -80,7 +131,7 @@ export async function getEmailReminderSettings(): Promise<EmailReminderSettings 
     return null;
   }
 
-  return normalizeSettings((data as UserSettingsRow | null) ?? null);
+  return mapUserSettingsRowToEmailSettings((data as UserSettingsRow | null) ?? null);
 }
 
 export async function saveEmailReminderSettings(partial: Partial<EmailReminderSettings>): Promise<EmailReminderSettings | null> {
@@ -193,6 +244,7 @@ export async function savePushEnabled(enabled: boolean): Promise<PushSettings | 
   if (!userId) return null;
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return null;
+  await ensureUserSettingsRowForNewUser(userId);
   const { error } = await supabase.from("user_settings").upsert(
     { user_id: userId, push_enabled: enabled },
     { onConflict: "user_id" }
