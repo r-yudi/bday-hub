@@ -22,6 +22,8 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
   const [pushSettings, setPushSettings] = useState<{ pushEnabled: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Subscribe/SW/config failures — never surface raw Error.message */
+  const [activationFailure, setActivationFailure] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
   const [showInstallHelp, setShowInstallHelp] = useState(false);
@@ -52,6 +54,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
     if (!user || !mounted) return;
     setSaving(true);
     setError(null);
+    setActivationFailure(false);
     const enabling = !(pushSettings?.pushEnabled ?? false);
 
     try {
@@ -128,7 +131,14 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         if (next) setPushSettings(next);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao alterar preferência.");
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[PushCard] device notification flow failed", e);
+      }
+      if (enabling) {
+        setActivationFailure(true);
+      } else {
+        setError("Não foi possível desativar agora. Tente de novo em instantes.");
+      }
     } finally {
       setSaving(false);
     }
@@ -286,6 +296,16 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             {saving ? "Salvando..." : "Ativar notificações no dispositivo"}
           </button>
         </>
+      )}
+      {activationFailure && (
+        <div className={compact ? "mt-2 space-y-1" : "mt-3 space-y-1.5"}>
+          <p className={compact ? "text-xs text-text" : "text-sm text-text"}>
+            Não foi possível ativar as notificações neste aparelho agora.
+          </p>
+          <p className="text-xs leading-relaxed text-muted">
+            Tente novamente em instantes. Se continuar, use email ou lembretes no app.
+          </p>
+        </div>
       )}
       {error && <p className="mt-2 text-xs text-danger">{error}</p>}
     </section>

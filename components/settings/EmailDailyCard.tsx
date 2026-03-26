@@ -68,7 +68,14 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
     setTimeFeedback(null);
     const value = formatTimeHHmm(h, m);
     try {
-      const saved = await saveEmailReminderSettings({ emailTime: value });
+      // If getEmailReminderSettings() fails inside save (race/RLS/network), saveEmailReminderSettings
+      // falls back to defaults where emailEnabled is false — pass current UI snapshot so upsert stays on.
+      const saved = await saveEmailReminderSettings({
+        emailTime: value,
+        emailEnabled: emailSettings.emailEnabled,
+        timezone: emailSettings.timezone,
+        reminderTiming: emailSettings.reminderTiming
+      });
       if (saved) {
         setEmailSettings(saved);
         setTimeFeedback("Horário salvo.");
@@ -108,6 +115,13 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
   }
 
   const enabled = Boolean(emailSettings?.emailEnabled);
+  const timeParts =
+    enabled && emailSettings
+      ? parseTimeHHmm(emailSettings.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime)
+      : null;
+  const timeDisabled = saving || savingTime;
+  const idH = compact ? "email-time-h-compact" : "email-time-h";
+  const idM = compact ? "email-time-m-compact" : "email-time-m";
 
   return (
     <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
@@ -141,47 +155,43 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
         </div>
       ) : (
         <div className={compact ? "mt-2" : "mt-4"}>
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={enabled}
-              disabled={saving}
-              onClick={() => void handleToggle()}
-              className={[
-                "relative h-8 w-14 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                enabled ? "bg-accent" : "bg-surface2"
-              ].join(" ")}
-              aria-label={enabled ? "Desativar lembretes por email" : "Ativar lembretes por email"}
-            >
-              <span
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="flex shrink-0 items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={enabled}
+                disabled={saving}
+                onClick={() => void handleToggle()}
                 className={[
-                  "absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-transform",
-                  enabled ? "left-7" : "left-1"
+                  "relative h-8 w-14 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                  enabled ? "bg-accent" : "bg-surface2"
                 ].join(" ")}
-              />
-            </button>
-            <span className="text-sm text-text">{enabled ? "Ativado" : "Desativado"}</span>
-          </div>
-          {enabled && emailSettings && (() => {
-            const t = parseTimeHHmm(emailSettings.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime);
-            const timeDisabled = saving || savingTime;
-            const idH = compact ? "email-time-h-compact" : "email-time-h";
-            const idM = compact ? "email-time-m-compact" : "email-time-m";
-            return (
-              <div className={compact ? "mt-2 space-y-1" : "mt-3 space-y-1"}>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-muted" id={`${idH}-label`}>
-                    Horário de envio
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
+                aria-label={enabled ? "Desativar lembretes por email" : "Ativar lembretes por email"}
+              >
+                <span
+                  className={[
+                    "absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-transform",
+                    enabled ? "left-7" : "left-1"
+                  ].join(" ")}
+                />
+              </button>
+              <span className="text-sm text-text">{enabled ? "Ativado" : "Desativado"}</span>
+            </div>
+            {timeParts && emailSettings && (
+              <>
+                <span className="text-xs text-muted whitespace-nowrap" id={`${idH}-label`}>
+                  Horário de envio
+                </span>
+                <div className="inline-flex items-center gap-1.5">
                   <select
                     id={idH}
                     aria-labelledby={`${idH}-label`}
-                    value={t.h}
+                    value={timeParts.h}
                     disabled={timeDisabled}
-                    onChange={(e) => void handleEmailTimeChange(parseInt(e.target.value, 10), t.m)}
+                    onChange={(e) =>
+                      void handleEmailTimeChange(parseInt(e.target.value, 10), timeParts.m)
+                    }
                     className="ui-focus-surface h-9 max-w-[5.5rem] rounded-xl border px-2 text-sm focus-visible:outline-none"
                     aria-label="Hora do email (24h)"
                   >
@@ -191,13 +201,15 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
                       </option>
                     ))}
                   </select>
-                  <span className="text-xs text-muted">:</span>
+                  <span className="text-xs text-muted tabular-nums">:</span>
                   <select
                     id={idM}
                     aria-labelledby={`${idH}-label`}
-                    value={t.m}
+                    value={timeParts.m}
                     disabled={timeDisabled}
-                    onChange={(e) => void handleEmailTimeChange(t.h, parseInt(e.target.value, 10))}
+                    onChange={(e) =>
+                      void handleEmailTimeChange(timeParts.h, parseInt(e.target.value, 10))
+                    }
                     className="ui-focus-surface h-9 max-w-[4.5rem] rounded-xl border px-2 text-sm focus-visible:outline-none"
                     aria-label="Minuto do horário de envio do email"
                   >
@@ -208,11 +220,13 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
                     ))}
                   </select>
                 </div>
-                <p className="text-xs text-muted">No seu horário</p>
-                {timeFeedback && <p className="text-xs text-success">{timeFeedback}</p>}
-              </div>
-            );
-          })()}
+                <span className="text-xs text-muted whitespace-nowrap">No seu horário</span>
+                {timeFeedback && (
+                  <span className="text-xs text-success whitespace-nowrap">{timeFeedback}</span>
+                )}
+              </>
+            )}
+          </div>
           {!compact && lastDispatch && (
             <div className="mt-3 space-y-0.5 text-xs text-muted">
               {lastDispatch.status === "sent" && (
