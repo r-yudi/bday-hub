@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getSafeBrowserSession } from "@/lib/supabase-browser";
 import { getPushSettings, savePushEnabled } from "@/lib/notificationSettingsRepo";
-
-type PushState = "unsupported" | "denied" | "default" | "granted";
 
 function toBase64Url(buf: ArrayBuffer): string {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
@@ -15,11 +13,9 @@ function toBase64Url(buf: ArrayBuffer): string {
     .replace(/=+$/, "");
 }
 
-type PushCardProps = { variant?: "default" | "compact" };
+type PushCardProps = { variant?: "default" | "compact"; listEmpty?: boolean };
 
-const PUSH_HOW = "Depende do navegador. No iOS, funciona melhor com o app instalado.";
-
-export function PushCard({ variant = "default" }: PushCardProps) {
+export function PushCard({ variant = "default", listEmpty = false }: PushCardProps) {
   const compact = variant === "compact";
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
@@ -28,9 +24,7 @@ export function PushCard({ variant = "default" }: PushCardProps) {
   const [error, setError] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
-  const [showHow, setShowHow] = useState(false);
-  const howTriggerRef = useRef<HTMLButtonElement>(null);
-  const howPanelRef = useRef<HTMLDivElement>(null);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -44,6 +38,8 @@ export function PushCard({ variant = "default" }: PushCardProps) {
     );
     if (typeof Notification !== "undefined") {
       setPermission(Notification.permission);
+    } else {
+      setPermission("unsupported");
     }
   }, [mounted]);
 
@@ -52,25 +48,7 @@ export function PushCard({ variant = "default" }: PushCardProps) {
     void getPushSettings().then((s) => setPushSettings(s ?? { pushEnabled: false }));
   }, [mounted, user?.id]);
 
-  useEffect(() => {
-    if (!showHow) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowHow(false); };
-    const onPointer = (e: MouseEvent | TouchEvent) => {
-      const t = e.target as Node;
-      if (howTriggerRef.current?.contains(t) || howPanelRef.current?.contains(t)) return;
-      setShowHow(false);
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("touchstart", onPointer, { passive: true });
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("touchstart", onPointer);
-    };
-  }, [showHow]);
-
-  async function handleToggle() {
+  async function handleSubscribeToggle() {
     if (!user || !mounted) return;
     setSaving(true);
     setError(null);
@@ -83,13 +61,13 @@ export function PushCard({ variant = "default" }: PushCardProps) {
         const notifPermission = await Notification.requestPermission();
         setPermission(notifPermission);
         if (notifPermission !== "granted") {
-          setError("Permissão negada. Push permanece desativado.");
+          setError("Permissão negada. As notificações no dispositivo permanecem desativadas.");
           setSaving(false);
           return;
         }
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidKey) {
-          setError("Push não configurado no servidor.");
+          setError("Serviço indisponível no momento.");
           setSaving(false);
           return;
         }
@@ -126,7 +104,7 @@ export function PushCard({ variant = "default" }: PushCardProps) {
           setError(
             data.message === "endpoint-already-used"
               ? "Este dispositivo já está em uso em outra conta."
-              : "Falha ao ativar push."
+              : "Não foi possível ativar."
           );
           setSaving(false);
           return;
@@ -150,107 +128,166 @@ export function PushCard({ variant = "default" }: PushCardProps) {
         if (next) setPushSettings(next);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao alterar push.");
+      setError(e instanceof Error ? e.message : "Erro ao alterar preferência.");
     } finally {
       setSaving(false);
     }
   }
 
-  const stateLabel: Record<PushState | "guest" | "no-standalone", string> = {
-    unsupported: "Não suportado (navegador)",
-    denied: "Permissão negada",
-    default: "Permissão não solicitada",
-    granted: pushSettings?.pushEnabled ? "Ativo" : "Permissão concedida (push desativado no app)",
-    guest: "Disponível para contas conectadas",
-    "no-standalone": "Requer PWA instalado"
-  };
+  async function handleRequestPermissionOnly() {
+    if (typeof Notification === "undefined") return;
+    const p = await Notification.requestPermission();
+    setPermission(p);
+  }
+
+  const titleCls = "ui-feature-title text-muted text-sm";
+
+  if (!mounted) {
+    return (
+      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+        <h2 className={titleCls}>Notificações no dispositivo</h2>
+        <p className="mt-2 text-sm text-muted">Carregando...</p>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+        <h2 className={titleCls}>Notificações no dispositivo</h2>
+        {!compact && (
+          <p className="mt-2 text-sm text-muted">
+            Neste aparelho: entre na sua conta e abra o Lembra a partir da tela inicial (cada aparelho configura à parte).
+          </p>
+        )}
+        {compact && (
+          <p className="mt-1 text-xs text-muted">Neste aparelho: conta + app na tela inicial.</p>
+        )}
+        <Link
+          href={compact ? "/login?returnTo=%2Ftoday" : "/login?returnTo=%2Fsettings"}
+          className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+        >
+          Entrar com Google
+        </Link>
+      </section>
+    );
+  }
+
+  if (!isStandalone) {
+    return (
+      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+        <h2 className={titleCls}>Notificações no dispositivo</h2>
+        <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-sm text-muted"}>
+          Para receber notificações neste dispositivo, adicione o Lembra à tela inicial.
+        </p>
+        {listEmpty && (
+          <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-xs text-muted"}>
+            Lista vazia: nada para avisar ainda; instalar aqui só prepara este aparelho.
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={() => setShowInstallHelp((v) => !v)}
+          className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
+        >
+          Como instalar
+        </button>
+        {showInstallHelp && (
+          <div className="ui-panel-soft mt-3 rounded-xl border p-4 text-sm text-muted">
+            <ul className="list-disc space-y-2 pl-5">
+              <li>
+                <strong className="text-text">iPhone ou iPad:</strong> Compartilhar → Adicionar à Tela de Início.
+              </li>
+              <li>
+                <strong className="text-text">Android:</strong> menu do navegador → Instalar app ou Adicionar à tela inicial.
+              </li>
+              <li>
+                <strong className="text-text">Computador:</strong> procure o ícone de instalar na barra de endereços (nem sempre existe).
+              </li>
+            </ul>
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  if (permission === "unsupported") {
+    return (
+      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+        <h2 className={titleCls}>Notificações no dispositivo</h2>
+        <p className="mt-2 text-sm text-muted">Neste aparelho ou navegador, alertas fora do app não estão disponíveis.</p>
+      </section>
+    );
+  }
+
+  if (permission === "denied") {
+    return (
+      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+        <h2 className={titleCls}>Notificações no dispositivo</h2>
+        <p className="mt-2 text-sm text-muted">
+          Alertas deste site estão bloqueados. Para mudar, use as configurações do navegador para este endereço.
+        </p>
+      </section>
+    );
+  }
+
+  if (permission === "default") {
+    return (
+      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
+        <h2 className={titleCls}>Notificações no dispositivo</h2>
+        <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-sm text-muted"}>
+          Toque abaixo para o navegador perguntar; neste aparelho, o sistema pode mostrar alertas com o app fechado (quando suportado).
+        </p>
+        <button
+          type="button"
+          onClick={() => void handleRequestPermissionOnly()}
+          className="ui-cta-primary mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+        >
+          Permitir notificações
+        </button>
+      </section>
+    );
+  }
+
+  const active = Boolean(pushSettings?.pushEnabled);
 
   return (
     <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
-      <div className="flex items-center gap-2">
-        <h2 className="ui-feature-title text-muted text-sm">Push (complementar)</h2>
-        {!compact && (
-          <span className="relative">
-            <button
-              ref={howTriggerRef}
-              type="button"
-              onClick={() => setShowHow((v) => !v)}
-              className="ui-focus-surface flex h-6 w-6 items-center justify-center rounded-full border border-border text-muted hover:bg-surface2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              aria-label="Como funciona?"
-              aria-expanded={showHow}
-            >
-              ?
-            </button>
-            {showHow && (
-              <div
-                ref={howPanelRef}
-                className="ui-panel-soft absolute left-0 top-full z-20 mt-1 min-w-[16rem] rounded-lg border p-2 text-xs shadow-lg"
-                role="tooltip"
-                aria-label="Como funciona?"
-              >
-                {PUSH_HOW}
-              </div>
-            )}
-          </span>
-        )}
-      </div>
-
-      {!mounted ? (
-        <p className="mt-2 text-sm text-muted">Carregando...</p>
-      ) : !user ? (
+      <h2 className={titleCls}>Notificações no dispositivo</h2>
+      {active ? (
         <>
-          {!compact && (
-            <p className="mt-2 text-sm leading-5 text-muted">
-              Notificações push estão disponíveis para contas conectadas (PWA instalada).
-            </p>
-          )}
-          <p className={compact ? "mt-1 text-xs text-muted" : "mt-1 text-xs text-muted"}>Estado: {stateLabel.guest}</p>
-          <Link
-            href={compact ? "/login?returnTo=%2Ftoday" : "/login?returnTo=%2Fsettings"}
+          <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-sm text-muted"}>
+            {listEmpty
+              ? "Ativado neste aparelho. Com aniversários na lista, o sistema pode mostrar alertas no horário combinado — nada é enviado enquanto a lista estiver vazia."
+              : "Ativado neste aparelho. Com aniversários na lista, o sistema pode mostrar alertas no horário combinado (outros aparelhos precisam ser configurados à parte)."}
+          </p>
+          <button
+            type="button"
+            onClick={() => void handleSubscribeToggle()}
+            disabled={saving}
             className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
           >
-            {compact ? "Entrar com Google" : "Entrar para ativar push"}
-          </Link>
-        </>
-      ) : !isStandalone ? (
-        <>
-          {!compact && (
-            <p className="mt-2 text-sm leading-5 text-muted">
-              Para ativar notificações push, instale o Lembra (PWA) na tela inicial.
-            </p>
-          )}
-          <p className="mt-1 text-xs text-muted">Estado: {stateLabel["no-standalone"]}</p>
+            {saving ? "Salvando..." : "Desativar notificações no dispositivo"}
+          </button>
         </>
       ) : (
         <>
-          {!compact && (
-            <p className="mt-2 text-sm leading-5 text-muted">
-              Receba um lembrete no dispositivo quando houver aniversários no dia (complementar ao email).
-            </p>
-          )}
-          <p className="mt-1 text-xs text-muted">
-            Estado: {permission === "unsupported" ? stateLabel.unsupported : permission === "denied" ? stateLabel.denied : permission === "default" ? stateLabel.default : stateLabel.granted}
+          <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-sm text-muted"}>
+            {listEmpty
+              ? "Só neste aparelho: com datas na lista, dá para avisar fora do app. Ative quando quiser; depende do sistema."
+              : "Só neste aparelho: ative para alertas fora do app no horário combinado, quando o sistema permitir."}
           </p>
-          {permission === "unsupported" ? (
-            !compact && <p className="mt-2 text-xs text-muted">Indisponível por enquanto neste navegador.</p>
-          ) : permission === "denied" ? (
-            !compact && <p className="mt-2 text-xs text-warning">Reative a permissão nas configurações do site para poder ativar push.</p>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void handleToggle()}
-              disabled={saving}
-              className={[
-                "mt-3 inline-flex h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium focus-visible:outline-none",
-                pushSettings?.pushEnabled ? "ui-cta-secondary border" : "ui-cta-primary bg-accent text-white"
-              ].join(" ")}
-            >
-              {saving ? "Salvando..." : pushSettings?.pushEnabled ? "Desativar push" : "Ativar push"}
-            </button>
-          )}
-          {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+          <button
+            type="button"
+            onClick={() => void handleSubscribeToggle()}
+            disabled={saving}
+            className="ui-cta-primary mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
+          >
+            {saving ? "Salvando..." : "Ativar notificações no dispositivo"}
+          </button>
         </>
       )}
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
     </section>
   );
 }

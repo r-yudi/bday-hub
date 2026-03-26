@@ -145,7 +145,7 @@ export function OnboardingGate({ peopleCount, mounted, onOpenAddModal }: Onboard
             Tudo pronto 🎉
           </h2>
           <p className="mt-2 text-sm text-muted">
-            No dia de cada aniversário da sua lista, o Lembra te avisa no horário que você configurou nos alertas.
+            Quando sua lista tiver aniversários, o Lembra usa os alertas que você configurou. Para rever o tour (lista, alertas e dicas) na página Início, em <strong className="text-text">Configurações</strong> use <strong className="text-text">Abrir introdução no Início</strong>.
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <Link
@@ -317,17 +317,17 @@ export function OnboardingGate({ peopleCount, mounted, onOpenAddModal }: Onboard
               Alertas
             </h2>
             <p className="mt-2 text-sm text-muted">
-              Configure lembretes para não esquecer nenhum aniversário.
+              No app (neste aparelho), por email na sua conta, e alertas fora do app só neste aparelho quando o Lembra estiver na tela inicial.
             </p>
             {!user && (
               <p className="mt-2 text-xs text-muted">
-                Email e push ficam disponíveis quando você entra com sua conta.
+                Email e alertas fora do app pedem login; cada aparelho configura alertas à parte.
               </p>
             )}
             <div className="mt-4 space-y-3">
-              <NotificationCard variant="compact" />
-              <EmailDailyCard variant="compact" />
-              <PushCard variant="compact" />
+              <NotificationCard variant="compact" listEmpty={peopleCount === 0} />
+              <EmailDailyCard variant="compact" listEmpty={peopleCount === 0} />
+              <PushCard variant="compact" listEmpty={peopleCount === 0} />
             </div>
             <p className="mt-4 text-xs text-muted">
               Você pode ajustar tudo depois em Configurações.
@@ -374,7 +374,7 @@ export function OnboardingGate({ peopleCount, mounted, onOpenAddModal }: Onboard
               <div className="ui-panel-soft rounded-xl p-4 space-y-1">
                 <h3 className="font-semibold text-text">Configurações</h3>
                 <p className="text-sm text-muted">
-                  Escolha como quer ser lembrado: notificações no app ou email diário.
+                  Em Configurações você vê cada canal e pode abrir de novo o tour na página Início.
                 </p>
               </div>
             </div>

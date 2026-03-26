@@ -28,7 +28,7 @@ async function gotoTodayReady(page: Page, options?: { showOnboarding?: boolean }
 async function gotoSettingsReady(page: Page) {
   await page.goto("/settings");
   await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lembretes por email" })).toBeVisible();
 }
 
 async function addBirthday(page: Page, options?: { name?: string; notes?: string; tag?: string }) {
@@ -173,17 +173,22 @@ test.describe("MVP smoke flows", () => {
     ).toBeVisible();
   });
 
-  test("Email diário section on /settings (guest: CTA)", async ({ page }) => {
+  test("Lembretes por email section on /settings (guest: CTA)", async ({ page }) => {
     await gotoSettingsReady(page);
-    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Entrar para ativar email" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Lembretes por email" })).toBeVisible();
+    await expect(page.getByText("Faça login para ativar emails")).toBeVisible();
+    const emailCard = page.getByRole("heading", { name: "Lembretes por email" }).locator("..");
+    await expect(emailCard.getByRole("link", { name: "Entrar com Google" })).toBeVisible();
   });
 
-  test("Push (complementar) section on /settings: guest sees instruction and CTA", async ({ page }) => {
+  test("Notificações no dispositivo on /settings: guest sees instruction and CTA", async ({ page }) => {
     await gotoSettingsReady(page);
-    await expect(page.getByRole("heading", { name: "Push (complementar)" })).toBeVisible();
-    await expect(page.getByText("Notificações push estão disponíveis para contas conectadas")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Entrar para ativar push" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Notificações no dispositivo" })).toBeVisible();
+    await expect(
+      page.getByText(/Neste aparelho: entre na sua conta e abra o Lembra a partir da tela inicial/)
+    ).toBeVisible();
+    const pushCard = page.getByRole("heading", { name: "Notificações no dispositivo" }).locator("..");
+    await expect(pushCard.getByRole("link", { name: "Entrar com Google" })).toBeVisible();
   });
 
   test("TopNav: navegar para Pessoas", async ({ page }) => {
@@ -204,7 +209,7 @@ test.describe("MVP smoke flows", () => {
     await page.getByRole("link", { name: "Configurações" }).click();
     await expect(page).toHaveURL(/\/settings$/);
     await expect(page.getByRole("heading", { name: "Configurações" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Email diário" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Lembretes por email" })).toBeVisible();
   });
 
   test("/manage redireciona para /people", async ({ page }) => {
@@ -321,15 +326,20 @@ test.describe("Onboarding wizard (guest)", () => {
   });
 });
 
-test.describe("Push (complementar) logado não-standalone", () => {
+test.describe("Notificações no dispositivo logado não-standalone", () => {
   const authPath = join(process.cwd(), "test-results", ".auth", "user.json");
   const hasAuth = existsSync(authPath);
   if (hasAuth) test.use({ storageState: authPath });
   test.skip(!hasAuth, "Requer storageState logado (test-results/.auth/user.json). Gerar: login em /login e salvar storageState.");
 
-  test("mostra instrução de instalar PWA em /settings e não mostra toggle", async ({ page }) => {
+  test("mostra instrução de instalar em /settings e não mostra ativar/desativar dispositivo", async ({ page }) => {
     await page.goto("/settings");
-    await expect(page.getByText("Para ativar notificações push, instale o Lembra (PWA) na tela inicial.")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Ativar push|Desativar push/ })).toHaveCount(0);
+    await expect(
+      page.getByText(/Para receber notificações.*adicione o Lembra à tela inicial/)
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Como instalar" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Ativar notificações no dispositivo|Desativar notificações no dispositivo/ })
+    ).toHaveCount(0);
   });
 });
