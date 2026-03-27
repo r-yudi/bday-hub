@@ -107,8 +107,7 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
       const saved = await saveEmailReminderSettings({
         emailTime: value,
         emailEnabled: emailSettings.emailEnabled,
-        timezone: emailSettings.timezone,
-        reminderTiming: emailSettings.reminderTiming
+        timezone: emailSettings.timezone
       });
       if (saved) {
         setEmailSettings(saved);
@@ -133,8 +132,7 @@ export function EmailDailyCard({ variant = "default", listEmpty = false }: Email
       const saved = await saveEmailReminderSettings({
         emailEnabled: nextEnabled,
         emailTime: emailSettings?.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime,
-        timezone: emailSettings?.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone,
-        reminderTiming: emailSettings?.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming
+        timezone: emailSettings?.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone
       });
       if (saved) {
         setEmailSettings(saved);

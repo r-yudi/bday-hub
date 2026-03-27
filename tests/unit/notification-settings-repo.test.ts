@@ -103,7 +103,6 @@ test("mapUserSettingsRowToEmailSettings: null row matches defaults", () => {
   const s = mapUserSettingsRowToEmailSettings(null);
   assert.equal(s.emailEnabled, false);
   assert.equal(s.emailTime, "09:00");
-  assert.equal(s.reminderTiming, "day_of");
 });
 
 test("mapUserSettingsRowToEmailSettings: preserves enabled and custom time", () => {
@@ -111,11 +110,9 @@ test("mapUserSettingsRowToEmailSettings: preserves enabled and custom time", () 
     user_id: "u1",
     email_enabled: true,
     email_time: "14:30",
-    timezone: "America/Sao_Paulo",
-    reminder_timing: "day_before"
+    timezone: "America/Sao_Paulo"
   });
   assert.equal(s.emailEnabled, true);
   assert.equal(s.emailTime, "14:30");
   assert.equal(s.timezone, "America/Sao_Paulo");
-  assert.equal(s.reminderTiming, "day_before");
 });

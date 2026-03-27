@@ -216,7 +216,7 @@ export async function GET(request: Request) {
   if (diagnostic && effectiveTestUserId) {
     const { data: userRow, error: userError } = await supabase
       .from("user_settings")
-      .select("user_id,email_enabled,email_time,timezone,reminder_timing,push_enabled")
+      .select("user_id,email_enabled,email_time,timezone,push_enabled")
       .eq("user_id", effectiveTestUserId)
       .maybeSingle();
     if (userError) {
@@ -356,7 +356,7 @@ export async function GET(request: Request) {
   if (effectiveTestUserId) {
     const { data: userRow, error: userError } = await supabase
       .from("user_settings")
-      .select("user_id,email_enabled,email_time,timezone,reminder_timing,push_enabled")
+      .select("user_id,email_enabled,email_time,timezone,push_enabled")
       .eq("user_id", effectiveTestUserId)
       .maybeSingle();
     if (userError) {
@@ -366,7 +366,7 @@ export async function GET(request: Request) {
   } else {
     const { data: settingsRows, error: settingsError } = await supabase
       .from("user_settings")
-      .select("user_id,email_enabled,email_time,timezone,reminder_timing,push_enabled")
+      .select("user_id,email_enabled,email_time,timezone,push_enabled")
       .or("email_enabled.eq.true,push_enabled.eq.true");
     if (settingsError) {
       return NextResponse.json({ ok: false, message: settingsError.message }, { status: 500 });
@@ -512,3 +512,4 @@ export async function GET(request: Request) {
   }
   return NextResponse.json(body);
 }
+

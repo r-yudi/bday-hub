@@ -14,7 +14,6 @@ export type UserSettingsReminderRow = {
   email_enabled: boolean;
   email_time: string | null;
   timezone: string | null;
-  reminder_timing?: string | null;
   push_enabled?: boolean;
 };
 
@@ -218,7 +217,8 @@ export async function processOneCandidate(
 
   if (!dispatchId) return { outcome: "failed", reason: "no-dispatch-id" };
 
-  const isDayBefore = row.reminder_timing === "day_before";
+  // reminder_timing column not used (not present in production schema); digest follows day_of path + tomorrow fallback.
+  const isDayBefore = false;
   const primaryTargetKey = isDayBefore ? addDaysToDateKey(dateKey, 1) : dateKey;
   const primaryMode: "today" | "tomorrow" = isDayBefore ? "tomorrow" : "today";
 
@@ -294,7 +294,7 @@ export async function processOneCandidate(
     }
   }
 
-  const digest = buildDailyReminderEmail(birthdays, digestIsoDate, mode);
+  const digest = buildDailyReminderEmail(birthdays, digestIsoDate, mode, row.user_id);
   const sent = await deps.sendReminderEmail({ to, subject: digest.subject, html: digest.html, text: digest.text });
 
   if (!sent.ok) {
@@ -306,3 +306,4 @@ export async function processOneCandidate(
   await deps.updateDispatch(dispatchId, { status: "sent", sent_at: now.toISOString() });
   return { outcome: "sent", ...(recoveredStale && { recoveredStale: true }) };
 }
+

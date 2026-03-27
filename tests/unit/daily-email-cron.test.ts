@@ -216,34 +216,6 @@ test("today wins: when today has birthdays only one getBirthdays (today) and sen
   assert.ok(!sentSubject.includes("Amanhã"));
 });
 
-test("reminder_timing day_before: digest uses tomorrow's birthdays and mode tomorrow", async () => {
-  const rowDayBefore: UserSettingsReminderRow = { ...ROW, reminder_timing: "day_before" };
-  let getBirthdaysCalls: Array<{ day: number; month: number }> = [];
-  let sentSubject = "";
-  const deps: DailyEmailCronDeps = {
-    insertDispatch: async () => ({ id: "id-1" }),
-    getExistingDispatch: async () => null,
-    claimStalePending: async () => false,
-    updateDispatch: async () => {},
-    getBirthdays: async (_userId, day, month) => {
-      getBirthdaysCalls.push({ day, month });
-      if (day === 11 && month === 3) return [{ name: "Bob", day: 11, month: 3 }];
-      return [];
-    },
-    getUserEmail: async () => "u@example.com",
-    sendReminderEmail: async (input) => {
-      sentSubject = input.subject;
-      return { ok: true };
-    }
-  };
-  const outcome = await processOneCandidate(deps, rowDayBefore, NOW);
-  assert.equal(outcome.outcome, "sent");
-  assert.equal(getBirthdaysCalls.length, 1);
-  assert.equal(getBirthdaysCalls[0].day, 11);
-  assert.equal(getBirthdaysCalls[0].month, 3);
-  assert.ok(sentSubject.includes("Amanhã"));
-  assert.ok(sentSubject.includes("Bob"));
-});
 
 test("tomorrow sends when today empty: subject and hero are tomorrow copy", async () => {
   let sentPayload: { subject: string; html: string } | null = null;
@@ -267,7 +239,11 @@ test("tomorrow sends when today empty: subject and hero are tomorrow copy", asyn
   assert.ok(sentPayload);
   assert.ok(sentPayload!.subject.includes("Amanhã"));
   assert.ok(sentPayload!.subject.includes("Bob"));
-  assert.ok(sentPayload!.html.includes("Amanhã alguém importante faz aniversário"));
+  const tomorrowHero =
+    sentPayload!.html.includes("Amanhã alguém importante faz aniversário") ||
+    sentPayload!.html.includes("Daqui a pouco tem data especial") ||
+    sentPayload!.html.includes("Amanhã tem gente completando ano");
+  assert.ok(tomorrowHero);
   assert.ok(sentPayload!.html.includes("Amanhã tem aniversário chegando"));
 });
 
@@ -300,9 +276,17 @@ test("priority tomorrow over 7 days: when today empty, tomorrow and 7 days both 
   assert.ok(sentPayload!.subject.includes("Amanhã"));
   assert.ok(sentPayload!.subject.includes("Bob"));
   assert.ok(!sentPayload!.subject.includes("7 dias") && !sentPayload!.subject.includes("semana"));
-  assert.ok(sentPayload!.html.includes("Amanhã alguém importante faz aniversário"));
+  const tomorrowHero2 =
+    sentPayload!.html.includes("Amanhã alguém importante faz aniversário") ||
+    sentPayload!.html.includes("Daqui a pouco tem data especial") ||
+    sentPayload!.html.includes("Amanhã tem gente completando ano");
+  assert.ok(tomorrowHero2);
   assert.ok(sentPayload!.html.includes("Bob"));
-  assert.ok(!sentPayload!.html.includes("Um aniversário está chegando"));
+  const weekOnly =
+    sentPayload!.html.includes("Um aniversário está chegando") ||
+    sentPayload!.html.includes("Daqui a uma semana tem data especial") ||
+    sentPayload!.html.includes("Se prepara: vem aniversário aí");
+  assert.ok(!weekOnly);
 });
 
 test("7 days sends when today and tomorrow empty: subject and hero are week copy", async () => {
@@ -328,7 +312,11 @@ test("7 days sends when today and tomorrow empty: subject and hero are week copy
   assert.ok(sentPayload);
   assert.ok(sentPayload!.subject.includes("7 dias") || sentPayload!.subject.includes("semana"));
   assert.ok(sentPayload!.subject.includes("Carol"));
-  assert.ok(sentPayload!.html.includes("Um aniversário está chegando"));
+  const weekHero =
+    sentPayload!.html.includes("Um aniversário está chegando") ||
+    sentPayload!.html.includes("Daqui a uma semana tem data especial") ||
+    sentPayload!.html.includes("Se prepara: vem aniversário aí");
+  assert.ok(weekHero);
   assert.ok(sentPayload!.html.includes("Carol"));
 });
 

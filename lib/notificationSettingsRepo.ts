@@ -1,10 +1,17 @@
 import { getSafeBrowserSession, getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+/** Console-only diagnostic codes for production debugging (never shown in UI). */
+function diagEmailSettings(code: string, extra?: Record<string, unknown>) {
+  if (typeof console !== "undefined" && console.warn) {
+    console.warn("[lembra:email_settings]", code, extra ?? {});
+  }
+}
+
 import {
   DEFAULT_EMAIL_REMINDER_SETTINGS,
   type EmailReminderSettings,
   type LastEmailDispatch,
-  type PushSettings,
-  type ReminderTiming
+  type PushSettings
 } from "@/lib/types";
 
 export function isValidTimezone(tz: string): boolean {
@@ -22,7 +29,6 @@ type UserSettingsRow = {
   email_enabled?: boolean | null;
   email_time?: string | null;
   timezone?: string | null;
-  reminder_timing?: string | null;
   last_daily_email_sent_on?: string | null;
   push_enabled?: boolean | null;
 };
@@ -32,17 +38,11 @@ function normalizeEmailTime(value?: string | null) {
   return /^\d{2}:\d{2}$/.test(value) ? value : DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime;
 }
 
-function normalizeReminderTiming(value?: string | null): ReminderTiming {
-  if (value === "day_of" || value === "day_before") return value;
-  return DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming;
-}
-
 function normalizeSettings(row?: UserSettingsRow | null): EmailReminderSettings {
   return {
     emailEnabled: Boolean(row?.email_enabled ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailEnabled),
     emailTime: normalizeEmailTime(row?.email_time),
     timezone: row?.timezone || DEFAULT_EMAIL_REMINDER_SETTINGS.timezone,
-    reminderTiming: normalizeReminderTiming(row?.reminder_timing),
     lastDailyEmailSentOn: row?.last_daily_email_sent_on ?? null
   };
 }
@@ -112,26 +112,51 @@ export async function ensureUserSettingsRowForNewUser(userId: string): Promise<v
 }
 
 export async function getEmailReminderSettings(): Promise<EmailReminderSettings | null> {
-  const userId = await getCurrentUserId();
-  if (!userId) return null;
-
   const supabase = getSupabaseBrowserClient();
-  if (!supabase) return null;
+  if (!supabase) {
+    diagEmailSettings("email_settings_client_missing", {
+      reason: "NEXT_PUBLIC_SUPABASE_* not set or client not created"
+    });
+    return null;
+  }
+
+  const sessionResult = await getSafeBrowserSession();
+  const userId = sessionResult.session?.user?.id ?? null;
+  if (!userId) {
+    diagEmailSettings("email_settings_session_missing", {
+      errorMessage: sessionResult.errorMessage ?? null,
+      sessionRecovered: sessionResult.sessionRecovered ?? false
+    });
+    return null;
+  }
 
   const { data, error } = await supabase
     .from("user_settings")
-    .select("user_id,email_enabled,email_time,timezone,reminder_timing,last_daily_email_sent_on,push_enabled")
+    .select("user_id,email_enabled,email_time,timezone,last_daily_email_sent_on,push_enabled")
     .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[notifications] remote settings read failed:", error.message);
-    }
+    diagEmailSettings("email_settings_query_failed", {
+      code: error.code ?? "unknown",
+      message: error.message
+    });
     return null;
   }
 
-  return mapUserSettingsRowToEmailSettings((data as UserSettingsRow | null) ?? null);
+  if (data == null) {
+    diagEmailSettings("email_settings_row_null", { userId });
+  }
+  try {
+    const mapped = mapUserSettingsRowToEmailSettings((data as UserSettingsRow | null) ?? null);
+    diagEmailSettings("email_settings_ok", { hasRow: data != null, userId });
+    return mapped;
+  } catch (e) {
+    diagEmailSettings("email_settings_mapping_failed", {
+      message: e instanceof Error ? e.message : String(e)
+    });
+    return null;
+  }
 }
 
 export async function saveEmailReminderSettings(partial: Partial<EmailReminderSettings>): Promise<EmailReminderSettings | null> {
@@ -148,7 +173,6 @@ export async function saveEmailReminderSettings(partial: Partial<EmailReminderSe
     emailTime:
       partial.emailTime !== undefined ? normalizeEmailTime(partial.emailTime) : (current.emailTime ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailTime),
     timezone: partial.timezone !== undefined ? partial.timezone : (current.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone),
-    reminderTiming: partial.reminderTiming !== undefined ? normalizeReminderTiming(partial.reminderTiming) : (current.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming)
   };
 
   // Always persist full email state so upsert never leaves email_time/timezone to DB default (avoids reset to 09:00 when only toggling enabled)
@@ -166,7 +190,6 @@ export function buildEmailReminderPayload(
   if (partial.emailEnabled !== undefined) payload.email_enabled = partial.emailEnabled;
   if (partial.emailTime !== undefined) payload.email_time = normalizeEmailTime(partial.emailTime);
   if (partial.timezone !== undefined) payload.timezone = partial.timezone;
-  if (partial.reminderTiming !== undefined) payload.reminder_timing = partial.reminderTiming;
   return payload;
 }
 
@@ -176,8 +199,7 @@ function buildEmailReminderPayloadFromFull(settings: EmailReminderSettings, user
     user_id: userId,
     email_enabled: settings.emailEnabled,
     email_time: normalizeEmailTime(settings.emailTime),
-    timezone: settings.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone,
-    reminder_timing: settings.reminderTiming ?? DEFAULT_EMAIL_REMINDER_SETTINGS.reminderTiming
+    timezone: settings.timezone ?? DEFAULT_EMAIL_REMINDER_SETTINGS.timezone
   };
 }
 
@@ -252,3 +274,5 @@ export async function savePushEnabled(enabled: boolean): Promise<PushSettings | 
   if (error) return null;
   return { pushEnabled: enabled };
 }
+
+
