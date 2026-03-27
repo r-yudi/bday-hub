@@ -75,7 +75,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
   useEffect(() => {
     if (!mounted || !user) return;
     void getPushSettings().then((s) => setPushSettings(s ?? { pushEnabled: false }));
-  }, [mounted, user]);
+  }, [mounted, user, permission]);
 
   async function handleSubscribeToggle() {
     if (!user || !mounted) return;
@@ -155,17 +155,33 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           return;
         }
 
-        let sub: PushSubscription;
-        try {
-          sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: new Uint8Array(keyBytes)
+        let sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          diagPush("push_activation_existing_subscription_detected", {
+            note: "Reusing browser subscription; syncing server + push_enabled."
           });
-        } catch (subErr) {
-          diagPush("push_subscribe_failed", {
-            message: subErr instanceof Error ? subErr.message : String(subErr),
-            name: subErr instanceof Error ? subErr.name : "unknown"
-          });
+        } else {
+          try {
+            sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: new Uint8Array(keyBytes)
+            });
+            diagPush("push_activation_subscribe_succeeded", { note: "New PushSubscription created." });
+          } catch (subErr) {
+            diagPush("push_subscribe_failed", {
+              message: subErr instanceof Error ? subErr.message : String(subErr),
+              name: subErr instanceof Error ? subErr.name : "unknown"
+            });
+            setActivationFailure(true);
+            setSaving(false);
+            return;
+          }
+        }
+
+        const p256dhKey = sub.getKey("p256dh");
+        const authKey = sub.getKey("auth");
+        if (!p256dhKey || !authKey) {
+          diagPush("push_subscribe_failed", { reason: "missing_subscription_keys" });
           setActivationFailure(true);
           setSaving(false);
           return;
@@ -188,8 +204,8 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           body: JSON.stringify({
             endpoint: sub.endpoint,
             keys: {
-              p256dh: toBase64Url(sub.getKey("p256dh")!),
-              auth: toBase64Url(sub.getKey("auth")!)
+              p256dh: toBase64Url(p256dhKey),
+              auth: toBase64Url(authKey)
             }
           })
         });
@@ -209,8 +225,31 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           return;
         }
 
-        const next = await savePushEnabled(true);
-        if (next) setPushSettings(next);
+        diagPush("push_activation_api_subscribe_succeeded", { httpStatus: res.status });
+        setActivationFailure(false);
+        setError(null);
+        setPushSettings({ pushEnabled: true });
+
+        const persisted = await savePushEnabled(true);
+        if (persisted) {
+          setPushSettings(persisted);
+          diagPush("push_activation_push_enabled_refreshed", { source: "savePushEnabled" });
+        } else {
+          diagPush("push_activation_push_enabled_upsert_failed", {
+            note: "API persisted subscription; upsert push_enabled failed — refetching."
+          });
+          const refetched = await getPushSettings();
+          if (refetched?.pushEnabled) {
+            setPushSettings(refetched);
+            diagPush("push_activation_push_enabled_refreshed", { source: "refetch_after_failed_upsert" });
+          } else {
+            diagPush("push_activation_ui_reconciled_optimistic", {
+              note: "Keeping active UI after API OK; push_enabled not confirmed in DB."
+            });
+          }
+        }
+
+        diagPush("push_activation_complete", { note: "Local UI active; subscription registered with API." });
       } else {
         const { session } = await getSafeBrowserSession();
         if (session?.access_token) {
@@ -226,6 +265,10 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         }
         const next = await savePushEnabled(false);
         if (next) setPushSettings(next);
+        else setPushSettings({ pushEnabled: false });
+        setActivationFailure(false);
+        setError(null);
+        diagPush("push_deactivation_complete", {});
       }
     } catch (e) {
       diagPush("push_unexpected_error", {
