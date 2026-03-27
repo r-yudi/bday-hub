@@ -22,26 +22,29 @@ function diagPush(code: string, extra?: Record<string, unknown>) {
   }
 }
 
-/** True when this origin has a usable push subscription (endpoint + keys). */
-async function probeLocalPushSubscription(): Promise<boolean> {
-  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return false;
+/**
+ * Registration for Web Push must be sw-push.js. next-pwa registers /sw.js for the same scope "/",
+ * so getRegistration("/") often returns the PWA worker — getSubscription() there stays null even
+ * after a successful subscribe() on sw-push.js (iOS standalone included).
+ */
+async function getSwPushRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return null;
   try {
-    let reg = await navigator.serviceWorker.getRegistration("/");
-    if (!reg) {
-      try {
-        reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
-      } catch {
-        return false;
-      }
-    }
+    const reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
     await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
-    if (!reg.pushManager) return false;
-    const sub = await reg.pushManager.getSubscription();
-    if (!sub?.endpoint) return false;
-    return Boolean(sub.getKey("p256dh") && sub.getKey("auth"));
+    return reg;
   } catch {
-    return false;
+    return null;
   }
+}
+
+/** True when sw-push.js has a usable push subscription (endpoint + keys). */
+async function probeLocalPushSubscription(): Promise<boolean> {
+  const reg = await getSwPushRegistration();
+  if (!reg?.pushManager) return false;
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub?.endpoint) return false;
+  return Boolean(sub.getKey("p256dh") && sub.getKey("auth"));
 }
 
 type PushCardProps = { variant?: "default" | "compact"; listEmpty?: boolean };
@@ -119,7 +122,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
       }
       if (merged) {
         if (!serverOn && local) {
-          diagPush("push_render_active_from_subscription", {});
+          diagPush("push_render_active_with_local_subscription", {});
         }
       } else {
         diagPush("push_render_inactive_no_subscription", { serverOn, local });
@@ -132,6 +135,17 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
     if (!mounted || !user) return;
     void reconcilePushState();
   }, [mounted, user, permission, isStandalone, reconcilePushState]);
+
+  const ctaGrantedLogRef = useRef(false);
+  useEffect(() => {
+    if (!mounted || !isStandalone || permission !== "granted" || pushSettings === null) return;
+    const active = Boolean(pushSettings.pushEnabled);
+    if (!active && !ctaGrantedLogRef.current) {
+      diagPush("push_render_cta_with_permission_granted", { mergedPushEnabled: pushSettings.pushEnabled });
+      ctaGrantedLogRef.current = true;
+    }
+    if (active) ctaGrantedLogRef.current = false;
+  }, [mounted, isStandalone, permission, pushSettings]);
 
   async function handleSubscribeToggle() {
     if (!user || !mounted) return;
@@ -156,17 +170,21 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         }
 
         let reg: ServiceWorkerRegistration;
-        try {
-          reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
-          await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
-        } catch (swErr) {
+        const regOrNull = await getSwPushRegistration();
+        if (!regOrNull) {
           diagPush("push_service_worker_register_failed", {
-            message: swErr instanceof Error ? swErr.message : String(swErr)
+            message: "getSwPushRegistration returned null"
           });
           setActivationFailure(true);
           setSaving(false);
           return;
         }
+        reg = regOrNull;
+        diagPush("push_sw_ready", {
+          activeScript: reg.active?.scriptURL ?? null,
+          installingScript: reg.installing?.scriptURL ?? null,
+          scope: reg.scope
+        });
 
         const notifPermission = await Notification.requestPermission();
         setPermission(notifPermission);
@@ -175,6 +193,13 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           setError("Permissão negada. As notificações no dispositivo permanecem desativadas.");
           setSaving(false);
           return;
+        }
+
+        diagPush("push_permission_granted", {});
+
+        await navigator.serviceWorker.ready;
+        if (!navigator.serviceWorker.controller) {
+          diagPush("push_sw_controller_missing", {});
         }
 
         if (!reg.pushManager) {
@@ -217,12 +242,15 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             note: "Reusing browser subscription; syncing server + push_enabled."
           });
         } else {
+          diagPush("push_get_subscription_before_subscribe_null", {});
           try {
             sub = await reg.pushManager.subscribe({
               userVisibleOnly: true,
               applicationServerKey: new Uint8Array(keyBytes)
             });
-            diagPush("push_activation_subscribe_succeeded", { note: "New PushSubscription created." });
+            diagPush("push_subscribe_returned_subscription", {
+              endpointLen: sub.endpoint?.length ?? 0
+            });
           } catch (subErr) {
             diagPush("push_subscribe_failed", {
               message: subErr instanceof Error ? subErr.message : String(subErr),
@@ -234,10 +262,23 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           }
         }
 
+        const subVerify = await reg.pushManager.getSubscription();
+        if (!subVerify) {
+          diagPush("push_get_subscription_after_subscribe_null", {});
+        } else {
+          diagPush("push_get_subscription_after_subscribe_present", {
+            sameObject: subVerify === sub,
+            endpointLen: subVerify.endpoint?.length ?? 0
+          });
+        }
+
         const p256dhKey = sub.getKey("p256dh");
         const authKey = sub.getKey("auth");
         if (!p256dhKey || !authKey) {
-          diagPush("push_subscribe_failed", { reason: "missing_subscription_keys" });
+          diagPush("push_subscribe_returned_invalid_keys", {
+            hasP256dh: Boolean(p256dhKey),
+            hasAuth: Boolean(authKey)
+          });
           setActivationFailure(true);
           setSaving(false);
           return;
@@ -281,7 +322,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           return;
         }
 
-        diagPush("push_activation_api_subscribe_succeeded", { httpStatus: res.status });
+        diagPush("push_api_subscribe_ok", { httpStatus: res.status });
         setActivationFailure(false);
         setError(null);
 
@@ -304,9 +345,9 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             headers: { Authorization: `Bearer ${session.access_token}` }
           });
         }
-        const reg = await navigator.serviceWorker.getRegistration("/");
-        if (reg?.pushManager) {
-          const sub = await reg.pushManager.getSubscription();
+        const regDeactivate = await getSwPushRegistration();
+        if (regDeactivate?.pushManager) {
+          const sub = await regDeactivate.pushManager.getSubscription();
           if (sub) await sub.unsubscribe().catch(() => {});
         }
         const next = await savePushEnabled(false);
