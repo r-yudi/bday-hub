@@ -1,16 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getSafeBrowserSession } from "@/lib/supabase-browser";
 import { getPushSettings, savePushEnabled } from "@/lib/notificationSettingsRepo";
 
 function toBase64Url(buf: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(buf)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function diagPush(code: string, extra?: Record<string, unknown>) {
+  if (typeof console !== "undefined" && console.warn) {
+    console.warn("[lembra:push]", code, extra ?? {});
+  }
 }
 
 type PushCardProps = { variant?: "default" | "compact"; listEmpty?: boolean };
@@ -22,11 +31,11 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
   const [pushSettings, setPushSettings] = useState<{ pushEnabled: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /** Subscribe/SW/config failures — never surface raw Error.message */
   const [activationFailure, setActivationFailure] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
   const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const loggedNotStandaloneRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -34,21 +43,39 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
 
   useEffect(() => {
     if (!mounted) return;
-    setIsStandalone(
+    const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-        (navigator as { standalone?: boolean }).standalone === true
-    );
+      (navigator as { standalone?: boolean }).standalone === true;
+    setIsStandalone(standalone);
     if (typeof Notification !== "undefined") {
       setPermission(Notification.permission);
     } else {
       setPermission("unsupported");
+      diagPush("push_unsupported", { reason: "Notification API missing" });
     }
-  }, [mounted]);
+    if (user && !standalone && !loggedNotStandaloneRef.current) {
+      loggedNotStandaloneRef.current = true;
+      diagPush("push_not_standalone", {
+        hint: "Device notifications require opening the app from the home screen on this device."
+      });
+    }
+  }, [mounted, user]);
+
+  useEffect(() => {
+    if (!mounted || !user || !isStandalone || permission !== "granted") return;
+    const k = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
+    if (!k) {
+      diagPush("push_vapid_missing", {
+        envVar: "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+        hint: "Must match server VAPID_PUBLIC_KEY; set on Vercel and redeploy so the client bundle includes it."
+      });
+    }
+  }, [mounted, user, isStandalone, permission]);
 
   useEffect(() => {
     if (!mounted || !user) return;
     void getPushSettings().then((s) => setPushSettings(s ?? { pushEnabled: false }));
-  }, [mounted, user?.id]);
+  }, [mounted, user]);
 
   async function handleSubscribeToggle() {
     if (!user || !mounted) return;
@@ -59,35 +86,99 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
 
     try {
       if (enabling) {
-        const reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
-        await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
+        if (!("serviceWorker" in navigator)) {
+          diagPush("push_service_worker_unavailable", { reason: "navigator.serviceWorker missing" });
+          setActivationFailure(true);
+          setSaving(false);
+          return;
+        }
+        if (typeof Notification === "undefined") {
+          diagPush("push_unsupported", { reason: "Notification API missing at activation" });
+          setActivationFailure(true);
+          setSaving(false);
+          return;
+        }
+
+        let reg: ServiceWorkerRegistration;
+        try {
+          reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
+          await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
+        } catch (swErr) {
+          diagPush("push_service_worker_register_failed", {
+            message: swErr instanceof Error ? swErr.message : String(swErr)
+          });
+          setActivationFailure(true);
+          setSaving(false);
+          return;
+        }
+
         const notifPermission = await Notification.requestPermission();
         setPermission(notifPermission);
         if (notifPermission !== "granted") {
+          diagPush("push_permission_denied", { permission: notifPermission });
           setError("Permissão negada. As notificações no dispositivo permanecem desativadas.");
           setSaving(false);
           return;
         }
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+        if (!reg.pushManager) {
+          diagPush("push_unsupported", { reason: "registration.pushManager is null" });
+          setActivationFailure(true);
+          setSaving(false);
+          return;
+        }
+
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
         if (!vapidKey) {
+          diagPush("push_vapid_missing", {
+            envVar: "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+            hint: "Same URL-safe base64 public key as VAPID_PUBLIC_KEY on the server."
+          });
           setError("Serviço indisponível no momento.");
           setSaving(false);
           return;
         }
-        const keyBytes = Uint8Array.from(
-          atob(vapidKey.replace(/-/g, "+").replace(/_/g, "/")),
-          (c) => c.charCodeAt(0)
-        );
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: keyBytes
-        });
+
+        let keyBytes: Uint8Array;
+        try {
+          keyBytes = Uint8Array.from(
+            atob(vapidKey.replace(/-/g, "+").replace(/_/g, "/")),
+            (c) => c.charCodeAt(0)
+          );
+        } catch (decodeErr) {
+          diagPush("push_vapid_invalid", {
+            phase: "base64_decode",
+            message: decodeErr instanceof Error ? decodeErr.message : String(decodeErr)
+          });
+          setError("Serviço indisponível no momento.");
+          setSaving(false);
+          return;
+        }
+
+        let sub: PushSubscription;
+        try {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: new Uint8Array(keyBytes)
+          });
+        } catch (subErr) {
+          diagPush("push_subscribe_failed", {
+            message: subErr instanceof Error ? subErr.message : String(subErr),
+            name: subErr instanceof Error ? subErr.name : "unknown"
+          });
+          setActivationFailure(true);
+          setSaving(false);
+          return;
+        }
+
         const { session } = await getSafeBrowserSession();
         if (!session?.access_token) {
+          diagPush("push_api_subscribe_failed", { phase: "session", reason: "missing_access_token" });
           setError("Sessão expirada. Faça login novamente.");
           setSaving(false);
           return;
         }
+
         const res = await fetch("/api/push/subscribe", {
           method: "POST",
           headers: {
@@ -102,8 +193,13 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             }
           })
         });
+
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
+          const data = (await res.json().catch(() => ({}))) as { message?: string };
+          diagPush("push_api_subscribe_failed", {
+            httpStatus: res.status,
+            message: data.message ?? null
+          });
           setError(
             data.message === "endpoint-already-used"
               ? "Este dispositivo já está em uso em outra conta."
@@ -112,6 +208,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           setSaving(false);
           return;
         }
+
         const next = await savePushEnabled(true);
         if (next) setPushSettings(next);
       } else {
@@ -131,9 +228,10 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         if (next) setPushSettings(next);
       }
     } catch (e) {
-      if (typeof console !== "undefined" && console.warn) {
-        console.warn("[PushCard] device notification flow failed", e);
-      }
+      diagPush("push_unexpected_error", {
+        message: e instanceof Error ? e.message : String(e),
+        enabling
+      });
       if (enabling) {
         setActivationFailure(true);
       } else {
@@ -148,6 +246,9 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
     if (typeof Notification === "undefined") return;
     const p = await Notification.requestPermission();
     setPermission(p);
+    if (p !== "granted") {
+      diagPush("push_permission_denied", { permission: p, context: "request_only" });
+    }
   }
 
   const titleCls = "ui-feature-title text-muted text-sm";
@@ -170,9 +271,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             Neste aparelho: entre na sua conta e abra o Lembra a partir da tela inicial (cada aparelho configura à parte).
           </p>
         )}
-        {compact && (
-          <p className="mt-1 text-xs text-muted">Neste aparelho: conta + app na tela inicial.</p>
-        )}
+        {compact && <p className="mt-1 text-xs text-muted">Neste aparelho: conta + app na tela inicial.</p>}
         <Link
           href={compact ? "/login?returnTo=%2Ftoday" : "/login?returnTo=%2Fsettings"}
           className="ui-cta-secondary mt-3 inline-flex h-10 items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium focus-visible:outline-none"
