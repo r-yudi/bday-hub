@@ -294,7 +294,7 @@ export async function processOneCandidate(
     }
   }
 
-  const digest = buildDailyReminderEmail(birthdays, digestIsoDate, mode, row.user_id);
+  const digest = buildDailyReminderEmail(birthdays, digestIsoDate, mode);
   const sent = await deps.sendReminderEmail({ to, subject: digest.subject, html: digest.html, text: digest.text });
 
   if (!sent.ok) {
