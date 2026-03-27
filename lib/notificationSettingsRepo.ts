@@ -29,7 +29,6 @@ type UserSettingsRow = {
   email_enabled?: boolean | null;
   email_time?: string | null;
   timezone?: string | null;
-  last_daily_email_sent_on?: string | null;
   push_enabled?: boolean | null;
 };
 
@@ -42,8 +41,7 @@ function normalizeSettings(row?: UserSettingsRow | null): EmailReminderSettings 
   return {
     emailEnabled: Boolean(row?.email_enabled ?? DEFAULT_EMAIL_REMINDER_SETTINGS.emailEnabled),
     emailTime: normalizeEmailTime(row?.email_time),
-    timezone: row?.timezone || DEFAULT_EMAIL_REMINDER_SETTINGS.timezone,
-    lastDailyEmailSentOn: row?.last_daily_email_sent_on ?? null
+    timezone: row?.timezone || DEFAULT_EMAIL_REMINDER_SETTINGS.timezone
   };
 }
 
@@ -132,7 +130,7 @@ export async function getEmailReminderSettings(): Promise<EmailReminderSettings 
 
   const { data, error } = await supabase
     .from("user_settings")
-    .select("user_id,email_enabled,email_time,timezone,last_daily_email_sent_on,push_enabled")
+    .select("user_id,email_enabled,email_time,timezone,push_enabled")
     .eq("user_id", userId)
     .maybeSingle();
 

@@ -33,7 +33,6 @@ export type EmailReminderSettings = {
   emailEnabled: boolean;
   emailTime: string;
   timezone: string;
-  lastDailyEmailSentOn?: string | null;
 };
 
 export type PushSettings = {
@@ -60,6 +59,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
 export const DEFAULT_EMAIL_REMINDER_SETTINGS: EmailReminderSettings = {
   emailEnabled: false,
   emailTime: "09:00",
-  timezone: "America/Sao_Paulo",
-  lastDailyEmailSentOn: null
+  timezone: "America/Sao_Paulo"
 };
