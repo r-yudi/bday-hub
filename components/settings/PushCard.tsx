@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { getSafeBrowserSession } from "@/lib/supabase-browser";
 import { getPushSettings, savePushEnabled } from "@/lib/notificationSettingsRepo";
@@ -19,6 +19,28 @@ function toBase64Url(buf: ArrayBuffer): string {
 function diagPush(code: string, extra?: Record<string, unknown>) {
   if (typeof console !== "undefined" && console.warn) {
     console.warn("[lembra:push]", code, extra ?? {});
+  }
+}
+
+/** True when this origin has a usable push subscription (endpoint + keys). */
+async function probeLocalPushSubscription(): Promise<boolean> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return false;
+  try {
+    let reg = await navigator.serviceWorker.getRegistration("/");
+    if (!reg) {
+      try {
+        reg = await navigator.serviceWorker.register("/sw-push.js", { scope: "/" });
+      } catch {
+        return false;
+      }
+    }
+    await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
+    if (!reg.pushManager) return false;
+    const sub = await reg.pushManager.getSubscription();
+    if (!sub?.endpoint) return false;
+    return Boolean(sub.getKey("p256dh") && sub.getKey("auth"));
+  } catch {
+    return false;
   }
 }
 
@@ -72,10 +94,44 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
     }
   }, [mounted, user, isStandalone, permission]);
 
+  const reconcilePushState = useCallback(async () => {
+    if (!mounted || !user) return;
+
+    if (!isStandalone || permission !== "granted") {
+      const s = await getPushSettings();
+      setPushSettings(s ?? { pushEnabled: false });
+      return;
+    }
+
+    const server = await getPushSettings();
+    const local = await probeLocalPushSubscription();
+    const serverOn = Boolean(server?.pushEnabled);
+    const merged = serverOn || local;
+
+    if (!serverOn && local) {
+      diagPush("push_subscription_exists_flag_false", { serverOn, local });
+    }
+
+    setPushSettings((prev) => {
+      const prevOn = Boolean(prev?.pushEnabled);
+      if (prevOn && !merged) {
+        diagPush("push_state_reverted_after_refetch", { serverOn, local });
+      }
+      if (merged) {
+        if (!serverOn && local) {
+          diagPush("push_render_active_from_subscription", {});
+        }
+      } else {
+        diagPush("push_render_inactive_no_subscription", { serverOn, local });
+      }
+      return { pushEnabled: merged };
+    });
+  }, [mounted, user, isStandalone, permission]);
+
   useEffect(() => {
     if (!mounted || !user) return;
-    void getPushSettings().then((s) => setPushSettings(s ?? { pushEnabled: false }));
-  }, [mounted, user, permission]);
+    void reconcilePushState();
+  }, [mounted, user, permission, isStandalone, reconcilePushState]);
 
   async function handleSubscribeToggle() {
     if (!user || !mounted) return;
@@ -228,28 +284,18 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         diagPush("push_activation_api_subscribe_succeeded", { httpStatus: res.status });
         setActivationFailure(false);
         setError(null);
-        setPushSettings({ pushEnabled: true });
 
         const persisted = await savePushEnabled(true);
         if (persisted) {
-          setPushSettings(persisted);
           diagPush("push_activation_push_enabled_refreshed", { source: "savePushEnabled" });
         } else {
           diagPush("push_activation_push_enabled_upsert_failed", {
-            note: "API persisted subscription; upsert push_enabled failed — refetching."
+            note: "API persisted subscription; upsert push_enabled failed — reconciling from subscription + refetch."
           });
-          const refetched = await getPushSettings();
-          if (refetched?.pushEnabled) {
-            setPushSettings(refetched);
-            diagPush("push_activation_push_enabled_refreshed", { source: "refetch_after_failed_upsert" });
-          } else {
-            diagPush("push_activation_ui_reconciled_optimistic", {
-              note: "Keeping active UI after API OK; push_enabled not confirmed in DB."
-            });
-          }
         }
 
-        diagPush("push_activation_complete", { note: "Local UI active; subscription registered with API." });
+        await reconcilePushState();
+        diagPush("push_activation_complete", { note: "Reconciled after API subscribe + push_enabled upsert attempt." });
       } else {
         const { session } = await getSafeBrowserSession();
         if (session?.access_token) {
