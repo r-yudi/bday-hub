@@ -48,6 +48,35 @@ async function getSwPushRegistration(): Promise<ServiceWorkerRegistration | null
   }
 }
 
+
+/**
+ * Wait until sw-push has an activated worker. iOS WebKit is picky about timing.
+ * Note: navigator.serviceWorker.controller may still be null when the *page* is controlled by
+ * /sw.js (Workbox) while push uses /sw-push.js — that does not mean subscribe() cannot run.
+ */
+async function waitForPushRegistrationActivated(reg: ServiceWorkerRegistration, timeoutMs = 20000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (reg.active?.state === "activated") return;
+    await new Promise<void>((r) => {
+      window.setTimeout(r, 120);
+    });
+    await reg.update().catch(() => {});
+  }
+  await ("ready" in reg && reg.ready ? reg.ready : Promise.resolve(reg));
+}
+
+function shortErrLabel(e: unknown, max = 48): string {
+  if (e instanceof Error && e.name) return e.name.slice(0, max);
+  return "unknown";
+}
+
+function shortErrClass(e: unknown, max = 32): string {
+  if (e !== null && typeof e === "object" && e.constructor?.name) {
+    return String(e.constructor.name).slice(0, max);
+  }
+  return "unknown";
+}
 /** True when sw-push.js has a usable push subscription (endpoint + keys). */
 async function probeLocalPushSubscription(): Promise<boolean> {
   const reg = await getSwPushRegistration();
@@ -73,6 +102,12 @@ type PushDebugSnapshot = {
   pushEnabledServer: boolean | null;
   mergedActive: boolean | null;
   renderMode: PushRenderMode;
+  subscribeAttemptStarted: boolean | null;
+  subscribeThrew: boolean | null;
+  subscribeErrorName: string;
+  subscribeErrorClass: string;
+  pushManagerAvailable: boolean | null;
+  vapidDecodedOk: boolean | null;
 };
 
 type PushCardProps = { variant?: "default" | "compact"; listEmpty?: boolean };
@@ -104,6 +139,12 @@ function PushDebugPanel({ snap }: { snap: PushDebugSnapshot | null }) {
         {row("subscription before subscribe", v(snap?.subBefore))}
         {row("subscription after subscribe", v(snap?.subAfter))}
         {row("subscribe returned subscription", v(snap?.subscribeReturned))}
+        {row("subscribe attempt started", v(snap?.subscribeAttemptStarted))}
+        {row("subscribe threw", v(snap?.subscribeThrew))}
+        {row("subscribe error name", snap?.subscribeErrorName ?? "—")}
+        {row("subscribe error class", snap?.subscribeErrorClass ?? "—")}
+        {row("pushManager available", v(snap?.pushManagerAvailable))}
+        {row("vapid decoded", v(snap?.vapidDecodedOk))}
         {row("api subscribe", snap?.apiSubscribe ?? "—")}
         {row("push_enabled server", v(snap?.pushEnabledServer))}
         {row("merged active", v(snap?.mergedActive))}
@@ -121,6 +162,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activationFailure, setActivationFailure] = useState(false);
+  const [activationIncompleteLocal, setActivationIncompleteLocal] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
   const [showInstallHelp, setShowInstallHelp] = useState(false);
@@ -135,6 +177,12 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
   const debugSwReadyRef = useRef(false);
   const renderModeRef = useRef<PushRenderMode>("other");
   const ctaGrantedLogRef = useRef(false);
+  const debugSubscribeAttemptRef = useRef<boolean | null>(null);
+  const debugSubscribeThrewRef = useRef<boolean | null>(null);
+  const debugSubscribeErrNameRef = useRef<string>("—");
+  const debugSubscribeErrClassRef = useRef<string>("—");
+  const debugPushManagerAvailRef = useRef<boolean | null>(null);
+  const debugVapidDecodedRef = useRef<boolean | null>(null);
 
   const readStandalone = useCallback(() => {
     if (typeof window === "undefined") return false;
@@ -241,6 +289,12 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         subBefore: debugSubBeforeRef.current,
         subAfter: debugSubAfterRef.current,
         subscribeReturned: debugSubscribeReturnedRef.current,
+        subscribeAttemptStarted: debugSubscribeAttemptRef.current,
+        subscribeThrew: debugSubscribeThrewRef.current,
+        subscribeErrorName: debugSubscribeErrNameRef.current,
+        subscribeErrorClass: debugSubscribeErrClassRef.current,
+        pushManagerAvailable: debugPushManagerAvailRef.current,
+        vapidDecodedOk: debugVapidDecodedRef.current,
         apiSubscribe: debugApiSubscribeRef.current,
         pushEnabledServer: serverPushEnabledRef.current,
         mergedActive,
@@ -327,6 +381,13 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         debugSubAfterRef.current = null;
         debugSubscribeReturnedRef.current = null;
         debugSwReadyRef.current = false;
+        debugSubscribeAttemptRef.current = null;
+        debugSubscribeThrewRef.current = null;
+        debugSubscribeErrNameRef.current = "—";
+        debugSubscribeErrClassRef.current = "—";
+        debugPushManagerAvailRef.current = null;
+        debugVapidDecodedRef.current = null;
+        setActivationIncompleteLocal(false);
         renderModeRef.current = "activate";
         void flushPushDebug();
 
@@ -381,11 +442,13 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
 
         diagPush("push_permission_granted", {});
 
+        await waitForPushRegistrationActivated(reg);
         await navigator.serviceWorker.ready;
         debugSwReadyRef.current = true;
         if (!navigator.serviceWorker.controller) {
           diagPush("push_sw_controller_missing", {});
         }
+        debugPushManagerAvailRef.current = Boolean(reg.pushManager);
         void flushPushDebug();
 
         if (!reg.pushManager) {
@@ -416,12 +479,25 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             atob(vapidKey.replace(/-/g, "+").replace(/_/g, "/")),
             (c) => c.charCodeAt(0)
           );
+          debugVapidDecodedRef.current = true;
         } catch (decodeErr) {
+          debugVapidDecodedRef.current = false;
           diagPush("push_vapid_invalid", {
             phase: "base64_decode",
             message: decodeErr instanceof Error ? decodeErr.message : String(decodeErr)
           });
           renderModeRef.current = "failed";
+          setError("Serviço indisponível no momento.");
+          setSaving(false);
+          void flushPushDebug();
+          return;
+        }
+
+        if (keyBytes.length !== 65) {
+          diagPush("push_vapid_len", { len: keyBytes.length });
+          debugVapidDecodedRef.current = false;
+          renderModeRef.current = "failed";
+          setActivationFailure(true);
           setError("Serviço indisponível no momento.");
           setSaving(false);
           void flushPushDebug();
@@ -439,26 +515,66 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           });
         } else {
           diagPush("push_get_subscription_before_subscribe_null", {});
-          try {
-            sub = await reg.pushManager.subscribe({
+          debugSubscribeAttemptRef.current = false;
+          debugSubscribeThrewRef.current = false;
+          debugSubscribeErrNameRef.current = "—";
+          debugSubscribeErrClassRef.current = "—";
+
+          const doSubscribe = () =>
+            reg.pushManager!.subscribe({
               userVisibleOnly: true,
               applicationServerKey: new Uint8Array(keyBytes)
             });
+
+          const runOnce = async () => {
+            debugSubscribeAttemptRef.current = true;
+            debugSubscribeThrewRef.current = false;
+            void flushPushDebug();
+            return doSubscribe();
+          };
+
+          try {
+            sub = await runOnce();
             debugSubscribeReturnedRef.current = true;
+            debugSubscribeThrewRef.current = false;
             diagPush("push_subscribe_returned_subscription", {
               endpointLen: sub.endpoint?.length ?? 0
             });
-          } catch (subErr) {
-            debugSubscribeReturnedRef.current = false;
+          } catch (subErr1) {
+            debugSubscribeThrewRef.current = true;
+            debugSubscribeErrNameRef.current = shortErrLabel(subErr1);
+            debugSubscribeErrClassRef.current = shortErrClass(subErr1);
             diagPush("push_subscribe_failed", {
-              message: subErr instanceof Error ? subErr.message : String(subErr),
-              name: subErr instanceof Error ? subErr.name : "unknown"
+              message: subErr1 instanceof Error ? subErr1.message : String(subErr1),
+              name: subErr1 instanceof Error ? subErr1.name : "unknown"
             });
-            renderModeRef.current = "failed";
-            setActivationFailure(true);
-            setSaving(false);
-            void flushPushDebug();
-            return;
+            await new Promise<void>((r) => {
+              window.setTimeout(r, 450);
+            });
+            try {
+              sub = await runOnce();
+              debugSubscribeReturnedRef.current = true;
+              debugSubscribeThrewRef.current = false;
+              diagPush("push_subscribe_retry_ok", {
+                endpointLen: sub.endpoint?.length ?? 0
+              });
+            } catch (subErr2) {
+              debugSubscribeReturnedRef.current = false;
+              debugSubscribeThrewRef.current = true;
+              debugSubscribeErrNameRef.current = shortErrLabel(subErr2);
+              debugSubscribeErrClassRef.current = shortErrClass(subErr2);
+              diagPush("push_subscribe_failed_retry", {
+                message: subErr2 instanceof Error ? subErr2.message : String(subErr2),
+                name: subErr2 instanceof Error ? subErr2.name : "unknown"
+              });
+              renderModeRef.current = "failed";
+              setActivationFailure(true);
+              setActivationIncompleteLocal(true);
+              setError(null);
+              setSaving(false);
+              void flushPushDebug();
+              return;
+            }
           }
         }
         void flushPushDebug();
@@ -488,6 +604,8 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           void flushPushDebug();
           return;
         }
+
+        setActivationIncompleteLocal(false);
 
         const { session } = await getSafeBrowserSession();
         if (!session?.access_token) {
@@ -570,10 +688,17 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         debugSubBeforeRef.current = null;
         debugSubAfterRef.current = null;
         debugSubscribeReturnedRef.current = null;
+        debugSubscribeAttemptRef.current = null;
+        debugSubscribeThrewRef.current = null;
+        debugSubscribeErrNameRef.current = "—";
+        debugSubscribeErrClassRef.current = "—";
+        debugPushManagerAvailRef.current = null;
+        debugVapidDecodedRef.current = null;
         const next = await savePushEnabled(false);
         if (next) setPushSettings(next);
         else setPushSettings({ pushEnabled: false });
         setActivationFailure(false);
+        setActivationIncompleteLocal(false);
         setError(null);
         diagPush("push_deactivation_complete", {});
         await reconcilePushState();
@@ -756,12 +881,25 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
       )}
       {activationFailure && (
         <div className={compact ? "mt-2 space-y-1" : "mt-3 space-y-1.5"}>
-          <p className={compact ? "text-xs text-text" : "text-sm text-text"}>
-            Não foi possível ativar as notificações neste aparelho agora.
-          </p>
-          <p className="text-xs leading-relaxed text-muted">
-            Tente novamente em instantes. Se continuar, use email ou lembretes no app.
-          </p>
+          {activationIncompleteLocal ? (
+            <>
+              <p className={compact ? "text-xs text-text" : "text-sm text-text"}>
+                Permissão concedida, mas a ativação não completou neste aparelho.
+              </p>
+              <p className="text-xs leading-relaxed text-muted">
+                Feche o Lembra pelo multitarefa e abra de novo pelo ícone na tela inicial; em seguida toque em Ativar outra vez. Se continuar, use email ou lembretes no app.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className={compact ? "text-xs text-text" : "text-sm text-text"}>
+                Não foi possível ativar as notificações neste aparelho agora.
+              </p>
+              <p className="text-xs leading-relaxed text-muted">
+                Tente novamente em instantes. Se continuar, use email ou lembretes no app.
+              </p>
+            </>
+          )}
         </div>
       )}
       {error && <p className="mt-2 text-xs text-danger">{error}</p>}
