@@ -53,7 +53,7 @@ No **Vercel → Project → Settings → Environment Variables**, setar/confirma
 - `VAPID_PUBLIC_KEY`
 - `VAPID_PRIVATE_KEY`
 - `VAPID_SUBJECT`
-- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (a mesma public key)
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (a mesma public key que `VAPID_PUBLIC_KEY`; string URL-safe base64 de `web-push generate-vapid-keys`, sem PEM — o cliente faz padding antes de `atob`)
 
 **Critérios de aceite**
 

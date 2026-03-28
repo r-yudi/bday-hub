@@ -5,6 +5,11 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { useAuth } from "@/components/AuthProvider";
 import { getSafeBrowserSession } from "@/lib/supabase-browser";
 import { getPushSettings, savePushEnabled } from "@/lib/notificationSettingsRepo";
+import {
+  decodeVapidPublicKeyBase64,
+  probeClientVapidPublicKey,
+  VAPID_PUBLIC_KEY_BYTE_LENGTH
+} from "@/lib/vapidClient";
 
 function toBase64Url(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf);
@@ -107,6 +112,13 @@ type PushDebugSnapshot = {
   subscribeErrorName: string;
   subscribeErrorClass: string;
   pushManagerAvailable: boolean | null;
+  /** present | missing */
+  vapidEnv: string;
+  /** ok | fail | n/a */
+  vapidDecode: string;
+  /** pass | fail | n/a */
+  vapidLength: string;
+  /** yes when env present, decode ok, and length 65 */
   vapidDecodedOk: boolean | null;
 };
 
@@ -144,6 +156,9 @@ function PushDebugPanel({ snap }: { snap: PushDebugSnapshot | null }) {
         {row("subscribe error name", snap?.subscribeErrorName ?? "—")}
         {row("subscribe error class", snap?.subscribeErrorClass ?? "—")}
         {row("pushManager available", v(snap?.pushManagerAvailable))}
+        {row("vapid env", snap?.vapidEnv ?? "—")}
+        {row("vapid decode", snap?.vapidDecode ?? "—")}
+        {row("vapid length", snap?.vapidLength ?? "—")}
         {row("vapid decoded", v(snap?.vapidDecodedOk))}
         {row("api subscribe", snap?.apiSubscribe ?? "—")}
         {row("push_enabled server", v(snap?.pushEnabledServer))}
@@ -182,7 +197,6 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
   const debugSubscribeErrNameRef = useRef<string>("—");
   const debugSubscribeErrClassRef = useRef<string>("—");
   const debugPushManagerAvailRef = useRef<boolean | null>(null);
-  const debugVapidDecodedRef = useRef<boolean | null>(null);
 
   const readStandalone = useCallback(() => {
     if (typeof window === "undefined") return false;
@@ -280,6 +294,22 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           : Boolean(pushSettings?.pushEnabled);
       const swReadyComputed =
         Boolean(reg?.active?.state === "activated" || reg?.installing) || debugSwReadyRef.current;
+      const vapidProbe = probeClientVapidPublicKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+      const vapidEnv = vapidProbe.envPresent ? "present" : "missing";
+      const vapidDecode = vapidProbe.envPresent ? (vapidProbe.decodeOk ? "ok" : "fail") : "n/a";
+      const vapidLength = !vapidProbe.envPresent
+        ? "n/a"
+        : !vapidProbe.decodeOk
+          ? "n/a"
+          : vapidProbe.lenOk
+            ? "pass"
+            : "fail";
+      const vapidDecodedOk =
+        vapidProbe.envPresent && vapidProbe.decodeOk && vapidProbe.lenOk
+          ? true
+          : vapidProbe.envPresent
+            ? false
+            : null;
       setPushDebug({
         standalone: isStandalone,
         permission: typeof Notification !== "undefined" ? Notification.permission : "unsupported",
@@ -294,7 +324,10 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         subscribeErrorName: debugSubscribeErrNameRef.current,
         subscribeErrorClass: debugSubscribeErrClassRef.current,
         pushManagerAvailable: debugPushManagerAvailRef.current,
-        vapidDecodedOk: debugVapidDecodedRef.current,
+        vapidEnv,
+        vapidDecode,
+        vapidLength,
+        vapidDecodedOk,
         apiSubscribe: debugApiSubscribeRef.current,
         pushEnabledServer: serverPushEnabledRef.current,
         mergedActive,
@@ -386,7 +419,6 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         debugSubscribeErrNameRef.current = "—";
         debugSubscribeErrClassRef.current = "—";
         debugPushManagerAvailRef.current = null;
-        debugVapidDecodedRef.current = null;
         setActivationIncompleteLocal(false);
         renderModeRef.current = "activate";
         void flushPushDebug();
@@ -475,13 +507,8 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
 
         let keyBytes: Uint8Array;
         try {
-          keyBytes = Uint8Array.from(
-            atob(vapidKey.replace(/-/g, "+").replace(/_/g, "/")),
-            (c) => c.charCodeAt(0)
-          );
-          debugVapidDecodedRef.current = true;
+          keyBytes = decodeVapidPublicKeyBase64(vapidKey);
         } catch (decodeErr) {
-          debugVapidDecodedRef.current = false;
           diagPush("push_vapid_invalid", {
             phase: "base64_decode",
             message: decodeErr instanceof Error ? decodeErr.message : String(decodeErr)
@@ -493,9 +520,8 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
           return;
         }
 
-        if (keyBytes.length !== 65) {
+        if (keyBytes.length !== VAPID_PUBLIC_KEY_BYTE_LENGTH) {
           diagPush("push_vapid_len", { len: keyBytes.length });
-          debugVapidDecodedRef.current = false;
           renderModeRef.current = "failed";
           setActivationFailure(true);
           setError("Serviço indisponível no momento.");
@@ -693,7 +719,6 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         debugSubscribeErrNameRef.current = "—";
         debugSubscribeErrClassRef.current = "—";
         debugPushManagerAvailRef.current = null;
-        debugVapidDecodedRef.current = null;
         const next = await savePushEnabled(false);
         if (next) setPushSettings(next);
         else setPushSettings({ pushEnabled: false });

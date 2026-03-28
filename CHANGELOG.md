@@ -12,6 +12,9 @@ Formato adotado:
 
 ## [Unreleased]
 
+### Fixed
+- **Web Push (PWA):** decodificação correta da chave pública VAPID no cliente (`lib/vapidClient.ts`): URL-safe base64 sem padding `=` (como em `web-push generate-vapid-keys`) + strip de aspas acidentais; painel de debug em `PushCard` com `vapid env` / `vapid decode` / `vapid length` além de `vapid decoded`; testes em `tests/unit/vapid-client.test.ts`.
+
 ### Changed
 - **Tema em runtime:** `light` / `dark` / `system` (`lib/theme.ts`, boot script no layout, `ThemeProvider` + Supabase `user_settings.theme`); controle **Claro / Escuro / Sistema** no `TopNav` (app e landing). Tokens `.dark` alinhados ao fundo near-black e superfícies quentes; `/today` com hierarquia extra em dark (`today-page-hoje-block`, `today-page-upcoming-region`). Docs: `docs/THEME.md`, SPEC, DESIGN_SYSTEM, AGENTS.
 
