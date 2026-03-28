@@ -339,7 +339,7 @@ test.describe("Notificações no dispositivo logado não-standalone", () => {
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Como instalar" })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Ativar notificações no dispositivo|Desativar notificações no dispositivo/ })
+      page.getByRole("button", { name: /Ativar notificações neste aparelho|Desativar notificações no dispositivo/ })
     ).toHaveCount(0);
   });
 });

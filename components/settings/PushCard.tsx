@@ -720,16 +720,6 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
     }
   }
 
-  async function handleRequestPermissionOnly() {
-    if (typeof Notification === "undefined") return;
-    const p = await Notification.requestPermission();
-    setPermission(p);
-    if (p !== "granted") {
-      diagPush("push_permission_denied", { permission: p, context: "request_only" });
-    }
-    void flushPushDebug();
-  }
-
   const titleCls = "ui-feature-title text-muted text-sm";
 
   if (!mounted) {
@@ -822,25 +812,6 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
     );
   }
 
-  if (permission === "default") {
-    return (
-      <section className={compact ? "rounded-xl border border-border bg-surface/50 p-3" : "ui-feature-block"}>
-        <h2 className={titleCls}>Notificações no dispositivo</h2>
-        <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-sm text-muted"}>
-          Toque abaixo para o navegador perguntar; neste aparelho, o sistema pode mostrar alertas com o app fechado (quando suportado).
-        </p>
-        <button
-          type="button"
-          onClick={() => void handleRequestPermissionOnly()}
-          className="ui-cta-primary mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
-        >
-          Permitir notificações
-        </button>
-        {debugPanelEl}
-      </section>
-    );
-  }
-
   const active = Boolean(pushSettings?.pushEnabled);
 
   return (
@@ -866,8 +837,8 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
         <>
           <p className={compact ? "mt-1 text-xs text-muted" : "mt-2 text-sm text-muted"}>
             {listEmpty
-              ? "Só neste aparelho: com datas na lista, dá para avisar fora do app. Ative quando quiser; depende do sistema."
-              : "Só neste aparelho: ative para alertas fora do app no horário combinado, quando o sistema permitir."}
+              ? "Só neste aparelho: com datas na lista, dá para avisar fora do app. Toque em Ativar; se o sistema pedir permissão, confirme."
+              : "Só neste aparelho: toque em Ativar para alertas fora do app no horário combinado. Se aparecer o pedido de permissão, confirme."}
           </p>
           <button
             type="button"
@@ -875,7 +846,7 @@ export function PushCard({ variant = "default", listEmpty = false }: PushCardPro
             disabled={saving}
             className="ui-cta-primary mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accentHover focus-visible:outline-none"
           >
-            {saving ? "Salvando..." : "Ativar notificações no dispositivo"}
+            {saving ? "Salvando..." : "Ativar notificações neste aparelho"}
           </button>
         </>
       )}
